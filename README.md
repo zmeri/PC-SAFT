@@ -1,6 +1,6 @@
 # PC-SAFT
 
-These functions implement the PC-SAFT equation of state. In addition to the hard chain and dispersion terms, these functions also include dipole, association and ion terms for use with these types of compounds. When the ion term is included, it is also called electrolyte PC-SAFT (ePC-SAFT).
+These functions implement the PC-SAFT equation of state. In addition to the hard chain and dispersion terms, these functions also include dipole, association and ion terms for use with these types of compounds. When the ion term is included it is also called electrolyte PC-SAFT (ePC-SAFT).
 
 ## Dependencies
 
