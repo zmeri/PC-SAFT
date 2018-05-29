@@ -2014,12 +2014,20 @@ def pcsaft_fit_pure(params, prop, T, P, molden, **kwargs):
     must be manually adjusted to match the parameters that are chosen to be 
     used for the compound.    
     
-    Data used for fitting needs to be in the form of a four column ndarray. Columns
-    should be
-        1) Property type (0 = density, 1 = vapor pressure)
-        2) Temperature (K)
-        3) Pressure (Pa)
-        4) Molar density (mol m^{-3}) (for vapor pressure this is not needed and any number can be used as a placeholder)
+    Parameters
+    ----------
+    params : ndarray
+        The parameters to be fit.
+    prop : ndarray, shape (m,)
+        Property type (0 = density, 1 = vapor pressure). The array has length m,
+        which is equal to the number of experimental data points.
+    T : ndarray, shape (m,)
+        Temperature (K)
+    P : ndarray, shape (m,)
+        Pressure (Pa)
+    molden : ndarray, shape (m,)
+        Molar density (mol m^{-3}) (for vapor pressure this is not needed and 
+        any number can be used as a placeholder)
     """
     kwargs = {'dipm': np.asarray([1.75]), 'dip_num': np.asarray([params[3]])} 
 
