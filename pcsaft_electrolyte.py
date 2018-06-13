@@ -810,7 +810,7 @@ def pcsaft_hres(x, m, s, e, t, rho, k_ij=None, e_assoc=None, vol_a=None, dipm=No
             chi = 3/(kappa*s)**3*(1.5 + np.log(1+kappa*s) - 2*(1+kappa*s) + \
                 0.5*(1+kappa*s)**2)
             dchikap_dk = (s*kappa*(6+3*s*kappa)-(6+6*s*kappa)*np.log(1+s*kappa)) \
-                /(s**3*kappa**3 (1+s*kappa))
+                /(s**3*kappa**3*(1+s*kappa))
             
             dadt_ion = -1/12./np.pi/kb/(dielc*perm_vac)*np.sum(x*q**2* \
                 (dchikap_dk*dkappa_dt/t-kappa*chi/t**2))
