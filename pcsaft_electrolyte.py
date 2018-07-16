@@ -726,7 +726,7 @@ def pcsaft_hres(x, m, s, e, t, rho, k_ij=None, e_assoc=None, vol_a=None, dipm=No
                     m_ijk = (m[i]*m[j]*m[k])**(1/3.)
                     if m_ijk > 2:
                         m_ijk = 2
-                    cdip = c0dip + (m_ij-1)/m_ij*c1dip + (m_ij-1)/m_ij*(m_ij-2)/m_ij*c2dip
+                    cdip = c0dip + (m_ijk-1)/m_ijk*c1dip + (m_ijk-1)/m_ijk*(m_ijk-2)/m_ijk*c2dip
                     J3 = np.sum(cdip*eta**idxd)
                     A3 += x[i]*x[j]*x[k]*e_ij[i,i]/t*e_ij[j,j]/t*e_ij[k,k]/t* \
                         s_ij[i,i]**3*s_ij[j,j]**3*s_ij[k,k]**3/s_ij[i,j]/s_ij[i,k] \
@@ -1167,7 +1167,7 @@ def pcsaft_fugcoef(x, m, s, e, t, rho, k_ij=None, e_assoc=None, vol_a=None, dipm
                     m_ijk = (m[i]*m[j]*m[k])**(1/3.)
                     if m_ijk > 2:
                         m_ijk = 2
-                    cdip = c0dip + (m_ij-1)/m_ij*c1dip + (m_ij-1)/m_ij*(m_ij-2)/m_ij*c2dip
+                    cdip = c0dip + (m_ijk-1)/m_ijk*c1dip + (m_ijk-1)/m_ijk*(m_ijk-2)/m_ijk*c2dip
                     J3 = np.sum(cdip*eta**idxd)
                     detJ3_det = np.sum(cdip*(idxd+2)*eta**(idxd+1))
                     A3 += x[i]*x[j]*x[k]*e_ij[i,i]/t*e_ij[j,j]/t*e_ij[k,k]/t* \
@@ -1460,7 +1460,7 @@ def pcsaft_Z(x, m, s, e, t, rho, k_ij=None, e_assoc=None, vol_a=None, dipm=None,
                     m_ijk = (m[i]*m[j]*m[k])**(1/3.)
                     if m_ijk > 2:
                         m_ijk = 2
-                    cdip = c0dip + (m_ij-1)/m_ij*c1dip + (m_ij-1)/m_ij*(m_ij-2)/m_ij*c2dip
+                    cdip = c0dip + (m_ijk-1)/m_ijk*c1dip + (m_ijk-1)/m_ijk*(m_ijk-2)/m_ijk*c2dip
                     J3 = np.sum(cdip*eta**idxd)
                     detJ3_det = np.sum(cdip*(idxd+2)*eta**(idxd+1))
                     A3 += x[i]*x[j]*x[k]*e_ij[i,i]/t*e_ij[j,j]/t*e_ij[k,k]/t* \
@@ -1710,7 +1710,7 @@ def pcsaft_ares(x, m, s, e, t, rho, k_ij=None, e_assoc=None, vol_a=None, dipm=No
                     m_ijk = (m[i]*m[j]*m[k])**(1/3.)
                     if m_ijk > 2:
                         m_ijk = 2
-                    cdip = c0dip + (m_ij-1)/m_ij*c1dip + (m_ij-1)/m_ij*(m_ij-2)/m_ij*c2dip
+                    cdip = c0dip + (m_ijk-1)/m_ijk*c1dip + (m_ijk-1)/m_ijk*(m_ijk-2)/m_ijk*c2dip
                     J3 = np.sum(cdip*eta**idxd)
                     A3 += x[i]*x[j]*x[k]*e_ij[i,i]/t*e_ij[j,j]/t*e_ij[k,k]/t* \
                         s_ij[i,i]**3*s_ij[j,j]**3*s_ij[k,k]**3/s_ij[i,j]/s_ij[i,k] \
