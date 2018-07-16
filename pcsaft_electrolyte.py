@@ -1826,7 +1826,6 @@ def dXA_find(ncA, ncomp, iA, delta_ij, den, XA, ddelta_dd, x, n_sites):
                 for k in range(ncA):
                     for l in range(n_sites):
                         indx2 = indx2 + 1
-                        (m+1)*(l+1)-1
                         sum1 = sum1 + den*x[k]*(XA[indx2]*ddelta_dd[j,k,i]*((indx1+indx2)%2))  # (indx1+indx2)%2 ensures that A-A and B-B associations are set to zero
                         A[indx1+(i)*n_sites*ncA,indx2+(i)*n_sites*ncA] = \
                         A[indx1+(i)*n_sites*ncA,indx2+(i)*n_sites*ncA] + \
