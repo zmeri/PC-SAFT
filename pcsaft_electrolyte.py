@@ -474,10 +474,6 @@ def pcsaft_den(x, m, s, e, t, p, phase='liq', **kwargs):
     N_AV = 6.022140857e23 # Avagadro's number
     
     d = s*(1-0.12*np.exp(-3*e/t))
-    if ('z' in kwargs):
-        z = kwargs['z']
-        d[np.where(z != 0)[0]] = s[np.where(z != 0)[0]]*(1-0.12) # for ions the diameter is assumed to be temperature independent (see Held et al. 2014)
-
     den_guess = 6/np.pi*eta_guess/np.sum(x*m*d**3)
     rho_guess = den_guess*1.0e30/N_AV
 
