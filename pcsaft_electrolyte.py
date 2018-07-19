@@ -708,7 +708,7 @@ def pcsaft_hres(x, m, s, e, t, rho, k_ij=None, e_assoc=None, vol_a=None, dipm=No
                     m_ij = 2
                 adip = a0dip + (m_ij-1)/m_ij*a1dip + (m_ij-1)/m_ij*(m_ij-2)/m_ij*a2dip
                 bdip = b0dip + (m_ij-1)/m_ij*b1dip + (m_ij-1)/m_ij*(m_ij-2)/m_ij*b2dip                
-                J2 = np.sum(adip + bdip*e_ij[j,j]/t*eta**idxd)
+                J2 = np.sum((adip + bdip*e_ij[j,j]/t)*eta**idxd)
                 dJ2_dt = np.sum(-bdip*e_ij[j,j]/t**2*eta**idxd)
                 A2 += x[i]*x[j]*e_ij[i,i]/t*e_ij[j,j]/t*s_ij[i,i]**3*s_ij[j,j]**3 \
                     /s_ij[i,j]**3*dip_num[i]*dip_num[j]*dipmSQ[i]*dipmSQ[j]*J2
@@ -1144,8 +1144,8 @@ def pcsaft_fugcoef(x, m, s, e, t, rho, k_ij=None, e_assoc=None, vol_a=None, dipm
                     m_ij = 2
                 adip = a0dip + (m_ij-1)/m_ij*a1dip + (m_ij-1)/m_ij*(m_ij-2)/m_ij*a2dip
                 bdip = b0dip + (m_ij-1)/m_ij*b1dip + (m_ij-1)/m_ij*(m_ij-2)/m_ij*b2dip                
-                J2 = np.sum(adip + bdip*e_ij[j,j]/t*eta**idxd)
-                detJ2_det = np.sum(adip + bdip*e_ij[j,j]/t*(idxd+1)*eta**idxd)
+                J2 = np.sum((adip + bdip*e_ij[j,j]/t)*eta**idxd)
+                detJ2_det = np.sum((adip + bdip*e_ij[j,j]/t)*(idxd+1)*eta**idxd)
                 A2 += x[i]*x[j]*e_ij[i,i]/t*e_ij[j,j]/t*s_ij[i,i]**3*s_ij[j,j]**3 \
                     /s_ij[i,j]**3*dip_num[i]*dip_num[j]*dipmSQ[i]*dipmSQ[j]*J2
                 dA2_det += x[i]*x[j]*e_ij[i,i]/t*e_ij[j,j]/t*s_ij[i,i]**3 \
@@ -1696,7 +1696,7 @@ def pcsaft_ares(x, m, s, e, t, rho, k_ij=None, e_assoc=None, vol_a=None, dipm=No
                     m_ij = 2
                 adip = a0dip + (m_ij-1)/m_ij*a1dip + (m_ij-1)/m_ij*(m_ij-2)/m_ij*a2dip
                 bdip = b0dip + (m_ij-1)/m_ij*b1dip + (m_ij-1)/m_ij*(m_ij-2)/m_ij*b2dip                
-                J2 = np.sum(adip + bdip*e_ij[j,j]/t*eta**idxd)         
+                J2 = np.sum((adip + bdip*e_ij[j,j]/t)*eta**idxd)         
                 A2 += x[i]*x[j]*e_ij[i,i]/t*e_ij[j,j]/t*s_ij[i,i]**3*s_ij[j,j]**3 \
                     /s_ij[i,j]**3*dip_num[i]*dip_num[j]*dipmSQ[i]*dipmSQ[j]*J2
                 
