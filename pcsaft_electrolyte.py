@@ -389,7 +389,7 @@ def pcsaft_PTz(p_guess, x_guess, beta_guess, mol, vol, x_total, m, s, e, t, **kw
         xl = np.copy(x_guess)
         beta = beta_guess
         xv = (mol*x_total - (1-beta)*mol*xl)/beta/mol
-        xv[np.where(z == 0)[0]] = 0.
+        xv[np.where(z != 0)[0]] = 0.
         xv = xv/np.sum(xv)
         while (dif>1e-9) and (itr<100):
             beta_old = beta
@@ -400,7 +400,7 @@ def pcsaft_PTz(p_guess, x_guess, beta_guess, mol, vol, x_total, m, s, e, t, **kw
             xl = fugcoef_v*xv/fugcoef_l
             xl = xl/np.sum(xl)
             xv = (mol*x_total - (1-beta)*mol*xl)/beta/mol
-            xv[np.where(z == 0)[0]] = 0. # here it is assumed that the ionic compounds are nonvolatile
+            xv[np.where(z != 0)[0]] = 0. # here it is assumed that the ionic compounds are nonvolatile
             xv = xv/np.sum(xv)
             beta = (vol/mol-rhol)/(rhov-rhol)
             dif = np.sum(abs(beta - beta_old))
@@ -1961,7 +1961,7 @@ def PTzfit(p_guess, x_guess, beta_guess, mol, vol, x_total, m, s, e, t, kwargs):
         xl = np.copy(x_guess)
         beta = beta_guess
         xv = (mol*x_total - (1-beta)*mol*xl)/beta/mol
-        xv[np.where(z == 0)[0]] = 0.
+        xv[np.where(z != 0)[0]] = 0.
         xv = xv/np.sum(xv)
         while (dif>1e-9) and (itr<100):
             beta_old = beta
@@ -1972,7 +1972,7 @@ def PTzfit(p_guess, x_guess, beta_guess, mol, vol, x_total, m, s, e, t, kwargs):
             xl = fugcoef_v*xv/fugcoef_l
             xl = xl/np.sum(xl)
             xv = (mol*x_total - (1-beta)*mol*xl)/beta/mol
-            xv[np.where(z == 0)[0]] = 0. # here it is assumed that the ionic compounds are nonvolatile
+            xv[np.where(z != 0)[0]] = 0. # here it is assumed that the ionic compounds are nonvolatile
             xv = xv/np.sum(xv)
             beta = (vol/mol-rhol)/(rhov-rhol)
             dif = np.sum(abs(beta - beta_old))
