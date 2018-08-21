@@ -16,7 +16,7 @@ This project is licensed under the GNU General Public License v3.0 License - see
 
 ## Acknowledgments
 
-When developing these functions the code from two other groups was used as a reference:
+When developing these functions the code from two other groups was used as references:
 * Code from Joachim Gross (https://www.th.bci.tu-dortmund.de/cms/de/Forschung/PC-SAFT/Download/index.html)
 * The MATLAB/Octave program written by Angel Martin and others (http://hpp.uva.es/open-source-software-eos/) 
 
