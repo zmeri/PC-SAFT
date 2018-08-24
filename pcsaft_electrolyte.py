@@ -216,8 +216,8 @@ def pcsaft_bubbleP(p_guess, xv_guess, x, m, s, e, t, **kwargs):
         xv_old = np.zeros_like(xv)
         while (dif>1e-9) and (itr<100):
             xv_old[:] = xv
-            rho = pcsaft_den(xv_guess, m, s, e, t, p_guess, phase='vap', **kwargs)        
-            fugcoef_v = pcsaft_fugcoef(xv_guess, m, s, e, t, rho, **kwargs)        
+            rho = pcsaft_den(xv, m, s, e, t, p_guess, phase='vap', **kwargs)        
+            fugcoef_v = pcsaft_fugcoef(xv, m, s, e, t, rho, **kwargs)        
         
             xv[np.where(z == 0)[0]] = (fugcoef_l*x/fugcoef_v)[np.where(z == 0)[0]] # here it is assumed that the ionic compounds are nonvolatile
             xv = xv/np.sum(xv)
