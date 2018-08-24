@@ -5,6 +5,11 @@ These functions implement the PC-SAFT equation of state. In addition to the hard
 ## Dependencies
 
 The Numpy and Scipy packages are required.
+When using the faster C++ functions [Cython](http://cython.org/) is needed, along with the [Eigen](https://github.com/eigenteam/eigen-git-mirror) package for linear algebra.
+
+## Cython version
+
+To speed up the original Python code the core functions have been rewritten in C++. These are then connected with the remaining Python code by using Cython. Using the Cython version gives a significant improvement in speed. The Cython code needs to be compiled before use, and for instructions on how to do this see the [Cython documentation](http://docs.cython.org/en/latest/src/quickstart/build.html).
 
 ## Author
 
