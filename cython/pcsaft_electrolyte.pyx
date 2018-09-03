@@ -687,7 +687,7 @@ def pcsaft_PTz(p_guess, x_guess, beta_guess, mol, vol, x_total, m, s, e, t, pyar
             xl = fugcoef_v*xv/fugcoef_l
             xl = xl/np.sum(xl)
             xv = (mol*x_total - (1-beta)*mol*xl)/beta/mol
-            beta = (vol/mol-rhol)/(rhov-rhol)
+            beta = (vol/mol*rhov*rhol-rhov)/(rhol-rhov)
             dif = np.sum(abs(beta - beta_old))
             itr += 1
     else:
@@ -711,7 +711,7 @@ def pcsaft_PTz(p_guess, x_guess, beta_guess, mol, vol, x_total, m, s, e, t, pyar
             xv = (mol*x_total - (1-beta)*mol*xl)/beta/mol
             xv[np.where(z != 0)[0]] = 0. # here it is assumed that the ionic compounds are nonvolatile
             xv = xv/np.sum(xv)
-            beta = (vol/mol-rhol)/(rhov-rhol)
+            beta = (vol/mol*rhov*rhol-rhov)/(rhol-rhov)
             dif = np.sum(abs(beta - beta_old))
             itr += 1
 
