@@ -378,7 +378,7 @@ def pcsaft_PTz(p_guess, x_guess, beta_guess, mol, vol, x_total, m, s, e, t, **kw
             xl = fugcoef_v*xv/fugcoef_l
             xl = xl/np.sum(xl)
             xv = (mol*x_total - (1-beta)*mol*xl)/beta/mol
-            beta = (vol/mol-rhol)/(rhov-rhol)
+            beta = (vol/mol*rhov*rhol-rhov)/(rhol-rhov)
             dif = np.sum(abs(beta - beta_old))
             itr += 1
     else:
@@ -402,7 +402,7 @@ def pcsaft_PTz(p_guess, x_guess, beta_guess, mol, vol, x_total, m, s, e, t, **kw
             xv = (mol*x_total - (1-beta)*mol*xl)/beta/mol
             xv[np.where(z != 0)[0]] = 0. # here it is assumed that the ionic compounds are nonvolatile
             xv = xv/np.sum(xv)
-            beta = (vol/mol-rhol)/(rhov-rhol)
+            beta = (vol/mol*rhov*rhol-rhov)/(rhol-rhov)
             dif = np.sum(abs(beta - beta_old))
             itr += 1
 
@@ -1947,10 +1947,10 @@ def PTzfit(p_guess, x_guess, beta_guess, mol, vol, x_total, m, s, e, t, kwargs):
             xl = fugcoef_v*xv/fugcoef_l
             xl = xl/np.sum(xl)
             xv = (mol*x_total - (1-beta)*mol*xl)/beta/mol
-            beta = (vol/mol-rhol)/(rhov-rhol)
+            beta = (vol/mol*rhov*rhol-rhov)/(rhol-rhov)
             dif = np.sum(abs(beta - beta_old))
             itr += 1
-        error = np.sum((vol - rhov*beta*mol - rhol*(1-beta)*mol)**2)
+        error = (vol - beta*mol/rhov - (1-beta)*mol/rhol)**2
         error += np.sum((xl*fugcoef_l - xv*fugcoef_v)**2)
         error += np.sum((mol*x_total - beta*mol*xv - (1-beta)*mol*xl)**2)
     else:
@@ -1974,10 +1974,10 @@ def PTzfit(p_guess, x_guess, beta_guess, mol, vol, x_total, m, s, e, t, kwargs):
             xv = (mol*x_total - (1-beta)*mol*xl)/beta/mol
             xv[np.where(z != 0)[0]] = 0. # here it is assumed that the ionic compounds are nonvolatile
             xv = xv/np.sum(xv)
-            beta = (vol/mol-rhol)/(rhov-rhol)
+            beta = (vol/mol*rhov*rhol-rhov)/(rhol-rhov)
             dif = np.sum(abs(beta - beta_old))
             itr += 1
-        error = (vol - rhov*beta*mol - rhol*(1-beta)*mol)**2
+        error = (vol - beta*mol/rhov - (1-beta)*mol/rhol)**2
         error += np.sum((xl*fugcoef_l - xv*fugcoef_v)[np.where(z == 0)[0]]**2)
         error += np.sum((mol*x_total - beta*mol*xv - (1-beta)*mol*xl)**2)
 
