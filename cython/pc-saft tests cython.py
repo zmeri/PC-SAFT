@@ -441,7 +441,7 @@ def test_PTz():
     xtot = (beta_ref*mol*xv_ref + (1-beta_ref)*mol*xl_ref)/mol
     rho_l = pcsaft_den(xl_ref, m, s, e, t, p_ref, pyargs, phase='liq')
     rho_v = pcsaft_den(xv_ref, m, s, e, t, p_ref, pyargs, phase='vap')
-    vol = rho_v*beta_ref*mol + rho_l*(1-beta_ref)*mol
+    vol = beta_ref*mol/rho_v + (1-beta_ref)*mol/rho_l
     result = pcsaft_PTz(p_ref, xl_ref, beta_ref, mol, vol, xtot, m, s, e, t, pyargs)
     p_calc = result[0]
     xl_calc = result[1]
