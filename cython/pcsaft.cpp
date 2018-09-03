@@ -1284,9 +1284,9 @@ double PTzfit_cpp(double p_guess, vector<double> x_guess, double beta_guess, dou
         vector<double> fugcoef_l(ncomp), fugcoef_v(ncomp), xv(ncomp);
         double rhol, rhov, summ=0., beta_old;
         for (int i = 0; i < ncomp; i++) {
-            if (cppargs.z[i] != 0) {
+            if (cppargs.z[i] == 0) {
                 xv[i] = (mol*x_total[i] - (1-beta)*mol*xl[i])/beta/mol;
-                summ += 0.;
+                summ += xv[i];
             }
         }
         for (int i = 0; i < ncomp; i++) {
@@ -1306,9 +1306,9 @@ double PTzfit_cpp(double p_guess, vector<double> x_guess, double beta_guess, dou
             }
             for (int i = 0; i < ncomp; i++) {
                 xl[i] = xl[i]/summ;
-                if (cppargs.z[i] != 0) { // here it is assumed that the ionic compounds are nonvolatile
+                if (cppargs.z[i] == 0) { // here it is assumed that the ionic compounds are nonvolatile
                     xv[i] = (mol*x_total[i] - (1-beta)*mol*xl[i])/beta/mol;
-                    summ += 0.;
+                    summ += xv[i];
                 }
             }
             for (int i = 0; i < ncomp; i++) {
@@ -1322,7 +1322,7 @@ double PTzfit_cpp(double p_guess, vector<double> x_guess, double beta_guess, dou
         
         error = pow((vol - rhov*beta*mol - rhol*(1-beta)*mol),2.);
         for (int i = 0; i < ncomp; i++) {
-            if (cppargs.z[i] != 0) {
+            if (cppargs.z[i] == 0) {
                 error += pow(xl[i]*fugcoef_l[i] - xv[i]*fugcoef_v[i], 2.);
             }
             error += pow((mol*x_total[i] - beta*mol*xv[i] - (1-beta)*mol*xl[i]), 2.);
