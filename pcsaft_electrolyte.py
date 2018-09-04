@@ -375,9 +375,14 @@ def pcsaft_PTz(p_guess, x_guess, beta_guess, mol, vol, x_total, m, s, e, t, **kw
             fugcoef_l = pcsaft_fugcoef(xl, m, s, e, t, rhol, **kwargs)
             rhov = pcsaft_den(xv, m, s, e, t, p, phase='vap', **kwargs)        
             fugcoef_v = pcsaft_fugcoef(xv, m, s, e, t, rhov, **kwargs)
-            xl = fugcoef_v*xv/fugcoef_l
-            xl = xl/np.sum(xl)
-            xv = (mol*x_total - (1-beta)*mol*xl)/beta/mol
+            if beta > 0.5:     
+                xl = fugcoef_v*xv/fugcoef_l
+                xl = xl/np.sum(xl)
+                xv = (mol*x_total - (1-beta)*mol*xl)/beta/mol # if beta is close to zero then this equation behaves poorly, and that is why we use this if statement to switch the equation around
+            else:
+                xv = fugcoef_l*xl/fugcoef_v
+                xv = xv/np.sum(xv)
+                xl = (mol*x_total - (beta)*mol*xv)/(1-beta)/mol
             beta = (vol/mol*rhov*rhol-rhov)/(rhol-rhov)
             dif = np.sum(abs(beta - beta_old))
             itr += 1
@@ -1944,9 +1949,14 @@ def PTzfit(p_guess, x_guess, beta_guess, mol, vol, x_total, m, s, e, t, kwargs):
             fugcoef_l = pcsaft_fugcoef(xl, m, s, e, t, rhol, **kwargs)
             rhov = pcsaft_den(xv, m, s, e, t, p_guess, phase='vap', **kwargs)        
             fugcoef_v = pcsaft_fugcoef(xv, m, s, e, t, rhov, **kwargs)
-            xl = fugcoef_v*xv/fugcoef_l
-            xl = xl/np.sum(xl)
-            xv = (mol*x_total - (1-beta)*mol*xl)/beta/mol
+            if beta > 0.5:     
+                xl = fugcoef_v*xv/fugcoef_l
+                xl = xl/np.sum(xl)
+                xv = (mol*x_total - (1-beta)*mol*xl)/beta/mol # if beta is close to zero then this equation behaves poorly, and that is why we use this if statement to switch the equation around
+            else:
+                xv = fugcoef_l*xl/fugcoef_v
+                xv = xv/np.sum(xv)
+                xl = (mol*x_total - (beta)*mol*xv)/(1-beta)/mol
             beta = (vol/mol*rhov*rhol-rhov)/(rhol-rhov)
             dif = np.sum(abs(beta - beta_old))
             itr += 1
