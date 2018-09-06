@@ -684,9 +684,14 @@ def pcsaft_PTz(p_guess, x_guess, beta_guess, mol, vol, x_total, m, s, e, t, pyar
             fugcoef_l = np.asarray(pcsaft_fugcoef_cpp(xl, m, s, e, t, rhol, cppargs))
             rhov = pcsaft_den_cpp(xv, m, s, e, t, p, 1, cppargs)        
             fugcoef_v = np.asarray(pcsaft_fugcoef_cpp(xv, m, s, e, t, rhov, cppargs))
-            xl = fugcoef_v*xv/fugcoef_l
-            xl = xl/np.sum(xl)
-            xv = (mol*x_total - (1-beta)*mol*xl)/beta/mol
+            if beta > 0.5:     
+                xl = fugcoef_v*xv/fugcoef_l
+                xl = xl/np.sum(xl)
+                xv = (mol*x_total - (1-beta)*mol*xl)/beta/mol # if beta is close to zero then this equation behaves poorly, and that is why we use this if statement to switch the equation around
+            else:
+                xv = fugcoef_l*xl/fugcoef_v
+                xv = xv/np.sum(xv)
+                xl = (mol*x_total - (beta)*mol*xv)/(1-beta)/mol
             beta = (vol/mol*rhov*rhol-rhov)/(rhol-rhov)
             dif = np.sum(abs(beta - beta_old))
             itr += 1
@@ -706,11 +711,17 @@ def pcsaft_PTz(p_guess, x_guess, beta_guess, mol, vol, x_total, m, s, e, t, pyar
             fugcoef_l = np.asarray(pcsaft_fugcoef_cpp(xl, m, s, e, t, rhol, cppargs))
             rhov = pcsaft_den_cpp(xv, m, s, e, t, p, 1, cppargs)        
             fugcoef_v = np.asarray(pcsaft_fugcoef_cpp(xv, m, s, e, t, rhov, cppargs))
-            xl = fugcoef_v*xv/fugcoef_l
-            xl = xl/np.sum(xl)
-            xv = (mol*x_total - (1-beta)*mol*xl)/beta/mol
-            xv[np.where(z != 0)[0]] = 0. # here it is assumed that the ionic compounds are nonvolatile
-            xv = xv/np.sum(xv)
+            if beta > 0.5:
+                xl = fugcoef_v*xv/fugcoef_l
+                xl = xl/np.sum(xl)*(((1-beta) - np.sum(x_total[np.where(z != 0)[0]]))/(1-beta)) # ensures that mole fractions add up to 1
+                xl[np.where(z != 0)[0]] = x_total[np.where(z != 0)[0]]/(1-beta)
+                xv = (mol*x_total - (1-beta)*mol*xl)/beta/mol
+                xv[np.where(xv < 0)[0]] = 0.
+            else:
+                xv = fugcoef_l*xl/fugcoef_v
+                xv[np.where(z != 0)[0]] = 0. # here it is assumed that the ionic compounds are nonvolatile
+                xv = xv/np.sum(xv)
+                xl = (mol*x_total - (beta)*mol*xv)/(1-beta)/mol
             beta = (vol/mol*rhov*rhol-rhov)/(rhol-rhov)
             dif = np.sum(abs(beta - beta_old))
             itr += 1
