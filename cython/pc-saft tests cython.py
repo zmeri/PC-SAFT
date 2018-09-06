@@ -464,6 +464,58 @@ def test_PTz():
     print('    PC-SAFT:', beta_calc, 'Pa')
     print('    Relative deviation:', (beta_calc-beta_ref)/beta_ref*100, '%')    
     
+    #    # NaCl in water
+    print('\n##########  Test with aqueous NaCl  ##########')
+    # 0 = Na+, 1 = Cl-, 2 = H2O
+    m = np.asarray([1, 1, 1.2047])
+    s = np.asarray([2.8232, 2.7599589, 0.])
+    e = np.asarray([230.00, 170.00, 353.9449])
+    volAB = np.asarray([0, 0, 0.0451])
+    eAB = np.asarray([0, 0, 2425.67])
+    k_ij = np.asarray([[0, 0.317, 0],
+                       [0.317, 0, -0.25],
+                        [0, -0.25, 0]])
+    z = np.asarray([1., -1., 0.]) 
+    
+    p_ref = 2393.8 # average of repeat data points from source: A. Apelblat and E. Korin, “The vapour pressures of saturated aqueous solutions of sodium chloride, sodium bromide, sodium nitrate, sodium nitrite, potassium iodate, and rubidium chloride at temperatures from 227 K to 323 K,” J. Chem. Thermodyn., vol. 30, no. 1, pp. 59–71, Jan. 1998. (Solubility calculated using equation from Yaws, Carl L.. (2008). Yaws' Handbook of Properties for Environmental and Green Engineering.)
+    t = 298.15 # K
+    s[2] = 2.7927 + 10.11*np.exp(-0.01775*t) - 1.417*np.exp(-0.01146*t) # temperature dependent segment diameter for water    
+    k_ij[0,2] = -0.007981*t + 2.37999
+    k_ij[2,0] = -0.007981*t + 2.37999
+    dielc = dielc_water(t)
+    
+    pyargs = {'e_assoc':eAB, 'vol_a':volAB, 'k_ij':k_ij, 'z':z, 'dielc':dielc}
+    
+    mol = 1.
+    xl_ref = np.asarray([0.0907304774758426, 0.0907304774758426, 0.818539045048315])    
+    xv_ref = np.asarray([0., 0, 1])
+    beta_ref = 0.001
+    xtot = (beta_ref*mol*xv_ref + (1-beta_ref)*mol*xl_ref)/mol
+    rho_l = pcsaft_den(xl_ref, m, s, e, t, p_ref, pyargs, phase='liq')
+    rho_v = pcsaft_den(xv_ref, m, s, e, t, p_ref, pyargs, phase='vap')
+    vol = beta_ref*mol/rho_v + (1-beta_ref)*mol/rho_l
+    result = pcsaft_PTz(p_ref, xl_ref, beta_ref, mol, vol, xtot, m, s, e, t, pyargs)
+    p_calc = result[0]
+    xl_calc = result[1]
+    xv_calc = result[2]
+    beta_calc = result[3]
+    print('----- Pressure at 298.15 K -----')
+    print('    Reference:', p_ref, 'Pa')
+    print('    PC-SAFT:', p_calc, 'Pa')
+    print('    Relative deviation:', (p_calc-p_ref)/p_ref*100, '%')
+    print('----- Liquid phase composition -----')
+    print('    Reference:', xl_ref)
+    print('    PC-SAFT:', xl_calc)
+    print('    Relative deviation:', (xl_calc-xl_ref)/xl_ref*100, '%')  
+    print('----- Vapor phase composition -----')
+    print('    Reference:', xv_ref)
+    print('    PC-SAFT:', xv_calc)
+    print('    Relative deviation:', (xv_calc-xv_ref)/xv_ref*100, '%')
+    print('----- Beta -----')
+    print('    Reference:', beta_ref)
+    print('    PC-SAFT:', beta_calc)
+    print('    Relative deviation:', (beta_calc-beta_ref)/beta_ref*100, '%') 
+    
     return None
     
 
