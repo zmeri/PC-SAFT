@@ -1109,6 +1109,9 @@ double pcsaft_den_cpp(vector<double> x, vector<double> m, vector<double> s, vect
         P_fit = pcsaft_p_cpp(x, m, s, e, t, rho, cppargs);
         y2 = pow((P_fit-p)/p*100, 2.);
         rho = rho2-y2/(y2-y1)*(rho2-rho1);
+        if (y2 == y1) {
+            break;
+        }
         if (rho < x_lo) {
             rho = (x_lo + rho2)/2;
         }
@@ -1128,6 +1131,9 @@ double pcsaft_den_cpp(vector<double> x, vector<double> m, vector<double> s, vect
             P_fit = pcsaft_p_cpp(x, m, s, e, t, rho, cppargs);
             y2 = pow((P_fit-p)/p*100, 2.);
             rho = rho2-y2/(y2-y1)*(rho2-rho1);
+            if (y2 == y1) {
+                break;
+            }
             if (rho < x_lo) {
                 rho = (x_lo + rho2)/2;
             }
@@ -1254,15 +1260,28 @@ double PTzfit_cpp(double p_guess, vector<double> x_guess, double beta_guess, dou
             rhov = pcsaft_den_cpp(xv, m, s, e, t, p_guess, 1, cppargs);    
             fugcoef_v = pcsaft_fugcoef_cpp(xv, m, s, e, t, rhov, cppargs);
 
-            summ = 0.;
-            for (int i = 0; i < ncomp; i++) {
-                xl[i] = fugcoef_v[i]*xv[i]/fugcoef_l[i];
-                summ += xl[i];
+            if (beta > 0.5) {
+                summ = 0.;
+                for (int i = 0; i < ncomp; i++) {
+                    xl[i] = fugcoef_v[i]*xv[i]/fugcoef_l[i];
+                    summ += xl[i];
+                }
+                for (int i = 0; i < ncomp; i++) {
+                    xl[i] = xl[i]/summ;
+                    xv[i] = (mol*x_total[i] - (1-beta)*mol*xl[i])/beta/mol; // if beta is close to zero then this equation behaves poorly, and that is why we use this if statement to switch the equation around
+                }
             }
-            for (int i = 0; i < ncomp; i++) {
-                xl[i] = xl[i]/summ;
-                xv[i] = (mol*x_total[i] - (1-beta)*mol*xl[i])/beta/mol;
-            }
+            else {
+                summ = 0.;
+                for (int i = 0; i < ncomp; i++) {
+                    xv[i] = fugcoef_l[i]*xl[i]/fugcoef_v[i];
+                    summ += xv[i];
+                }
+                for (int i = 0; i < ncomp; i++) {
+                    xv[i] = xv[i]/summ;
+                    xl[i] = (mol*x_total[i] - (beta)*mol*xv[i])/(1-beta)/mol;
+                }
+            }  
 
             beta = (vol/mol*rhov*rhol-rhov)/(rhol-rhov);
             dif = abs(beta - beta_old);
@@ -1299,20 +1318,37 @@ double PTzfit_cpp(double p_guess, vector<double> x_guess, double beta_guess, dou
             rhov = pcsaft_den_cpp(xv, m, s, e, t, p_guess, 1, cppargs);    
             fugcoef_v = pcsaft_fugcoef_cpp(xv, m, s, e, t, rhov, cppargs);
 
-            summ = 0.;
-            for (int i = 0; i < ncomp; i++) {
-                xl[i] = fugcoef_v[i]*xv[i]/fugcoef_l[i];
-                summ += xl[i];
-            }
-            for (int i = 0; i < ncomp; i++) {
-                xl[i] = xl[i]/summ;
-                if (cppargs.z[i] == 0) { // here it is assumed that the ionic compounds are nonvolatile
-                    xv[i] = (mol*x_total[i] - (1-beta)*mol*xl[i])/beta/mol;
-                    summ += xv[i];
+            if (beta > 0.5) {
+                summ = 0.;
+                for (int i = 0; i < ncomp; i++) {
+                    if (cppargs.z[i] == 0) {            
+                        xl[i] = fugcoef_v[i]*xv[i]/fugcoef_l[i];
+                        summ += xl[i];
+                    }
+                }
+                for (int i = 0; i < ncomp; i++) {
+                    if (cppargs.z[i] == 0) {
+                        xl[i] = xl[i]/summ*(((1-beta) - x_ions)/(1-beta)); // ensures that mole fractions add up to 1
+                        xv[i] = (mol*x_total[i] - (1-beta)*mol*xl[i])/beta/mol; // if beta is close to zero then this equation behaves poorly, and that is why we use this if statement to switch the equation around
+                    }
+                    else {                  
+                        xl[i] = x_total[i]/(1-beta);
+                        xv[i] = 0.;
+                    }                    
                 }
             }
-            for (int i = 0; i < ncomp; i++) {
-                xv[i] = xv[i]/summ;
+            else {
+                summ = 0.;
+                for (int i = 0; i < ncomp; i++) {
+                    if (cppargs.z[i] == 0) { // here it is assumed that the ionic compounds are nonvolatile
+                        xv[i] = fugcoef_l[i]*xl[i]/fugcoef_v[i];
+                    }
+                    summ += xv[i];
+                }
+                for (int i = 0; i < ncomp; i++) {
+                    xv[i] = xv[i]/summ;
+                    xl[i] = (mol*x_total[i] - beta*mol*xv[i])/(1-beta)/mol;
+                }    
             }
 
             beta = (vol/mol*rhov*rhol-rhov)/(rhol-rhov);
