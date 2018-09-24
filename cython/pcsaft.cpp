@@ -58,7 +58,7 @@ vector<double> dXA_find(int ncA, int ncomp, vector<int> iA, vector<double> delta
                 for (int k = 0; k < ncA; k++) {
                     for (int l = 0; l < n_sites; l++) {
                         indx2 += 1;
-                        sum1 = sum1 + den*x[k]*(XA[indx2]*ddelta_dd[j*(ncA+ncA+ncomp)+k*(ncA+ncomp)+i]*((indx1+indx2)%2)); // (indx1+indx2)%2 ensures that A-A and B-B associations are set to zero
+                        sum1 = sum1 + den*x[k]*(XA[indx2]*ddelta_dd[j*(ncA*ncomp)+k*(ncomp)+i]*((indx1+indx2)%2)); // (indx1+indx2)%2 ensures that A-A and B-B associations are set to zero
                         A(indx1+i*n_sites*ncA,indx2+i*n_sites*ncA) =
                         A(indx1+i*n_sites*ncA,indx2+i*n_sites*ncA) +
                         XA[indx1]*XA[indx1]*den*x[k]*delta_ij[j*ncA+k]*((indx1+indx2)%2);
