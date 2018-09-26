@@ -546,3 +546,129 @@ def test_Hvap():
     print('    Relative deviation:', (calc-ref)/ref*100, '%')     
     
     return None
+
+def test_dadt():
+    """Test the function for the temperature derivative of the Helmholtz energy."""
+    print('##########  Testing pcsaft_dadt  ##########')
+
+    # Toluene    
+    print('##########  Test with toluene  ##########')
+    x = np.asarray([1.])
+    m = np.asarray([2.8149])
+    s = np.asarray([3.7169])
+    e = np.asarray([285.69])
+    
+    p = 100000.
+    t = 330.
+    
+    rho = pcsaft_den(x, m, s, e, t, p, phase='liq')
+    dadt_eos = pcsaft_dadt(x, m, s, e, t, rho)
+    
+    # calculating numerical derivative
+    der1 = pcsaft_ares(x, m, s, e, t-1, rho)
+    der2 = pcsaft_ares(x, m, s, e, t+1, rho)
+    dadt_num = (der2-der1)/2.
+    print('    Numerical derivative:', dadt_num)
+    print('    PC-SAFT derivative:', dadt_eos)
+    print('    Relative deviation:', (dadt_eos-dadt_num)/dadt_num*100, '%')
+    
+    # Acetic acid   
+    print('##########  Test with acetic acid  ##########')
+    m = np.asarray([1.3403])
+    s = np.asarray([3.8582])
+    e = np.asarray([211.59])
+    volAB = np.asarray([0.075550])
+    eAB = np.asarray([3044.4])
+
+    p = 100000.
+    t = 310.
+    
+    rho = pcsaft_den(x, m, s, e, t, p, phase='liq', e_assoc=eAB, vol_a=volAB)
+    dadt_eos = pcsaft_dadt(x, m, s, e, t, rho, e_assoc=eAB, vol_a=volAB)
+    
+    # calculating numerical derivative
+    der1 = pcsaft_ares(x, m, s, e, t-1, rho, e_assoc=eAB, vol_a=volAB)
+    der2 = pcsaft_ares(x, m, s, e, t+1, rho, e_assoc=eAB, vol_a=volAB)
+    dadt_num = (der2-der1)/2.
+    print('    Numerical derivative:', dadt_num)
+    print('    PC-SAFT derivative:', dadt_eos)
+    print('    Relative deviation:', (dadt_eos-dadt_num)/dadt_num*100, '%')      
+    
+    # Water    
+    print('##########  Test with water  ##########')
+    m = np.asarray([1.2047])
+    e = np.asarray([353.95])
+    volAB = np.asarray([0.0451])
+    eAB = np.asarray([2425.67])
+
+    p = 100000.
+    t = 290.
+    
+    s = np.asarray([2.7927 + 10.11*np.exp(-0.01775*t) - 1.417*np.exp(-0.01146*t)])
+
+    rho = pcsaft_den(x, m, s, e, t, p, phase='liq', e_assoc=eAB, vol_a=volAB)
+    dadt_eos = pcsaft_dadt(x, m, s, e, t, rho, e_assoc=eAB, vol_a=volAB)
+    
+    # calculating numerical derivative
+    der1 = pcsaft_ares(x, m, s, e, t-1, rho, e_assoc=eAB, vol_a=volAB)
+    der2 = pcsaft_ares(x, m, s, e, t+1, rho, e_assoc=eAB, vol_a=volAB)
+    dadt_num = (der2-der1)/2.
+    print('    Numerical derivative:', dadt_num)
+    print('    PC-SAFT derivative:', dadt_eos)
+    print('    Relative deviation:', (dadt_eos-dadt_num)/dadt_num*100, '%')   
+    
+    # Butyl acetate    
+    print('##########  Test with butyl acetate  ##########')
+    m = np.asarray([2.76462805])
+    s = np.asarray([4.02244938])
+    e = np.asarray([263.69902915])
+    dpm = np.asarray([1.84])
+    dip_num = np.asarray([4.99688339])
+
+    p = 100000.
+    t = 370.
+
+    rho = pcsaft_den(x, m, s, e, t, p, phase='liq', dipm=dpm, dip_num=dip_num)
+    dadt_eos = pcsaft_dadt(x, m, s, e, t, rho, dipm=dpm, dip_num=dip_num)
+    
+    # calculating numerical derivative
+    der1 = pcsaft_ares(x, m, s, e, t-1, rho, dipm=dpm, dip_num=dip_num)
+    der2 = pcsaft_ares(x, m, s, e, t+1, rho, dipm=dpm, dip_num=dip_num)
+    dadt_num = (der2-der1)/2.
+    print('    Numerical derivative:', dadt_num)
+    print('    PC-SAFT derivative:', dadt_eos)
+    print('    Relative deviation:', (dadt_eos-dadt_num)/dadt_num*100, '%')  
+    
+    # Aqueous NaCl    
+    print('##########  Test with aqueous NaCl  ##########')
+    # 0 = Na+, 1 = Cl-, 2 = H2O
+    x = np.asarray([0.0907304774758426, 0.0907304774758426, 0.818539045048315])    
+    m = np.asarray([1, 1, 1.2047])
+    s = np.asarray([2.8232, 2.7599589, 0.])
+    e = np.asarray([230.00, 170.00, 353.9449])
+    volAB = np.asarray([0, 0, 0.0451])
+    eAB = np.asarray([0, 0, 2425.67])
+    k_ij = np.asarray([[0, 0.317, 0],
+                       [0.317, 0, -0.25],
+                        [0, -0.25, 0]])
+    z = np.asarray([1., -1., 0.]) 
+    
+    t = 298.15 # K
+    p = 100000. # Pa
+    s[2] = 2.7927 + 10.11*np.exp(-0.01775*t) - 1.417*np.exp(-0.01146*t) # temperature dependent segment diameter for water    
+    k_ij[0,2] = -0.007981*t + 2.37999
+    k_ij[2,0] = -0.007981*t + 2.37999
+    dielc = dielc_water(t)
+
+    rho = pcsaft_den(x, m, s, e, t, p, phase='liq', k_ij=k_ij, e_assoc=eAB, vol_a=volAB, z=z, dielc=dielc)
+    dadt_eos = pcsaft_dadt(x, m, s, e, t, rho, k_ij=k_ij, e_assoc=eAB, vol_a=volAB, z=z, dielc=dielc)
+    
+    # calculating numerical derivative
+    der1 = pcsaft_ares(x, m, s, e, t-1, rho, k_ij=k_ij, e_assoc=eAB, vol_a=volAB, z=z, dielc=dielc)
+    der2 = pcsaft_ares(x, m, s, e, t+1, rho, k_ij=k_ij, e_assoc=eAB, vol_a=volAB, z=z, dielc=dielc)
+    dadt_num = (der2-der1)/2.
+    print('    Numerical derivative:', dadt_num)
+    print('    PC-SAFT derivative:', dadt_eos)
+    print('    Relative deviation:', (dadt_eos-dadt_num)/dadt_num*100, '%')      
+    
+    return None
