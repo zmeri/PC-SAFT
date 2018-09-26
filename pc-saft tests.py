@@ -5,8 +5,12 @@ Tests for checking that the PC-SAFT functions are working correctly.
 @author: Zach Baird
 """
 import numpy as np
+import timeit
 from pcsaft_electrolyte import pcsaft_den, pcsaft_hres, pcsaft_gres, pcsaft_sres, pcsaft_Hvap
-from pcsaft_electrolyte import pcsaft_vaporP, pcsaft_bubbleP, dielc_water, pcsaft_PTz
+from pcsaft_electrolyte import pcsaft_vaporP, pcsaft_bubbleP, dielc_water, pcsaft_PTz, pcsaft_osmoticC
+from pcsaft_electrolyte import pcsaft_dadt, pcsaft_d2adt, pcsaft_dZdt, pcsaft_Z, pcsaft_dhdt
+from pcsaft_electrolyte import pcsaft_dgdt, pcsaft_dsdt, pcsaft_cp, pcsaft_ares
+import pylab as pl
 
 def test_hres():
     """Test the residual enthalpy function to see if it is working correctly."""
@@ -163,7 +167,7 @@ def test_gres():
 
 def test_density():
     """Test the density function to see if it is working correctly."""
-    # Toluene
+#     Toluene
     print('##########  Test with toluene  ##########')
     x = np.asarray([1.])
     m = np.asarray([2.8149])
@@ -210,11 +214,11 @@ def test_density():
     
     # Butyl acetate
     print('\n##########  Test with butyl acetate  ##########')
-    m = np.asarray([2.76462805])
-    s = np.asarray([4.02244938])
-    e = np.asarray([263.69902915])
-    dpm = np.asarray([1.84])
-    dip_num = np.asarray([4.99688339])
+    m = np.asarray([3.9706])
+    s = np.asarray([3.5440])
+    e = np.asarray([241.93])
+    dpm = np.asarray([1.86])
+    dip_num = np.asarray([1.0])
     
     ref = 8021. # source: DIPPR correlation
     calc = pcsaft_den(x, m, s, e, 240, 101325, phase='liq', dipm=dpm, dip_num=dip_num)
@@ -288,7 +292,7 @@ def test_vaporP():
     print('    PC-SAFT:', calc, 'Pa')
     print('    Relative deviation:', (calc-ref)/ref*100, '%')
     
-    # Water
+#     Water
     print('\n##########  Test with water  ##########')
     m = np.asarray([1.2047])
     e = np.asarray([353.95])
@@ -319,13 +323,13 @@ def test_vaporP():
     print('    PC-SAFT:', calc, 'Pa')
     print('    Relative deviation:', (calc-ref)/ref*100, '%')    
     
-    # Butyl acetate
+#    # Butyl acetate
     print('\n##########  Test with butyl acetate  ##########')
-    m = np.asarray([2.76462805])
-    s = np.asarray([4.02244938])
-    e = np.asarray([263.69902915])
-    dpm = np.asarray([1.84])
-    dip_num = np.asarray([4.99688339])
+    m = np.asarray([3.9706])
+    s = np.asarray([3.5440])
+    e = np.asarray([241.93])
+    dpm = np.asarray([1.86])
+    dip_num = np.asarray([1.0])
     
     ref = 219.6 # source: DIPPR correlation
     calc = pcsaft_vaporP(ref, x, m, s, e, 270, dipm=dpm, dip_num=dip_num)
@@ -339,7 +343,7 @@ def test_vaporP():
     
 def test_bubbleP():
     """Test the bubble point pressure function to see if it is working correctly."""
-    # Binary mixture: methanol-cyclohexane
+#     Binary mixture: methanol-cyclohexane
     print('\n##########  Test with methanol-cyclohexane mixture  ##########')
     #0 = methanol, 1 = cyclohexane
     x = np.asarray([0.3,0.7])
@@ -428,58 +432,6 @@ def test_PTz():
     print('    PC-SAFT:', p_calc, 'Pa')
     print('    Relative deviation:', (p_calc-p_ref)/p_ref*100, '%')
     print('----- Liquid phase composition -----')
-    print('    Reference:', xl_ref, 'Pa')
-    print('    PC-SAFT:', xl_calc, 'Pa')
-    print('    Relative deviation:', (xl_calc-xl_ref)/xl_ref*100, '%')  
-    print('----- Vapor phase composition -----')
-    print('    Reference:', xv_ref, 'Pa')
-    print('    PC-SAFT:', xv_calc, 'Pa')
-    print('    Relative deviation:', (xv_calc-xv_ref)/xv_ref*100, '%')
-    print('----- Beta -----')
-    print('    Reference:', beta_ref, 'Pa')
-    print('    PC-SAFT:', beta_calc, 'Pa')
-    print('    Relative deviation:', (beta_calc-beta_ref)/beta_ref*100, '%')    
-    
-    #    # NaCl in water
-    print('\n##########  Test with aqueous NaCl  ##########')
-    # 0 = Na+, 1 = Cl-, 2 = H2O
-    m = np.asarray([1, 1, 1.2047])
-    s = np.asarray([2.8232, 2.7599589, 0.])
-    e = np.asarray([230.00, 170.00, 353.9449])
-    volAB = np.asarray([0, 0, 0.0451])
-    eAB = np.asarray([0, 0, 2425.67])
-    k_ij = np.asarray([[0, 0.317, 0],
-                       [0.317, 0, -0.25],
-                        [0, -0.25, 0]])
-    z = np.asarray([1., -1., 0.]) 
-    
-    p_ref = 2393.8 # average of repeat data points from source: A. Apelblat and E. Korin, “The vapour pressures of saturated aqueous solutions of sodium chloride, sodium bromide, sodium nitrate, sodium nitrite, potassium iodate, and rubidium chloride at temperatures from 227 K to 323 K,” J. Chem. Thermodyn., vol. 30, no. 1, pp. 59–71, Jan. 1998. (Solubility calculated using equation from Yaws, Carl L.. (2008). Yaws' Handbook of Properties for Environmental and Green Engineering.)
-    t = 298.15 # K
-    s[2] = 2.7927 + 10.11*np.exp(-0.01775*t) - 1.417*np.exp(-0.01146*t) # temperature dependent segment diameter for water    
-    k_ij[0,2] = -0.007981*t + 2.37999
-    k_ij[2,0] = -0.007981*t + 2.37999
-    dielc = dielc_water(t)
-    
-    pyargs = {'e_assoc':eAB, 'vol_a':volAB, 'k_ij':k_ij, 'z':z, 'dielc':dielc}
-    
-    mol = 1.
-    xl_ref = np.asarray([0.0907304774758426, 0.0907304774758426, 0.818539045048315])    
-    xv_ref = np.asarray([0., 0, 1])
-    beta_ref = 0.001
-    xtot = (beta_ref*mol*xv_ref + (1-beta_ref)*mol*xl_ref)/mol
-    rho_l = pcsaft_den(xl_ref, m, s, e, t, p_ref, pyargs, phase='liq')
-    rho_v = pcsaft_den(xv_ref, m, s, e, t, p_ref, pyargs, phase='vap')
-    vol = beta_ref*mol/rho_v + (1-beta_ref)*mol/rho_l
-    result = pcsaft_PTz(p_ref, xl_ref, beta_ref, mol, vol, xtot, m, s, e, t, pyargs)
-    p_calc = result[0]
-    xl_calc = result[1]
-    xv_calc = result[2]
-    beta_calc = result[3]
-    print('----- Pressure at 298.15 K -----')
-    print('    Reference:', p_ref, 'Pa')
-    print('    PC-SAFT:', p_calc, 'Pa')
-    print('    Relative deviation:', (p_calc-p_ref)/p_ref*100, '%')
-    print('----- Liquid phase composition -----')
     print('    Reference:', xl_ref)
     print('    PC-SAFT:', xl_calc)
     print('    Relative deviation:', (xl_calc-xl_ref)/xl_ref*100, '%')  
@@ -490,7 +442,41 @@ def test_PTz():
     print('----- Beta -----')
     print('    Reference:', beta_ref)
     print('    PC-SAFT:', beta_calc)
-    print('    Relative deviation:', (beta_calc-beta_ref)/beta_ref*100, '%') 
+    print('    Relative deviation:', (beta_calc-beta_ref)/beta_ref*100, '%')    
+    
+    return None
+    
+
+def test_osmoticC():
+    """Test the function for calculating osmotic coefficients to see if it is working correctly."""
+    # NaCl in water
+    print('\n##########  Test with aqueous NaCl  ##########')
+    # 0 = Na+, 1 = Cl-, 2 = H2O
+    x = np.asarray([0.0629838206, 0.0629838206, 0.8740323588])
+    m = np.asarray([1, 1, 1.2047])
+    s = np.asarray([2.8232, 2.7599589, 0.])
+    e = np.asarray([230.00, 170.00, 353.9449])
+    volAB = np.asarray([0, 0, 0.0451])
+    eAB = np.asarray([0, 0, 2425.67])
+    k_ij = np.asarray([[0, 0.317, 0],
+                       [0.317, 0, -0.25],
+                        [0, -0.25, 0]])
+    z = np.asarray([1., -1., 0.]) 
+    
+    ref = 1.116 # source: R. A. Robinson and R. H. Stokes, Electrolyte Solutions: Second Revised Edition. Dover Publications, 1959.
+    t = 293.15 # K
+    s[2] = 2.7927 + 10.11*np.exp(-0.01775*t) - 1.417*np.exp(-0.01146*t) # temperature dependent segment diameter for water    
+    k_ij[0,2] = -0.007981*t + 2.37999
+    k_ij[2,0] = -0.007981*t + 2.37999
+    dielc = dielc_water(t)
+ 
+    rho = pcsaft_den(x, m, s, e, t, 2339.3, phase='liq', k_ij=k_ij, e_assoc=eAB, vol_a=volAB, z=z, dielc=dielc)      
+    result = pcsaft_osmoticC(x, m, s, e, t, rho, k_ij=k_ij, e_assoc=eAB, vol_a=volAB, z=z, dielc=dielc)
+    calc = result[0]
+    print('----- Osmotic coefficient at 293.15 K -----')
+    print('    Reference:', ref)
+    print('    PC-SAFT:', calc)
+    print('    Relative deviation:', (calc-ref)/ref*100, '%')      
     
     return None
 
@@ -546,6 +532,7 @@ def test_Hvap():
     print('    Relative deviation:', (calc-ref)/ref*100, '%')     
     
     return None
+
 
 def test_dadt():
     """Test the function for the temperature derivative of the Helmholtz energy."""
@@ -673,6 +660,7 @@ def test_dadt():
     
     return None
 
+
 def test_d2adt():
     """Test the function for the second temperature derivative of the Helmholtz energy."""
     print('##########  Testing pcsaft_d2adt  ##########')
@@ -778,3 +766,90 @@ def test_d2adt():
     print('    Relative deviation:', (d2adt_eos-d2adt_num)/d2adt_num*100, '%')      
     
     return None
+
+
+def test_cp():
+    """Test the heat capacity function to see if it is working correctly."""
+    # Benzene
+    print('##########  Test with benzene  ##########')
+    x = np.asarray([1.])
+    m = np.asarray([2.4653])
+    s = np.asarray([3.6478])
+    e = np.asarray([287.35])
+    cnsts = np.asarray([55238., 173380, 764.25, 72545, 2445.7]) # constants for Aly-Lee equation (obtained from DIPPR)
+    
+    ref = 140.78 # source: Equation of state from Polt et al. (1992) (available at https://webbook.nist.gov/chemistry/fluid/)
+    p = 100000.
+    t = 330.
+    rho = pcsaft_den(x, m, s, e, t, p, phase='liq')
+    calc = pcsaft_cp(x, m, s, e, t, rho, cnsts)
+    print('----- Heat capacity at 330 K -----')
+    print('    Reference:', ref, 'J mol^-1 K^-1')
+    print('    PC-SAFT:', calc, 'J mol^-1 K^-1')
+    print('    Relative deviation:', (calc-ref)/ref*100, '%')
+
+    # Toluene
+    print('##########  Test with toluene  ##########')
+    x = np.asarray([1.])
+    m = np.asarray([2.8149])
+    s = np.asarray([3.7169])
+    e = np.asarray([285.69])
+    cnsts = np.asarray([58140., 286300, 1440.6, 189800, 650.43]) # constants for Aly-Lee equation (obtained from DIPPR)
+    
+    ref = 179.79 # source: Equation of state from Polt et al. (1992) (available at https://webbook.nist.gov/chemistry/fluid/)
+    p = 100000.
+    t = 370.
+    rho = pcsaft_den(x, m, s, e, t, p, phase='liq')
+    calc = pcsaft_cp(x, m, s, e, t, rho, cnsts)
+    print('----- Heat capacity at 370 K -----')
+    print('    Reference:', ref, 'J mol^-1 K^-1')
+    print('    PC-SAFT:', calc, 'J mol^-1 K^-1')
+    print('    Relative deviation:', (calc-ref)/ref*100, '%')
+    
+    # Water
+    print('\n##########  Test with acetic acid  ##########')
+    m = np.asarray([1.3403])
+    s = np.asarray([3.8582])
+    e = np.asarray([211.59])
+    volAB = np.asarray([0.075550])
+    eAB = np.asarray([3044.4])
+    cnsts = np.asarray([40200., 136750, 1262, 70030, 569.7]) # constants for Aly-Lee equation (obtained from DIPPR)
+
+    ref = 130.3 # source: DIPPR
+    p = 100000.
+    t = 325.
+    rho = pcsaft_den(x, m, s, e, t, p, phase='liq', e_assoc=eAB, vol_a=volAB)
+    calc = pcsaft_cp(x, m, s, e, t, rho, cnsts, e_assoc=eAB, vol_a=volAB)
+    """ Note: Large deviations occur with acetic acid and water. This behavior 
+    has been observed before and was described in R. T. C. S. Ribeiro, A. L. 
+    Alberton, M. L. L. Paredes, G. M. Kontogeorgis, and X. Liang, “Extensive 
+    Study of the Capabilities and Limitations of the CPA and sPC-SAFT Equations 
+    of State in Modeling a Wide Range of Acetic Acid Properties,” Ind. Eng. 
+    Chem. Res., vol. 57, no. 16, pp. 5690–5704, Apr. 2018. """
+    print('----- Heat capacity at 325 K -----')
+    print('    Reference:', ref, 'J mol^-1 K^-1')
+    print('    PC-SAFT:', calc, 'J mol^-1 K^-1')
+    print('    Relative deviation:', (calc-ref)/ref*100, '%')    
+    
+    # Butyl acetate
+    print('\n##########  Test with butyl acetate  ##########')
+    m = np.asarray([2.76462805])
+    s = np.asarray([4.02244938])
+    e = np.asarray([263.69902915])
+    dpm = np.asarray([1.84])
+    dip_num = np.asarray([4.99688339])
+    cnsts = np.asarray([116840., 376900, 1956, 281800, 811.2]) # constants for Aly-Lee equation (obtained from DIPPR)
+
+    ref = 234.9 # source: DIPPR correlation
+    p = 100000.
+    t = 320.
+    rho = pcsaft_den(x, m, s, e, t, p, phase='liq', dipm=dpm, dip_num=dip_num)
+    calc = pcsaft_cp(x, m, s, e, t, rho, cnsts, dipm=dpm, dip_num=dip_num)
+    print('----- Heat capacity at 320 K -----')
+    print('    Reference:', ref, 'J mol^-1 K^-1')
+    print('    PC-SAFT:', calc, 'J mol^-1 K^-1')
+    print('    Relative deviation:', (calc-ref)/ref*100, '%')     
+    
+    return None
+
+test_density()
