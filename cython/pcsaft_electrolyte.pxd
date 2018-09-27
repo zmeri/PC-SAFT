@@ -21,6 +21,18 @@ cdef extern from "pcsaft.cpp":
     double PTzfit_cpp(double p_guess, vector[double] x_guess, double beta_guess, double mol, \
         double vol, vector[double] x_total, vector[double] m, vector[double] s, vector[double] e, \
         double t, add_args &cppargs)
+    vector[double] chem_equil_cpp(vector[double] x_guess, vector[double] m, vector[double] s, \
+        vector[double] e, double t, double p, add_args &cppargs)
+    double pcsaft_ares_cpp(vector[double] x, vector[double] m, vector[double] s, vector[double] e, \
+        double t, double rho, add_args &cppargs)
+    double pcsaft_dadt_cpp(vector[double] x, vector[double] m, vector[double] s, vector[double] e, \
+        double t, double rho, add_args &cppargs)
+    double pcsaft_hres_cpp(vector[double] x, vector[double] m, vector[double] s, vector[double] e, \
+        double t, double rho, add_args &cppargs)
+    double pcsaft_sres_cpp(vector[double] x, vector[double] m, vector[double] s, vector[double] e, \
+        double t, double rho, add_args &cppargs)
+    double pcsaft_gres_cpp(vector[double] x, vector[double] m, vector[double] s, vector[double] e, \
+        double t, double rho, add_args &cppargs)
    
     ctypedef struct add_args: 
         vector[double] k_ij
@@ -30,3 +42,5 @@ cdef extern from "pcsaft.cpp":
         vector[double] dip_num
         vector[double] z
         double dielc
+        vector[double] k_hb
+        vector[double] l_ij
