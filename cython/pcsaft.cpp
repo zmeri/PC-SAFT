@@ -2,7 +2,6 @@
 #include <string>
 #include <cmath>
 #include "math.h"
-#include <iostream>
 #include <Eigen/Dense>
 
 #include "pcsaft.h"
@@ -378,12 +377,12 @@ double pcsaft_Z_cpp(vector<double> x, vector<double> m, vector<double> s, vector
     double Zassoc = 0;
     if (!cppargs.e_assoc.empty()) {
         int a_sites = 2;
-        int ncA = count_if(cppargs.e_assoc.begin(), cppargs.e_assoc.end(), IsNotZero); // number of associating compounds in the fluid
+        int ncA = count_if(cppargs.vol_a.begin(), cppargs.vol_a.end(), IsNotZero); // number of associating compounds in the fluid
  
         vector<int> iA (ncA, 0); //indices of associating compounds
         int ctr = 0;
         for (int i = 0; i < ncomp; i++) {
-            if (cppargs.e_assoc[i] != 0.0) {
+            if (cppargs.vol_a[i] != 0.0) {
                 iA[ctr] = i;
                 ctr += 1;
             }
@@ -448,7 +447,7 @@ double pcsaft_Z_cpp(vector<double> x, vector<double> m, vector<double> s, vector
             XA_old = XA;
         }
 
-        vector<double> dXA_dd(ncA*ncA*ncomp, 0);
+        vector<double> dXA_dd(ncA*a_sites*ncomp, 0);
         dXA_dd = dXA_find(ncA, ncomp, iA, delta_ij, den, XA, ddelta_dd, x_assoc, a_sites);
 
         summ = 0.;
@@ -875,12 +874,12 @@ vector<double> pcsaft_fugcoef_cpp(vector<double> x, vector<double> m, vector<dou
     vector<double> mu_assoc(ncomp, 0);
     if (!cppargs.e_assoc.empty()) {
         int a_sites = 2;
-        int ncA = count_if(cppargs.e_assoc.begin(), cppargs.e_assoc.end(), IsNotZero); // number of associating compounds in the fluid
+        int ncA = count_if(cppargs.vol_a.begin(), cppargs.vol_a.end(), IsNotZero); // number of associating compounds in the fluid
  
         vector<int> iA (ncA, 0); //indices of associating compounds
         int ctr = 0;
         for (int i = 0; i < ncomp; i++) {
-            if (cppargs.e_assoc[i] != 0.0) {
+            if (cppargs.vol_a[i] != 0.0) {
                 iA[ctr] = i;
                 ctr += 1;
             }
@@ -945,7 +944,7 @@ vector<double> pcsaft_fugcoef_cpp(vector<double> x, vector<double> m, vector<dou
             XA_old = XA;
         }
 
-        vector<double> dXA_dd(ncA*ncA*ncomp, 0);
+        vector<double> dXA_dd(ncA*a_sites*ncomp, 0);
         dXA_dd = dXA_find(ncA, ncomp, iA, delta_ij, den, XA, ddelta_dd, x_assoc, a_sites);
 
         for (int i = 0; i < ncomp; i++) {
@@ -1301,12 +1300,12 @@ double pcsaft_ares_cpp(vector<double> x, vector<double> m, vector<double> s, vec
     double ares_assoc = 0.;
     if (!cppargs.e_assoc.empty()) {
         int a_sites = 2;
-        int ncA = count_if(cppargs.e_assoc.begin(), cppargs.e_assoc.end(), IsNotZero); // number of associating compounds in the fluid
+        int ncA = count_if(cppargs.vol_a.begin(), cppargs.vol_a.end(), IsNotZero); // number of associating compounds in the fluid
  
         vector<int> iA (ncA, 0); //indices of associating compounds
         int ctr = 0;
         for (int i = 0; i < ncomp; i++) {
-            if (cppargs.e_assoc[i] != 0.0) {
+            if (cppargs.vol_a[i] != 0.0) {
                 iA[ctr] = i;
                 ctr += 1;
             }
@@ -1680,12 +1679,12 @@ double pcsaft_dadt_cpp(vector<double> x, vector<double> m, vector<double> s, vec
     double dadt_assoc = 0.;
     if (!cppargs.e_assoc.empty()) {
         int a_sites = 2;
-        int ncA = count_if(cppargs.e_assoc.begin(), cppargs.e_assoc.end(), IsNotZero); // number of associating compounds in the fluid
+        int ncA = count_if(cppargs.vol_a.begin(), cppargs.vol_a.end(), IsNotZero); // number of associating compounds in the fluid
  
         vector<int> iA (ncA, 0); //indices of associating compounds
         int ctr = 0;
         for (int i = 0; i < ncomp; i++) {
-            if (cppargs.e_assoc[i] != 0.0) {
+            if (cppargs.vol_a[i] != 0.0) {
                 iA[ctr] = i;
                 ctr += 1;
             }
@@ -2213,7 +2212,7 @@ double bubblePfit_cpp(double p_guess, vector<double> xv_guess, vector<double> x,
             }
         }
     }
-
+    
     if (!isfinite(error)) {
         error = 100000000.;
     }
