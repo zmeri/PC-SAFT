@@ -426,6 +426,9 @@ double pcsaft_Z_cpp(vector<double> x, vector<double> m, vector<double> s, vector
                 }
             }           
             XA[i*2] = (-1 + sqrt(1+8*den*delta_ij[i*ncA+i]))/(4*den*delta_ij[i*ncA+i]);
+            if (!isfinite(XA[i*2])) {
+                XA[i*2] = 0.02;
+            }
             XA[i*2+1] = XA[i*2];
         }
 
@@ -923,6 +926,9 @@ vector<double> pcsaft_fugcoef_cpp(vector<double> x, vector<double> m, vector<dou
                 }
             }           
             XA[i*2] = (-1 + sqrt(1+8*den*delta_ij[i*ncA+i]))/(4*den*delta_ij[i*ncA+i]);
+            if (!isfinite(XA[i*2])) {
+                XA[i*2] = 0.02;
+            }
             XA[i*2+1] = XA[i*2];
         }
 
@@ -1337,6 +1343,9 @@ double pcsaft_ares_cpp(vector<double> x, vector<double> m, vector<double> s, vec
                 delta_ij[idxa] = ghs[iA[j]]*(exp(eABij[idxa]/t)-1)*pow(s_ij[iA[i]*ncomp+iA[j]], 3)*volABij[idxa];
             }           
             XA[i*2] = (-1 + sqrt(1+8*den*delta_ij[i*ncA+i]))/(4*den*delta_ij[i*ncA+i]);
+            if (!isfinite(XA[i*2])) {
+                XA[i*2] = 0.02;
+            }
             XA[i*2+1] = XA[i*2];
         }
 
@@ -1720,6 +1729,9 @@ double pcsaft_dadt_cpp(vector<double> x, vector<double> m, vector<double> s, vec
                     *(exp(eABij[idxa]/t)-1));
             }           
             XA[i*2] = (-1 + sqrt(1+8*den*delta_ij[i*ncA+i]))/(4*den*delta_ij[i*ncA+i]);
+            if (!isfinite(XA[i*2])) {
+                XA[i*2] = 0.02;
+            }
             XA[i*2+1] = XA[i*2];
         }
 
