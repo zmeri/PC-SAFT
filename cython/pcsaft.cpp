@@ -9,24 +9,24 @@
 using namespace std;
 using namespace Eigen;
 
-vector<double> XA_find(vector<double> XA_guess, int ncomp, vector<double> delta_ij, double den,
+vector<double> XA_find(vector<double> XA_guess, int ncA, vector<double> delta_ij, double den,
     vector<double> x) {
     /**Iterate over this function in order to solve for XA*/
-    int n_sites = XA_guess.size()/ncomp;
+    int n_sites = XA_guess.size()/ncA;
     double summ2;
     vector<double> XA = XA_guess;
 
-    for (int i = 0; i < ncomp; i++) {
+    for (int i = 0; i < ncA; i++) {
         for (int kout = 0; kout < n_sites; kout++) {
             summ2 = 0.;
-            for (int j = 0; j < ncomp; j++) {
+            for (int j = 0; j < ncA; j++) {
                 for (int kin = 0; kin < n_sites; kin++) {
                     if (kin != kout) {
-                        summ2 += den*x[j]*XA_guess[j*ncomp+kin]*delta_ij[i*ncomp+j];
+                        summ2 += den*x[j]*XA_guess[j*n_sites+kin]*delta_ij[i*ncA+j];
                     }
                 }
             }
-            XA[i*ncomp+kout] = 1./(1.+summ2);
+            XA[i*n_sites+kout] = 1./(1.+summ2);
         }
     }
 
