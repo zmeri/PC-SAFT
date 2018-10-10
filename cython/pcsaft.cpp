@@ -457,7 +457,7 @@ double pcsaft_Z_cpp(vector<double> x, vector<double> m, vector<double> s, vector
         for (int i = 0; i < ncomp; i++) {
             for (int j = 0; j < ncA; j++) {
                 for (int k = 0; k < a_sites; k++) {
-                    summ += x[i]*den*x[iA[j]]*(1/XA[(j+1)*k]-0.5)*dXA_dd[i*(ncA*a_sites)+j*(a_sites)+k];
+                    summ += x[i]*den*x[iA[j]]*(1/XA[j*a_sites+k]-0.5)*dXA_dd[i*(ncA*a_sites)+j*(a_sites)+k];
                 }
             }
         }
@@ -956,14 +956,14 @@ vector<double> pcsaft_fugcoef_cpp(vector<double> x, vector<double> m, vector<dou
         for (int i = 0; i < ncomp; i++) {
             for (int j = 0; j < ncA; j++) {
                 for (int k = 0; k < a_sites; k++) {
-                    mu_assoc[i] += x[iA[j]]*den*dXA_dd[i*(ncA*a_sites)+j*(a_sites)+k]*(1/XA[(j+1)*k]-0.5);
+                    mu_assoc[i] += x[iA[j]]*den*dXA_dd[i*(ncA*a_sites)+j*(a_sites)+k]*(1/XA[j*a_sites+k]-0.5);
                 }
             }
         }
 
         for (int i = 0; i < ncA; i++) {
             for (int l = 0; l < a_sites; l++) {
-                mu_assoc[iA[i]] += log(XA[(i+1)*l])-0.5*XA[(i+1)*l];
+                mu_assoc[iA[i]] += log(XA[i*a_sites+l])-0.5*XA[i*a_sites+l];
             }
             mu_assoc[iA[i]] += 0.5*a_sites;
         }
@@ -1371,7 +1371,7 @@ double pcsaft_ares_cpp(vector<double> x, vector<double> m, vector<double> s, vec
         for (int i = 0; i < ncA; i++) {
             for (int j = 0; j < ncA; j++) {
                 for (int k = 0; k < a_sites; k++) {
-                    ares_assoc += x[iA[i]]*(log(XA[(j+1)*k])-0.5*XA[(j+1)*k]);
+                    ares_assoc += x[iA[i]]*(log(XA[j*a_sites+k])-0.5*XA[j*a_sites+k]);
                 }
             }
             ares_assoc += 0.5*a_sites;
