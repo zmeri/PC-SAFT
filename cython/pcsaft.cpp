@@ -2120,7 +2120,7 @@ double pcsaft_den_cpp(vector<double> x, vector<double> m, vector<double> s, vect
     }
     else if (phase == 0 && y2 > 1.0e-3 && (rho - x_lo) < 1e-3) {
         iter = 1;        
-        rho_guess = 0.74;
+        rho_guess = 0.73;
         rho_guess = 6/PI*rho_guess/summ*1.0e30/N_AV;
         rho1 = rho_guess;
         rho2 = rho1 + dx;
