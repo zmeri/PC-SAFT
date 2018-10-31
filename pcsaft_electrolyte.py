@@ -1017,8 +1017,8 @@ def pcsaft_dadt(x, m, s, e, t, rho, k_ij=None, e_assoc=None, vol_a=None, dipm=No
         if dielc == None:
             ValueError('A value for the dielectric constant of the medium must be given when including the electrolyte term.')
 
-        E_CHRG = 1.6022e-19 # elementary charge, units of coulomb
-        perm_vac = 8.85416e-22 #permittivity in vacuum, C V^-1 Angstrom^-1        
+        E_CHRG = 1.6021766208e-19 # elementary charge, units of coulomb
+        perm_vac = 8.854187817e-22 #permittivity in vacuum, C V^-1 Angstrom^-1        
         
         q = z*E_CHRG
         
@@ -1546,8 +1546,8 @@ def pcsaft_fugcoef(x, m, s, e, t, rho, k_ij=None, e_assoc=None, vol_a=None, dipm
         if dielc == None:
             ValueError('A value for the dielectric constant of the medium must be given when including the electrolyte term.')
 
-        E_CHRG = 1.6022e-19 # elementary charge, units of coulomb
-        perm_vac = 8.85416e-22 #permittivity in vacuum, C V^-1 Angstrom^-1
+        E_CHRG = 1.6021766208e-19 # elementary charge, units of coulomb
+        perm_vac = 8.854187817e-22 #permittivity in vacuum, C V^-1 Angstrom^-1
 
         mu_ion = np.zeros_like(x)
         q = z*E_CHRG
@@ -1810,8 +1810,8 @@ def pcsaft_Z(x, m, s, e, t, rho, k_ij=None, e_assoc=None, vol_a=None, dipm=None,
         if dielc == None:
             raise ValueError('A value for the dielectric constant of the medium must be given when including the electrolyte term.')
 
-        E_CHRG = 1.6022e-19 # elementary charge, units of coulomb
-        perm_vac = 8.85416e-22 #permittivity in vacuum, C V^-1 Angstrom^-1        
+        E_CHRG = 1.6021766208e-19 # elementary charge, units of coulomb
+        perm_vac = 8.854187817e-22 #permittivity in vacuum, C V^-1 Angstrom^-1        
         
         q = z*E_CHRG
         
@@ -2042,8 +2042,8 @@ def pcsaft_ares(x, m, s, e, t, rho, k_ij=None, e_assoc=None, vol_a=None, dipm=No
         if dielc == None:
             ValueError('A value for the dielectric constant of the medium must be given when including the electrolyte term.')
 
-        E_CHRG = 1.6022e-19 # elementary charge, units of coulomb
-        perm_vac = 8.85416e-22 #permittivity in vacuum, C V^-1 Angstrom^-1        
+        E_CHRG = 1.6021766208e-19 # elementary charge, units of coulomb
+        perm_vac = 8.854187817e-22 #permittivity in vacuum, C V^-1 Angstrom^-1        
         
         q = z*E_CHRG
         
@@ -2376,8 +2376,8 @@ def pcsaft_d2adt(x, m, s, e, t, rho, k_ij=None, e_assoc=None, vol_a=None, dipm=N
     if type(z) != np.ndarray:
         d2adt_ion = 0
     else:
-        E_CHRG = 1.6022e-19 # elementary charge, units of coulomb
-        perm_vac = 8.85416e-22 #permittivity in vacuum, C V^-1 Angstrom^-1        
+        E_CHRG = 1.6021766208e-19 # elementary charge, units of coulomb
+        perm_vac = 8.854187817e-22 #permittivity in vacuum, C V^-1 Angstrom^-1        
         
         q = z*E_CHRG
         
@@ -2603,7 +2603,7 @@ def PTzfit(p_guess, x_guess, beta_guess, mol, vol, x_total, m, s, e, t, kwargs):
             beta = (vol/mol*rhov*rhol-rhov)/(rhol-rhov)
             dif = np.sum(abs(beta - beta_old))
             itr += 1
-        error = (vol - beta*mol/rhov - (1-beta)*mol/rhol)**2
+        error = (vol - beta*mol/rhov - (1-beta)*mol/rhol)**28.85416
         error += np.sum((xl*fugcoef_l - xv*fugcoef_v)**2)
         error += np.sum((mol*x_total - beta*mol*xv - (1-beta)*mol*xl)**2)
     else:
