@@ -47,11 +47,11 @@ def test_hres():
     print('Acetic acid, vapor:\t\t', calc, -15393.63, 'J/mol')
     
     # Butyl acetate ---------
-    m = np.asarray([2.76462805])
-    s = np.asarray([4.02244938])
-    e = np.asarray([263.69902915])
-    dpm = np.asarray([1.84])
-    dip_num = np.asarray([4.99688339])
+    m = np.asarray([3.9706])
+    s = np.asarray([3.5440])
+    e = np.asarray([241.93])
+    dpm = np.asarray([1.86])
+    dip_num = np.asarray([1.0])
     pyargs = {'dipm':dpm, 'dip_num':dip_num}
     
     den = pcsaft_den(x, m, s, e, t, p, pyargs, phase='liq')
@@ -101,11 +101,11 @@ def test_sres():
     print('Acetic acid, vapor:\t\t', calc, -40.8743, 'J/mol/K')
     
     # Butyl acetate ---------
-    m = np.asarray([2.76462805])
-    s = np.asarray([4.02244938])
-    e = np.asarray([263.69902915])
-    dpm = np.asarray([1.84])
-    dip_num = np.asarray([4.99688339])
+    m = np.asarray([3.9706])
+    s = np.asarray([3.5440])
+    e = np.asarray([241.93])
+    dpm = np.asarray([1.86])
+    dip_num = np.asarray([1.0])
     pyargs = {'dipm':dpm, 'dip_num':dip_num}
     
     den = pcsaft_den(x, m, s, e, t, p, pyargs, phase='liq')
@@ -155,11 +155,11 @@ def test_gres():
     print('Acetic acid, vapor:\t\t', calc, -2109.459, 'J/mol')
     
     # Butyl acetate ---------
-    m = np.asarray([2.76462805])
-    s = np.asarray([4.02244938])
-    e = np.asarray([263.69902915])
-    dpm = np.asarray([1.84])
-    dip_num = np.asarray([4.99688339])
+    m = np.asarray([3.9706])
+    s = np.asarray([3.5440])
+    e = np.asarray([241.93])
+    dpm = np.asarray([1.86])
+    dip_num = np.asarray([1.0])
     pyargs = {'dipm':dpm, 'dip_num':dip_num}
     
     den = pcsaft_den(x, m, s, e, t, p, pyargs, phase='liq')
@@ -594,11 +594,11 @@ def test_Hvap():
     
     # Butyl acetate
     print('\n##########  Test with butyl acetate  ##########')
-    m = np.asarray([2.76462805])
-    s = np.asarray([4.02244938])
-    e = np.asarray([263.69902915])
-    dpm = np.asarray([1.84])
-    dip_num = np.asarray([4.99688339])
+    m = np.asarray([3.9706])
+    s = np.asarray([3.5440])
+    e = np.asarray([241.93])
+    dpm = np.asarray([1.86])
+    dip_num = np.asarray([1.0])
     pyargs = {'dipm':dpm, 'dip_num':dip_num}
     
     ref = 32280. # source: DIPPR correlation
@@ -687,11 +687,11 @@ def test_dadt():
     
     # Butyl acetate    
     print('##########  Test with butyl acetate  ##########')
-    m = np.asarray([2.76462805])
-    s = np.asarray([4.02244938])
-    e = np.asarray([263.69902915])
-    dpm = np.asarray([1.84])
-    dip_num = np.asarray([4.99688339])
+    m = np.asarray([3.9706])
+    s = np.asarray([3.5440])
+    e = np.asarray([241.93])
+    dpm = np.asarray([1.86])
+    dip_num = np.asarray([1.0])
     pyargs = {'dipm':dpm, 'dip_num':dip_num}
 
     p = 100000.
@@ -812,11 +812,11 @@ def test_cp():
     
     # Butyl acetate
     print('\n##########  Test with butyl acetate  ##########')
-    m = np.asarray([2.76462805])
-    s = np.asarray([4.02244938])
-    e = np.asarray([263.69902915])
-    dpm = np.asarray([1.84])
-    dip_num = np.asarray([4.99688339])
+    m = np.asarray([3.9706])
+    s = np.asarray([3.5440])
+    e = np.asarray([241.93])
+    dpm = np.asarray([1.86])
+    dip_num = np.asarray([1.0])
     cnsts = np.asarray([116840., 376900, 1956, 281800, 811.2]) # constants for Aly-Lee equation (obtained from DIPPR)
     pyargs = {'dipm':dpm, 'dip_num':dip_num}
 
