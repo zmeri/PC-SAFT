@@ -5,9 +5,10 @@ Tests for checking that the PC-SAFT functions are working correctly.
 @author: Zach Baird
 """
 import numpy as np
+import timeit
 from pcsaft_electrolyte import pcsaft_den, pcsaft_hres, pcsaft_gres, pcsaft_sres, pcsaft_Hvap
 from pcsaft_electrolyte import pcsaft_vaporP, pcsaft_bubbleP, dielc_water, pcsaft_PTz, pcsaft_osmoticC
-from pcsaft_electrolyte import pcsaft_cp, pcsaft_ares, pcsaft_dadt
+from pcsaft_electrolyte import pcsaft_cp, pcsaft_ares, pcsaft_dadt, pcsaft_p
 
 def test_hres():
     """Test the residual enthalpy function to see if it is working correctly."""
@@ -46,20 +47,20 @@ def test_hres():
     calc = pcsaft_hres(x, m, s, e, t, den, pyargs)
     print('Acetic acid, vapor:\t\t', calc, -15393.63, 'J/mol')
     
-    # Butyl acetate ---------
-    m = np.asarray([3.9706])
-    s = np.asarray([3.5440])
-    e = np.asarray([241.93])
-    dpm = np.asarray([1.86])
+    # Dimethyl ether ---------
+    m = np.asarray([2.2634])
+    s = np.asarray([3.2723])
+    e = np.asarray([210.29])
+    dpm = np.asarray([1.3])
     dip_num = np.asarray([1.0])
     pyargs = {'dipm':dpm, 'dip_num':dip_num}
     
     den = pcsaft_den(x, m, s, e, t, p, pyargs, phase='liq')
     calc = pcsaft_hres(x, m, s, e, t, den, pyargs)
-    print('Butyl acetate, liquid:\t', calc, -43443.19, 'J/mol')
+    print('Dimethyl ether, liquid:\t', calc, -18242.5, 'J/mol')
     den = pcsaft_den(x, m, s, e, t, p, pyargs, phase='vap')
     calc = pcsaft_hres(x, m, s, e, t, den, pyargs)
-    print('Butyl acetate, vapor:\t\t', calc, -516.4779, 'J/mol')
+    print('Dimethyl ether, vapor:\t\t', calc, -89.6574, 'J/mol')
     
     return None
     
@@ -100,20 +101,20 @@ def test_sres():
     calc = pcsaft_sres(x, m, s, e, t, den, pyargs)
     print('Acetic acid, vapor:\t\t', calc, -40.8743, 'J/mol/K')
     
-    # Butyl acetate ---------
-    m = np.asarray([3.9706])
-    s = np.asarray([3.5440])
-    e = np.asarray([241.93])
-    dpm = np.asarray([1.86])
+    # Dimethyl ether ---------
+    m = np.asarray([2.2634])
+    s = np.asarray([3.2723])
+    e = np.asarray([210.29])
+    dpm = np.asarray([1.3])
     dip_num = np.asarray([1.0])
     pyargs = {'dipm':dpm, 'dip_num':dip_num}
     
     den = pcsaft_den(x, m, s, e, t, p, pyargs, phase='liq')
     calc = pcsaft_sres(x, m, s, e, t, den, pyargs)
-    print('Butyl acetate, liquid:\t', calc, -108.9615, 'J/mol/K')
+    print('Dimethyl ether, liquid:\t', calc, -75.2232, 'J/mol/K')
     den = pcsaft_den(x, m, s, e, t, p, pyargs, phase='vap')
     calc = pcsaft_sres(x, m, s, e, t, den, pyargs)
-    print('Butyl acetate, vapor:\t\t', calc, -1.0361, 'J/mol/K')
+    print('Dimethyl ether, vapor:\t\t', calc, -0.17854, 'J/mol/K')
     
     return None
     
@@ -154,20 +155,20 @@ def test_gres():
     calc = pcsaft_gres(x, m, s, e, t, den, pyargs)
     print('Acetic acid, vapor:\t\t', calc, -2109.459, 'J/mol')
     
-    # Butyl acetate ---------
-    m = np.asarray([3.9706])
-    s = np.asarray([3.5440])
-    e = np.asarray([241.93])
-    dpm = np.asarray([1.86])
+    # Dimethyl ether ---------
+    m = np.asarray([2.2634])
+    s = np.asarray([3.2723])
+    e = np.asarray([210.29])
+    dpm = np.asarray([1.3])
     dip_num = np.asarray([1.0])
     pyargs = {'dipm':dpm, 'dip_num':dip_num}
     
     den = pcsaft_den(x, m, s, e, t, p, pyargs, phase='liq')
     calc = pcsaft_gres(x, m, s, e, t, den, pyargs)
-    print('Butyl acetate, liquid:\t', calc, -8030.709, 'J/mol')
+    print('Dimethyl ether, liquid:\t', calc, -6205.02, 'J/mol')
     den = pcsaft_den(x, m, s, e, t, p, pyargs, phase='vap')
     calc = pcsaft_gres(x, m, s, e, t, den, pyargs)
-    print('Butyl acetate, vapor:\t\t', calc, -179.7519, 'J/mol')
+    print('Dimethyl ether, vapor:\t\t', calc, -31.6322, 'J/mol')
     
     return None
 
@@ -221,16 +222,16 @@ def test_density():
     print('    PC-SAFT:', calc, 'mol m^-3')
     print('    Relative deviation:', (calc-ref)/ref*100, '%')  
     
-    # Butyl acetate
-    print('\n##########  Test with butyl acetate  ##########')
-    m = np.asarray([3.9706])
-    s = np.asarray([3.5440])
-    e = np.asarray([241.93])
-    dpm = np.asarray([1.86])
+    # Dimethyl ether
+    print('\n##########  Test with dimethyl ether  ##########')
+    m = np.asarray([2.2634])
+    s = np.asarray([3.2723])
+    e = np.asarray([210.29])
+    dpm = np.asarray([1.3])
     dip_num = np.asarray([1.0])
     pyargs = {'dipm':dpm, 'dip_num':dip_num}
     
-    ref = 8021. # source: DIPPR correlation
+    ref = 16110. # source: DIPPR correlation
     calc = pcsaft_den(x, m, s, e, 240, 101325, pyargs, phase='liq')
     print('----- Density at 240 K and 101325 Pa -----')
     print('    Reference:', ref, 'mol m^-3')
@@ -339,21 +340,21 @@ def test_vaporP():
     print('    PC-SAFT:', calc, 'Pa')
     print('    Relative deviation:', (calc-ref)/ref*100, '%')    
     
-    # Butyl acetate
-    print('\n##########  Test with butyl acetate  ##########')
-    m = np.asarray([3.9706])
-    s = np.asarray([3.5440])
-    e = np.asarray([241.93])
-    dpm = np.asarray([1.86])
+    # Dimethyl ether
+    print('\n##########  Test with dimethyl ether  ##########')
+    m = np.asarray([2.2634])
+    s = np.asarray([3.2723])
+    e = np.asarray([210.29])
+    dpm = np.asarray([1.3])
     dip_num = np.asarray([1.0])
     pyargs = {'dipm':dpm, 'dip_num':dip_num}
     
-    ref = 219.6 # source: DIPPR correlation
-    calc = pcsaft_vaporP(ref, x, m, s, e, 270, pyargs)
-    print('----- Vapor pressure at 270 K -----')
+    ref = 625100. # source: DIPPR correlation
+    calc = pcsaft_vaporP(ref, x, m, s, e, 300, pyargs)
+    print('----- Vapor pressure at 300 K -----')
     print('    Reference:', ref, 'Pa')
     print('    PC-SAFT:', calc, 'Pa')
-    print('    Relative deviation:', (calc-ref)/ref*100, '%')     
+    print('    Relative deviation:', (calc-ref)/ref*100, '%')  
     
     return None
 
@@ -592,19 +593,19 @@ def test_Hvap():
     print('    PC-SAFT:', calc, 'J mol^-1')
     print('    Relative deviation:', (calc-ref)/ref*100, '%')    
     
-    # Butyl acetate
-    print('\n##########  Test with butyl acetate  ##########')
-    m = np.asarray([3.9706])
-    s = np.asarray([3.5440])
-    e = np.asarray([241.93])
-    dpm = np.asarray([1.86])
+    # Dimethyl ether
+    print('\n##########  Test with dimethyl ether  ##########')
+    m = np.asarray([2.2634])
+    s = np.asarray([3.2723])
+    e = np.asarray([210.29])
+    dpm = np.asarray([1.3])
     dip_num = np.asarray([1.0])
     pyargs = {'dipm':dpm, 'dip_num':dip_num}
     
-    ref = 32280. # source: DIPPR correlation
-    p = 362200. # source: DIPPR correlation
-    calc = pcsaft_Hvap(p, x, m, s, e, 450., pyargs)[0]
-    print('----- Enthalpy of vaporization at 450 K -----')
+    ref = 17410. # source: DIPPR correlation
+    p = 937300. # source: DIPPR correlation
+    calc = pcsaft_Hvap(p, x, m, s, e, 315., pyargs)[0]
+    print('----- Enthalpy of vaporization at 315 K -----')
     print('    Reference:', ref, 'J mol^-1')
     print('    PC-SAFT:', calc, 'J mol^-1')
     print('    Relative deviation:', (calc-ref)/ref*100, '%')     
@@ -685,12 +686,12 @@ def test_dadt():
     print('    PC-SAFT derivative:', dadt_eos)
     print('    Relative deviation:', (dadt_eos-dadt_num)/dadt_num*100, '%')   
     
-    # Butyl acetate    
-    print('##########  Test with butyl acetate  ##########')
-    m = np.asarray([3.9706])
-    s = np.asarray([3.5440])
-    e = np.asarray([241.93])
-    dpm = np.asarray([1.86])
+    # Dimethyl ether    
+    print('##########  Test with dimethyl ether  ##########')
+    m = np.asarray([2.2634])
+    s = np.asarray([3.2723])
+    e = np.asarray([210.29])
+    dpm = np.asarray([1.3])
     dip_num = np.asarray([1.0])
     pyargs = {'dipm':dpm, 'dip_num':dip_num}
 
@@ -810,22 +811,22 @@ def test_cp():
     print('    PC-SAFT:', calc, 'J mol^-1 K^-1')
     print('    Relative deviation:', (calc-ref)/ref*100, '%')    
     
-    # Butyl acetate
-    print('\n##########  Test with butyl acetate  ##########')
-    m = np.asarray([3.9706])
-    s = np.asarray([3.5440])
-    e = np.asarray([241.93])
-    dpm = np.asarray([1.86])
+    # Dimethyl ether
+    print('\n##########  Test with dimethyl ether  ##########')
+    m = np.asarray([2.2634])
+    s = np.asarray([3.2723])
+    e = np.asarray([210.29])
+    dpm = np.asarray([1.3])
     dip_num = np.asarray([1.0])
-    cnsts = np.asarray([116840., 376900, 1956, 281800, 811.2]) # constants for Aly-Lee equation (obtained from DIPPR)
+    cnsts = np.asarray([57431., 94494, 895.51, 65065, 2467.4]) # constants for Aly-Lee equation (obtained from DIPPR)
     pyargs = {'dipm':dpm, 'dip_num':dip_num}
 
-    ref = 234.9 # source: DIPPR correlation
+    ref = 102.2 # source: DIPPR correlation
     p = 100000.
-    t = 320.
+    t = 240.
     rho = pcsaft_den(x, m, s, e, t, p, pyargs, phase='liq')
     calc = pcsaft_cp(x, m, s, e, t, rho, cnsts, pyargs)
-    print('----- Heat capacity at 320 K -----')
+    print('----- Heat capacity at 240 K -----')
     print('    Reference:', ref, 'J mol^-1 K^-1')
     print('    PC-SAFT:', calc, 'J mol^-1 K^-1')
     print('    Relative deviation:', (calc-ref)/ref*100, '%')     
