@@ -2030,8 +2030,7 @@ def pcsaft_ares(x, m, s, e, t, rho, k_ij=None, e_assoc=None, vol_a=None, dipm=No
         for i in range(ncA):
             for j in range(ncA):
                 for k in range(a_sites):
-                    summ += x[iA[i]]*(np.log(XA[(j+1)*k])-0.5*XA[(j+1)*k])
-            summ += 0.5*a_sites
+                    summ += x[iA[i]]*(np.log(XA[(j+1)*k]) - 0.5*XA[(j+1)*k] + 0.5)
         
         ares_assoc = summ
 
