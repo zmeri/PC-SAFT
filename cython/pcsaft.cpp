@@ -1371,10 +1371,9 @@ double pcsaft_ares_cpp(vector<double> x, vector<double> m, vector<double> s, vec
         for (int i = 0; i < ncA; i++) {
             for (int j = 0; j < ncA; j++) {
                 for (int k = 0; k < a_sites; k++) {
-                    ares_assoc += x[iA[i]]*(log(XA[j*a_sites+k])-0.5*XA[j*a_sites+k]);
+                    ares_assoc += x[iA[i]]*(log(XA[j*a_sites+k])  -0.5*XA[j*a_sites+k] + 0.5);
                 }
             }
-            ares_assoc += 0.5*a_sites;
         }
     }
 
