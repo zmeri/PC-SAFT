@@ -137,7 +137,14 @@ def pcsaft_p(x, m, s, e, t, rho, pyargs):
     P : float
         Pressure (Pa)
     """ 
+    
     cppargs = create_struct(pyargs)
+    if type(m) == np.float_:
+        m = np.asarray([m])
+    if type(s) == np.float_:
+        s = np.asarray([s])
+    if type(e) == np.float_:
+        e = np.asarray([e])
     return pcsaft_p_cpp(x, m, s, e, t, rho, cppargs)
     
     
@@ -194,6 +201,12 @@ def pcsaft_fugcoef(x, m, s, e, t, rho, pyargs):
         Fugacity coefficients of each component.
     """    
     cppargs = create_struct(pyargs)
+    if type(m) == np.float_:
+        m = np.asarray([m])
+    if type(s) == np.float_:
+        s = np.asarray([s])
+    if type(e) == np.float_:
+        e = np.asarray([e])
     return pcsaft_fugcoef_cpp(x, m, s, e, t, rho, cppargs)
     
 
@@ -250,6 +263,12 @@ def pcsaft_Z(x, m, s, e, t, rho, pyargs):
         Compressibility factor
     """
     cppargs = create_struct(pyargs)
+    if type(m) == np.float_:
+        m = np.asarray([m])
+    if type(s) == np.float_:
+        s = np.asarray([s])
+    if type(e) == np.float_:
+        e = np.asarray([e])
     return pcsaft_Z_cpp(x, m, s, e, t, rho, cppargs)
 
    
@@ -306,6 +325,13 @@ def pcsaft_vaporP(p_guess, x, m, s, e, t, pyargs):
         Vapor pressure (Pa)    
     """
     cppargs = create_struct(pyargs)  
+    if type(m) == np.float_:
+        m = np.asarray([m])
+    if type(s) == np.float_:
+        s = np.asarray([s])
+    if type(e) == np.float_:
+        e = np.asarray([e])
+
     Pvap = minimize(vaporPfit, p_guess, args=(x, m, s, e, t, cppargs), tol=1e-10, method='Nelder-Mead', options={'maxiter': 100}).x
     return Pvap
 
@@ -365,6 +391,12 @@ def pcsaft_bubbleP(p_guess, xv_guess, x, m, s, e, t, pyargs):
             1 : Composition of the liquid phase
     """
     cppargs = create_struct(pyargs)
+    if type(m) == np.float_:
+        m = np.asarray([m])
+    if type(s) == np.float_:
+        s = np.asarray([s])
+    if type(e) == np.float_:
+        e = np.asarray([e])
     
     result = minimize(bubblePfit, p_guess, args=(xv_guess, x, m, s, e, t, cppargs), tol=1e-10, method='Nelder-Mead', options={'maxiter': 100})
     bubP = result.x
@@ -464,6 +496,12 @@ def pcsaft_Hvap(p_guess, x, m, s, e, t, pyargs):
             1 : vapor pressure (Pa), float
     """
     cppargs = create_struct(pyargs)
+    if type(m) == np.float_:
+        m = np.asarray([m])
+    if type(s) == np.float_:
+        s = np.asarray([s])
+    if type(e) == np.float_:
+        e = np.asarray([e])
     
     Pvap = minimize(vaporPfit, p_guess, args=(x, m, s, e, t, cppargs), tol=1e-10, method='Nelder-Mead', options={'maxiter': 100}).x
 
@@ -530,6 +568,12 @@ def pcsaft_osmoticC(x, m, s, e, t, rho, pyargs):
         Molal osmotic coefficient
     """
     cppargs = create_struct(pyargs)    
+    if type(m) == np.float_:
+        m = np.asarray([m])
+    if type(s) == np.float_:
+        s = np.asarray([s])
+    if type(e) == np.float_:
+        e = np.asarray([e])
     
     indx_water = np.where(e == 353.9449)[0] # to find index for water    
     molality = x/(x[indx_water]*18.0153/1000.)
@@ -612,6 +656,13 @@ def pcsaft_cp(x, m, s, e, t, rho, params, pyargs):
         ph = 1
     
     cppargs = create_struct(pyargs)
+    if type(m) == np.float_:
+        m = np.asarray([m])
+    if type(s) == np.float_:
+        s = np.asarray([s])
+    if type(e) == np.float_:
+        e = np.asarray([e])
+
     cp_ideal = aly_lee(t, params)
     p = pcsaft_p_cpp(x, m, s, e, t, rho, cppargs)
     rho0 = pcsaft_den_cpp(x, m, s, e, t-0.001, p, ph, cppargs)
@@ -689,6 +740,13 @@ def pcsaft_PTz(p_guess, x_guess, beta_guess, mol, vol, x_total, m, s, e, t, pyar
             3 : mole fraction of the mixture vaporized
     """ 
     cppargs = create_struct(pyargs)    
+    if type(m) == np.float_:
+        m = np.asarray([m])
+    if type(s) == np.float_:
+        s = np.asarray([s])
+    if type(e) == np.float_:
+        e = np.asarray([e])
+
     result = minimize(PTzfit, p_guess, args=(x_guess, beta_guess, mol, vol, x_total, m, s, e, t, cppargs), tol=1e-10, method='Nelder-Mead', options={'maxiter': 100})
     p = result.x
 
@@ -813,6 +871,12 @@ def pcsaft_den(x, m, s, e, t, p, pyargs, phase='liq'):
     else:
         phase_num = 1
         
+    if type(m) == np.float_:
+        m = np.asarray([m])
+    if type(s) == np.float_:
+        s = np.asarray([s])
+    if type(e) == np.float_:
+        e = np.asarray([e])
     return pcsaft_den_cpp(x, m, s, e, t, p, phase_num, cppargs)
     
 
@@ -869,6 +933,12 @@ def pcsaft_hres(x, m, s, e, t, rho, pyargs):
         Residual enthalpy (J mol^{-1})
     """
     cppargs = create_struct(pyargs)
+    if type(m) == np.float_:
+        m = np.asarray([m])
+    if type(s) == np.float_:
+        s = np.asarray([s])
+    if type(e) == np.float_:
+        e = np.asarray([e])
     return pcsaft_hres_cpp(x, m, s, e, t, rho, cppargs)
 
 def pcsaft_sres(x, m, s, e, t, rho, pyargs):
@@ -924,6 +994,12 @@ def pcsaft_sres(x, m, s, e, t, rho, pyargs):
         Residual entropy (J mol^{-1} K^{-1})
     """    
     cppargs = create_struct(pyargs)
+    if type(m) == np.float_:
+        m = np.asarray([m])
+    if type(s) == np.float_:
+        s = np.asarray([s])
+    if type(e) == np.float_:
+        e = np.asarray([e])
     return pcsaft_sres_cpp(x, m, s, e, t, rho, cppargs)
 
 def pcsaft_gres(x, m, s, e, t, rho, pyargs):
@@ -979,6 +1055,12 @@ def pcsaft_gres(x, m, s, e, t, rho, pyargs):
         Residual Gibbs energy (J mol^{-1})
     """
     cppargs = create_struct(pyargs)
+    if type(m) == np.float_:
+        m = np.asarray([m])
+    if type(s) == np.float_:
+        s = np.asarray([s])
+    if type(e) == np.float_:
+        e = np.asarray([e])
     return pcsaft_gres_cpp(x, m, s, e, t, rho, cppargs)
 
 
@@ -1035,6 +1117,12 @@ def pcsaft_ares(x, m, s, e, t, rho, pyargs):
         Residual Helmholtz energy (J mol^{-1})
     """    
     cppargs = create_struct(pyargs)
+    if type(m) == np.float_:
+        m = np.asarray([m])
+    if type(s) == np.float_:
+        s = np.asarray([s])
+    if type(e) == np.float_:
+        e = np.asarray([e])
     return pcsaft_ares_cpp(x, m, s, e, t, rho, cppargs)
     
 
@@ -1091,6 +1179,12 @@ def pcsaft_dadt(x, m, s, e, t, rho, pyargs):
         Temperature derivative of the residual Helmholtz energy (J mol^{-1})
     """    
     cppargs = create_struct(pyargs)
+    if type(m) == np.float_:
+        m = np.asarray([m])
+    if type(s) == np.float_:
+        s = np.asarray([s])
+    if type(e) == np.float_:
+        e = np.asarray([e])
     return pcsaft_dadt_cpp(x, m, s, e, t, rho, cppargs)
 
 
@@ -1244,12 +1338,16 @@ def dielc_water(t):
     
 def np_to_vector(np_array):
     """Take a numpy array and return a C++ vector."""
-    np_array = np_array.flatten()
-    N = np_array.shape[0]
     cdef vector[double] cpp_vector
-    
-    for i in range(N):
-        cpp_vector.push_back(np_array[i])   
+
+    try:
+        np_array = np_array.flatten()
+        N = np_array.shape[0]
+        for i in range(N):
+            cpp_vector.push_back(np_array[i]) 
+    except TypeError:
+        cpp_vector.push_back(np_array)
+      
     return cpp_vector
     
 def create_struct(pyargs):
