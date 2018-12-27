@@ -8,7 +8,7 @@ import numpy as np
 import timeit
 from pcsaft_electrolyte import pcsaft_den, pcsaft_hres, pcsaft_gres, pcsaft_sres, pcsaft_Hvap
 from pcsaft_electrolyte import pcsaft_vaporP, pcsaft_bubbleP, dielc_water, pcsaft_PTz, pcsaft_osmoticC
-from pcsaft_electrolyte import pcsaft_cp, pcsaft_ares, pcsaft_dadt, pcsaft_p
+from pcsaft_electrolyte import pcsaft_cp, pcsaft_ares, pcsaft_dadt, pcsaft_p, pcsaft_bubbleT
 
 def test_hres():
     """Test the residual enthalpy function to see if it is working correctly."""
@@ -418,7 +418,69 @@ def test_bubbleP():
     print('    Relative deviation:', (calc-ref)/ref*100, '%')    
     
     return None
+
+
+def test_bubbleT():
+    """Test the bubble point temperature function to see if it is working correctly."""
+    # Binary mixture: methanol-cyclohexane
+    print('\n##########  Test with methanol-cyclohexane mixture  ##########')
+    #0 = methanol, 1 = cyclohexane
+    x = np.asarray([0.3,0.7])
+    m = np.asarray([1.5255, 2.5303])
+    s = np.asarray([3.2300, 3.8499])
+    e = np.asarray([188.90, 278.11])
+    volAB = np.asarray([0.035176, 0.])
+    eAB = np.asarray([2899.5, 0.])
+    k_ij = np.asarray([[0, 0.051],
+                       [0.051, 0]])
+    pyargs = {'e_assoc':eAB, 'vol_a':volAB, 'k_ij':k_ij}
     
+    p = 101330
+    ref = 327.48 # source: Marinichev A.N.; Susarev M.P.: Investigation of Liquid-Vapor Equilibrium in the System Methanol-Cyclohexane at 35, 45 and 55°C and 760 mm Hg. J.Appl.Chem.USSR 38 (1965) 1582-1584
+    xv_ref = np.asarray([0.59400,0.40600])
+    result = pcsaft_bubbleT(ref, xv_ref, x, m, s, e, p, pyargs)
+    calc = result[0]
+    xv = result[1]
+    print('----- Bubble point temperature at 101330 Pa -----')
+    print('    Reference:', ref, 'K')
+    print('    PC-SAFT:', calc, 'K')
+    print('    Relative deviation:', (calc-ref)/ref*100, '%')
+    print('    Vapor composition (reference):', xv_ref)
+    print('    Vapor composition (PC-SAFT):', xv)     
+    
+    # NaCl in water
+    print('\n##########  Test with aqueous NaCl  ##########')
+    # 0 = Na+, 1 = Cl-, 2 = H2O
+    x = np.asarray([0.0907304774758426, 0.0907304774758426, 0.818539045048315])    
+    m = np.asarray([1, 1, 1.2047])
+    s = np.asarray([2.8232, 2.7599589, 0.])
+    e = np.asarray([230.00, 170.00, 353.9449])
+    volAB = np.asarray([0, 0, 0.0451])
+    eAB = np.asarray([0, 0, 2425.67])
+    k_ij = np.asarray([[0, 0.317, 0],
+                       [0.317, 0, -0.25],
+                        [0, -0.25, 0]])
+    z = np.asarray([1., -1., 0.]) 
+    
+    p = 2393.8 # Pa
+    ref = 298.15 # K, average of repeat data points from source: A. Apelblat and E. Korin, “The vapour pressures of saturated aqueous solutions of sodium chloride, sodium bromide, sodium nitrate, sodium nitrite, potassium iodate, and rubidium chloride at temperatures from 227 K to 323 K,” J. Chem. Thermodyn., vol. 30, no. 1, pp. 59–71, Jan. 1998. (Solubility calculated using equation from Yaws, Carl L.. (2008). Yaws' Handbook of Properties for Environmental and Green Engineering.)
+    s[2] = 2.7927 + 10.11*np.exp(-0.01775*ref) - 1.417*np.exp(-0.01146*ref) # temperature dependent segment diameter for water    
+    k_ij[0,2] = -0.007981*ref + 2.37999
+    k_ij[2,0] = -0.007981*ref + 2.37999
+    dielc = dielc_water(ref)
+    
+    pyargs = {'e_assoc':eAB, 'vol_a':volAB, 'k_ij':k_ij, 'z':z, 'dielc':dielc}
+
+    xv_guess = np.asarray([0., 0., 1.])
+    result = pcsaft_bubbleT(ref, xv_guess, x, m, s, e, p, pyargs)
+    calc = result[0]
+    print('----- Bubble point temperature at 2393.8 Pa -----')
+    print('    Reference:', ref, 'K')
+    print('    PC-SAFT:', calc, 'K')
+    print('    Relative deviation:', (calc-ref)/ref*100, '%')    
+    
+    return None
+
     
 def test_PTz():
     """Test the function for PTz data to see if it is working correctly."""
