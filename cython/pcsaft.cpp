@@ -2231,6 +2231,87 @@ double bubblePfit_cpp(double p_guess, vector<double> xv_guess, vector<double> x,
 }
 
 
+double bubbleTfit_cpp(double t_guess, vector<double> xv_guess, vector<double> x, vector<double> m, vector<double> s, vector<double> e,
+    double p, add_args &cppargs) {
+    /**Minimize this function to calculate the bubble point temperature.*/
+    int ncomp = x.size();
+    double error = 0.;
+
+    if (cppargs.z.empty()) { // Check that the mixture does not contain electrolytes. For electrolytes, a different equilibrium criterion should be used. 
+        double rho = pcsaft_den_cpp(x, m, s, e, t_guess, p, 0, cppargs);       
+        vector<double> fugcoef_l = pcsaft_fugcoef_cpp(x, m, s, e, t_guess, rho, cppargs);
+        
+        // internal iteration loop for vapor phase composition
+        int itr = 0;
+        double dif = 10000.;
+        double summ;
+        vector<double> xv = xv_guess;
+        vector<double> xv_old = xv_guess;
+        vector<double> fugcoef_v(ncomp, 0);
+        while ((dif>1e-9) && (itr<100)) {
+            xv_old = xv;
+            rho = pcsaft_den_cpp(xv, m, s, e, t_guess, p, 1, cppargs); 
+            fugcoef_v = pcsaft_fugcoef_cpp(xv, m, s, e, t_guess, rho, cppargs);
+            summ = 0.;
+            for (int i = 0; i < ncomp; i++) {
+                xv[i] = fugcoef_l[i]*x[i]/fugcoef_v[i];
+                summ += xv[i];
+            }
+            dif = 0.;
+            for (int i = 0; i < ncomp; i++) {
+                xv[i] = xv[i]/summ;
+                dif += abs(xv[i] - xv_old[i]);
+            }
+            itr += 1;
+        }
+        for (int i = 0; i < ncomp; i++) {
+            error += pow(fugcoef_l[i]*x[i] - fugcoef_v[i]*xv[i], 2.);
+        }
+    }
+    else {
+        double rho = pcsaft_den_cpp(x, m, s, e, t_guess, p, 0, cppargs);
+        vector<double> fugcoef_l = pcsaft_fugcoef_cpp(x, m, s, e, t_guess, rho, cppargs);
+        
+        // internal iteration loop for vapor phase composition
+        int itr = 0;
+        double dif = 10000., summ;
+        vector<double> xv = xv_guess;
+        vector<double> xv_old = xv_guess;
+        vector<double> fugcoef_v(ncomp, 0);
+        while ((dif>1e-9) && (itr<100)) {
+            xv_old = xv;
+            rho = pcsaft_den_cpp(xv, m, s, e, t_guess, p, 1, cppargs);
+            fugcoef_v = pcsaft_fugcoef_cpp(xv, m, s, e, t_guess, rho, cppargs);
+            summ = 0.;
+            for (int i = 0; i < ncomp; i++) {
+                if (cppargs.z[i] == 0) {         
+                    xv[i] = fugcoef_l[i]*x[i]/fugcoef_v[i];
+                    summ += xv[i];
+                }
+            }
+
+            dif = 0.;
+            for (int i = 0; i < ncomp; i++) {
+                xv[i] = xv[i]/summ;
+                dif += abs(xv[i] - xv_old[i]);
+            }
+            itr += 1;
+        }
+
+        for (int i = 0; i < ncomp; i++) {
+            if (cppargs.z[i] == 0) {
+                error += pow(fugcoef_l[i]*x[i] - fugcoef_v[i]*xv[i], 2.);
+            }
+        }
+    }
+
+    if (!isfinite(error)) {
+        error = 100000000.;
+    }
+    return error;
+}
+
+
 double PTzfit_cpp(double p_guess, vector<double> x_guess, double beta_guess, double mol, 
     double vol, vector<double> x_total, vector<double> m, vector<double> s, vector<double> e,
     double t, add_args &cppargs) {
