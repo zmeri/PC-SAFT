@@ -12,11 +12,14 @@ association and ion terms for use with these types of compounds.
 Functions
 ---------
 - pcsaft_vaporP : calculate the vapor pressure
+- pcsaft_bubbleT : calculate the bubble point temperature of a mixture
 - pcsaft_bubbleP : calculate the bubble point pressure of a mixture
+- pcsaft_bubblePfit : used for fitting using bubble point pressure data
 - pcsaft_Hvap : calculate the enthalpy of vaporization
 - pcsaft_osmoticC : calculate the osmotic coefficient for the mixture
 - pcsaft_cp : calculate the heat capacity
 - pcsaft_PTz : allows PTz data to be used for parameter fitting
+- pcsaft_PTzfit : used for fitting using PTz data
 - pcsaft_den : calculate the molar density
 - pcsaft_p : calculate the pressure
 - pcsaft_hres : calculate the residual enthalpy
@@ -30,6 +33,8 @@ Functions
 - dXA_find : used internally to solve for the derivative of XA wrt density
 - dXAdt_find : used internally to solve for the derivative of XA wrt temperature
 - vaporPfit : used internally to solve for the vapor pressure
+- bubblePfit : used internally to solve for the bubble point pressure
+- bubbleTfit : used internally to solve for the bubble point temperature
 - PTzfit : used internally to solve for pressure and compositions
 - aly_lee : returns the ideal gas heat capacity
 - dielc_water : returns the dielectric constant of water
@@ -334,6 +339,111 @@ def pcsaft_vaporP(p_guess, x, m, s, e, t, pyargs):
 
     Pvap = minimize(vaporPfit, p_guess, args=(x, m, s, e, t, cppargs), tol=1e-10, method='Nelder-Mead', options={'maxiter': 100}).x
     return Pvap
+
+
+def pcsaft_bubbleT(t_guess, xv_guess, x, m, s, e, p, pyargs):
+    """
+    Calculate the bubble point temperature of a mixture and the vapor composition.
+    
+    Parameters
+    ----------
+    t_guess : float
+        Guess for the bubble point temperature (K)    
+    x : ndarray, shape (n,)
+        Mole fractions of each component. It has a length of n, where n is
+        the number of components in the system.
+    m : ndarray, shape (n,)
+        Segment number for each component.
+    s : ndarray, shape (n,)
+        Segment diameter for each component. For ions this is the diameter of
+        the hydrated ion. Units of Angstrom.
+    e : ndarray, shape (n,)
+        Dispersion energy of each component. For ions this is the dispersion
+        energy of the hydrated ion. Units of K.
+    p : float
+        Pressure (Pa)
+    pyargs : dict
+        A dictionary containing additional arguments that can be passed for 
+        use in PC-SAFT:
+        
+        k_ij : ndarray, shape (n,n)
+            Binary interaction parameters between components in the mixture. 
+            (dimensions: ncomp x ncomp)
+        e_assoc : ndarray, shape (n,)
+            Association energy of the associating components. For non associating
+            compounds this is set to 0. Units of K.
+        vol_a : ndarray, shape (n,)
+            Effective association volume of the associating components. For non 
+            associating compounds this is set to 0.
+        dipm : ndarray, shape (n,)
+            Dipole moment of the polar components. For components where the dipole 
+            term is not used this is set to 0. Units of Debye.
+        dip_num : ndarray, shape (n,)
+            The effective number of dipole functional groups on each component 
+            molecule. Some implementations use this as an adjustable parameter 
+            that is fit to data.
+        z : ndarray, shape (n,)
+            Charge number of the ions          
+        dielc : float
+            Dielectric constant of the medium to be used for electrolyte
+            calculations.
+        
+    Returns
+    -------
+    results : list
+        A list containing the following results:
+            0 : Bubble point temperature (K)
+            1 : Composition of the liquid phase
+    """
+    cppargs = create_struct(pyargs)
+    if type(m) == np.float_:
+        m = np.asarray([m])
+    if type(s) == np.float_:
+        s = np.asarray([s])
+    if type(e) == np.float_:
+        e = np.asarray([e])
+    
+    result = minimize(bubbleTfit, t_guess, args=(xv_guess, x, m, s, e, p, cppargs), tol=1e-10, method='Nelder-Mead', options={'maxiter': 100})
+    bubT = result.x
+
+#   Determine vapor phase composition at bubble pressure    
+    if cppargs['z'] == []: # Check that the mixture does not contain electrolytes. For electrolytes, a different equilibrium criterion should be used. 
+        rho = pcsaft_den_cpp(x, m, s, e, bubT, p, 0, cppargs)        
+        fugcoef_l = np.asarray(pcsaft_fugcoef_cpp(x, m, s, e, bubT, rho, cppargs))
+        
+        itr = 0
+        dif = 10000.
+        xv = np.copy(xv_guess)
+        xv_old = np.zeros_like(xv)
+        while (dif>1e-9) and (itr<100):
+            xv_old[:] = xv
+            rho = pcsaft_den_cpp(xv, m, s, e, bubT, p, 1, cppargs)        
+            fugcoef_v = np.asarray(pcsaft_fugcoef_cpp(xv, m, s, e, bubT, rho, cppargs))
+            xv = fugcoef_l*x/fugcoef_v
+            xv = xv/np.sum(xv)
+            dif = np.sum(abs(xv - xv_old))
+            itr += 1
+    else:
+        z = np.asarray(cppargs['z'])
+        rho = pcsaft_den_cpp(x, m, s, e, bubT, p, 0, cppargs)        
+        fugcoef_l = np.asarray(pcsaft_fugcoef_cpp(x, m, s, e, bubT, rho, cppargs))       
+        
+        itr = 0
+        dif = 10000.
+        xv = np.copy(xv_guess)
+        xv_old = np.zeros_like(xv)
+        while (dif>1e-9) and (itr<100):
+            xv_old[:] = xv
+            rho = pcsaft_den_cpp(xv, m, s, e, bubT, p, 1, cppargs)
+            fugcoef_v = np.asarray(pcsaft_fugcoef_cpp(xv, m, s, e, bubT, rho, cppargs))
+       
+            xv[np.where(z == 0)[0]] = (fugcoef_l*x/fugcoef_v)[np.where(z == 0)[0]] # here it is assumed that the ionic compounds are nonvolatile
+            xv = xv/np.sum(xv)
+            dif = np.sum(abs(xv - xv_old))
+            itr += 1
+    
+    results = [bubT, xv]
+    return results
 
 
 def pcsaft_bubbleP(p_guess, xv_guess, x, m, s, e, t, pyargs):
@@ -1214,6 +1324,11 @@ def dXAdt_find(ncA, ncomp, delta_ij, den, XA, ddelta_dt, x, n_sites):
 def bubblePfit(p_guess, xv_guess, x, m, s, e, t, cppargs):
     """Minimize this function to calculate the bubble point pressure."""
     error = bubblePfit_cpp(p_guess, xv_guess, x, m, s, e, t, cppargs)
+    return error
+
+def bubbleTfit(t_guess, xv_guess, x, m, s, e, p, cppargs):
+    """Minimize this function to calculate the bubble point temperature."""
+    error = bubbleTfit_cpp(t_guess, xv_guess, x, m, s, e, p, cppargs)
     return error
     
 def vaporPfit(p_guess, x, m, s, e, t, cppargs):
