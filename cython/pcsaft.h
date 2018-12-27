@@ -43,6 +43,8 @@ double pcsaft_gres_cpp(vector<double> x, vector<double> m, vector<double> s, vec
 
 double bubblePfit_cpp(double p_guess, vector<double> xv_guess, vector<double> x, vector<double> m, vector<double> s, vector<double> e,
     double t, add_args &cppargs);
+double bubbleTfit_cpp(double t_guess, vector<double> xv_guess, vector<double> x, vector<double> m, vector<double> s, vector<double> e,
+    double t, add_args &cppargs);
 double PTzfit_cpp(double p_guess, vector<double> x_guess, double beta_guess, double mol, 
     double vol, vector<double> x_total, vector<double> m, vector<double> s, vector<double> e,
     double t, add_args &cppargs);
