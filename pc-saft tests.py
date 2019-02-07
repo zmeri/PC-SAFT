@@ -342,6 +342,30 @@ def test_vaporP():
     
 def test_bubbleP():
     """Test the bubble point pressure function to see if it is working correctly."""
+    # Binary mixture: methane-benzene
+    print('\n##########  Test with methane-benzene mixture  ##########')
+    #0 = methane, 1 = benzene
+    x = np.asarray([0.0252,0.9748])
+    m = np.asarray([1.0000, 2.4653])
+    s = np.asarray([3.7039, 3.6478])
+    e = np.asarray([150.03, 287.35])
+    k_ij = np.asarray([[0, 0.037],
+                       [0.037, 0]])
+    
+    t = 421.05    
+    ref = 1986983.25 # source: H.-M. Lin, H. M. Sebastian, J. J. Simnick, and K.-C. Chao, “Gas-liquid equilibrium in binary mixtures of methane with N-decane, benzene, and toluene,” J. Chem. Eng. Data, vol. 24, no. 2, pp. 146–149, Apr. 1979.
+    xv_ref = np.asarray([0.6516,0.3484])
+    result = pcsaft_bubbleP(ref, xv_ref, x, m, s, e, t, k_ij=k_ij)
+    calc = result[0]
+    xv = result[1]
+    print('----- Bubble point pressure at %s K -----' % t)
+    print('    Reference:', ref, 'Pa')
+    print('    PC-SAFT:', calc, 'Pa')
+    print('    Relative deviation:', (calc-ref)/ref*100, '%')
+    print('    Vapor composition (reference):', xv_ref)
+    print('    Vapor composition (PC-SAFT):', xv)
+    
+
 #     Binary mixture: methanol-cyclohexane
     print('\n##########  Test with methanol-cyclohexane mixture  ##########')
     #0 = methanol, 1 = cyclohexane
@@ -366,6 +390,51 @@ def test_bubbleP():
     print('    Vapor composition (reference):', xv_ref)
     print('    Vapor composition (PC-SAFT):', xv)     
     
+
+    # Binary mixture: water-acetic acid
+    print('\n##########  Test with water-acetic acid mixture  ##########')
+    #0 = water, 1 = acetic acid
+    m = np.asarray([1.2047, 1.3403])
+    s = np.asarray([0, 3.8582])
+    e = np.asarray([353.95, 211.59])
+    volAB = np.asarray([0.0451, 0.075550])
+    eAB = np.asarray([2425.67, 3044.4])
+    k_ij = np.asarray([[0, -0.127],
+                       [-0.127, 0]])
+
+    xl = np.asarray([0.9898662364, 0.0101337636])    
+    t = 403.574
+    s[0] = 3.8395 + 1.2828*np.exp(-0.0074944*t) - 1.3939*np.exp(-0.00056029*t)
+    ref = 273722. # source: Othmer, D. F.; Silvis, S. J.; Spiel, A. Ind. Eng. Chem., 1952, 44, 1864-72 Composition of vapors from boiling binary solutions pressure equilibrium still for studying water - acetic acid system
+    xv_ref = np.asarray([0.9923666645, 0.0076333355])
+    result = pcsaft_bubbleP(ref, xv_ref, xl, m, s, e, t, k_ij=k_ij, e_assoc=eAB, vol_a=volAB)
+    calc = result[0]
+    xv = result[1]
+    print('----- Bubble point pressure at %s K -----' % t)
+    print('    Liquid composition:', xl)    
+    print('    Reference pressure:', ref, 'Pa')
+    print('    PC-SAFT pressure:', calc, 'Pa')
+    print('    Relative deviation:', (calc-ref)/ref*100, '%')
+    print('    Vapor composition (reference):', xv_ref)
+    print('    Vapor composition (PC-SAFT):', xv)
+    
+    xl = np.asarray([0.2691800943, 0.7308199057])    
+    t = 372.774
+    s[0] = 3.8395 + 1.2828*np.exp(-0.0074944*t) - 1.3939*np.exp(-0.00056029*t)
+    ref = 74463. # source: Freeman, J. R.; Wilson, G. M. AIChE Symp. Ser., 1985, 81, 14-25 High temperature vapor-liquid equilibrium measurements on acetic acid/water mixtures
+    xv_ref = np.asarray([0.3878269411, 0.6121730589])
+    result = pcsaft_bubbleP(ref, xv_ref, xl, m, s, e, t, k_ij=k_ij, e_assoc=eAB, vol_a=volAB)
+    calc = result[0]
+    xv = result[1]
+    print('----- Bubble point pressure at %s K -----' % t)
+    print('    Liquid composition:', xl)
+    print('    Reference pressure:', ref, 'Pa')
+    print('    PC-SAFT pressure:', calc, 'Pa')
+    print('    Relative deviation:', (calc-ref)/ref*100, '%')
+    print('    Vapor composition (reference):', xv_ref)
+    print('    Vapor composition (PC-SAFT):', xv)
+
+
     # NaCl in water
     print('\n##########  Test with aqueous NaCl  ##########')
     # 0 = Na+, 1 = Cl-, 2 = H2O
