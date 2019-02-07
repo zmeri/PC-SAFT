@@ -196,7 +196,7 @@ def pcsaft_bubbleP(p_guess, xv_guess, x, m, s, e, t, **kwargs):
 
     # Determine vapor phase composition at bubble pressure    
     if not ('z' in kwargs): # Check that the mixture does not contain electrolytes. For electrolytes, a different equilibrium criterion should be used. 
-        rho = pcsaft_den(x, m, s, e, t, p_guess, phase='liq', **kwargs)        
+        rho = pcsaft_den(x, m, s, e, t, bubP, phase='liq', **kwargs)        
         fugcoef_l = pcsaft_fugcoef(x, m, s, e, t, rho, **kwargs)
         
         itr = 0
@@ -205,7 +205,7 @@ def pcsaft_bubbleP(p_guess, xv_guess, x, m, s, e, t, **kwargs):
         xv_old = np.zeros_like(xv)
         while (dif>1e-9) and (itr<100):
             xv_old[:] = xv
-            rho = pcsaft_den(xv, m, s, e, t, p_guess, phase='vap', **kwargs)        
+            rho = pcsaft_den(xv, m, s, e, t, bubP, phase='vap', **kwargs)        
             fugcoef_v = pcsaft_fugcoef(xv, m, s, e, t, rho, **kwargs)
             xv = fugcoef_l*x/fugcoef_v
             xv = xv/np.sum(xv)
@@ -213,7 +213,7 @@ def pcsaft_bubbleP(p_guess, xv_guess, x, m, s, e, t, **kwargs):
             itr += 1
     else:
         z = kwargs['z']
-        rho = pcsaft_den(x, m, s, e, t, p_guess, phase='liq', **kwargs)        
+        rho = pcsaft_den(x, m, s, e, t, bubP, phase='liq', **kwargs)        
         fugcoef_l = pcsaft_fugcoef(x, m, s, e, t, rho, **kwargs)        
         
         itr = 0
@@ -222,7 +222,7 @@ def pcsaft_bubbleP(p_guess, xv_guess, x, m, s, e, t, **kwargs):
         xv_old = np.zeros_like(xv)
         while (dif>1e-9) and (itr<100):
             xv_old[:] = xv
-            rho = pcsaft_den(xv, m, s, e, t, p_guess, phase='vap', **kwargs)        
+            rho = pcsaft_den(xv, m, s, e, t, bubP, phase='vap', **kwargs)        
             fugcoef_v = pcsaft_fugcoef(xv, m, s, e, t, rho, **kwargs)        
         
             xv[np.where(z == 0)[0]] = (fugcoef_l*x/fugcoef_v)[np.where(z == 0)[0]] # here it is assumed that the ionic compounds are nonvolatile
