@@ -204,8 +204,8 @@ double pcsaft_Z_cpp(vector<double> x, vector<double> m, vector<double> s, vector
         m_avg += x[i]*m[i];
     }
 
-    vector<double> ghs (ncomp, 0);
-    vector<double> denghs (ncomp, 0);
+    vector<double> ghs (ncomp*ncomp, 0);
+    vector<double> denghs (ncomp*ncomp, 0);
     vector<double> e_ij (ncomp*ncomp, 0);
     vector<double> s_ij (ncomp*ncomp, 0);
     double m2es3 = 0.;
@@ -239,14 +239,14 @@ double pcsaft_Z_cpp(vector<double> x, vector<double> m, vector<double> s, vector
             }
             m2es3 = m2es3 + x[i]*x[j]*m[i]*m[j]*e_ij[idx]/t*pow(s_ij[idx], 3);
             m2e2s3 = m2e2s3 + x[i]*x[j]*m[i]*m[j]*pow(e_ij[idx]/t,2)*pow(s_ij[idx], 3);
+            ghs[idx] = 1/(1-zeta[3]) + (d[i]*d[j]/(d[i]+d[j]))*3*zeta[2]/(1-zeta[3])/(1-zeta[3]) + 
+                    pow(d[i]*d[j]/(d[i]+d[j]), 2)*2*zeta[2]*zeta[2]/pow(1-zeta[3], 3);
+            denghs[idx] = zeta[3]/(1-zeta[3])/(1-zeta[3]) + 
+                (d[i]*d[j]/(d[i]+d[j]))*(3*zeta[2]/(1-zeta[3])/(1-zeta[3]) +
+                6*zeta[2]*zeta[3]/pow(1-zeta[3], 3)) + 
+                pow(d[i]*d[j]/(d[i]+d[j]), 2)*(4*zeta[2]*zeta[2]/pow(1-zeta[3], 3) +
+                6*zeta[2]*zeta[2]*zeta[3]/pow(1-zeta[3], 4));
         }
-        ghs[i] = 1/(1-zeta[3]) + (d[i]*d[i]/(d[i]+d[i]))*3*zeta[2]/(1-zeta[3])/(1-zeta[3]) + 
-            pow(d[i]*d[i]/(d[i]+d[i]), 2)*2*zeta[2]*zeta[2]/pow(1-zeta[3], 3);
-        denghs[i] = zeta[3]/(1-zeta[3])/(1-zeta[3]) + 
-            (d[i]*d[i]/(d[i]+d[i]))*(3*zeta[2]/(1-zeta[3])/(1-zeta[3]) +
-            6*zeta[2]*zeta[3]/pow(1-zeta[3], 3)) + 
-            pow(d[i]*d[i]/(d[i]+d[i]), 2)*(4*zeta[2]*zeta[2]/pow(1-zeta[3], 3) +
-            6*zeta[2]*zeta[2]*zeta[3]/pow(1-zeta[3], 4));
     }
 
     double Zhs = zeta[3]/(1-zeta[3]) + 3.*zeta[1]*zeta[2]/zeta[0]/(1.-zeta[3])/(1.-zeta[3]) + 
@@ -279,7 +279,7 @@ double pcsaft_Z_cpp(vector<double> x, vector<double> m, vector<double> s, vector
 
     summ = 0.0;
     for (int i = 0; i < ncomp; i++) {
-        summ += x[i]*(m[i]-1)/ghs[i]*denghs[i];
+        summ += x[i]*(m[i]-1)/ghs[i*ncomp+i]*denghs[i*ncomp+i];
     }
 
     double Zid = 1.0;
@@ -414,7 +414,7 @@ double pcsaft_Z_cpp(vector<double> x, vector<double> m, vector<double> s, vector
                     volABij[idxa] = sqrt(cppargs.vol_a[iA[i]]*cppargs.vol_a[iA[j]])*pow(sqrt(s_ij[idxi]*
                         s_ij[idxj])/(0.5*(s_ij[idxi]+s_ij[idxj])), 3)*(1-cppargs.k_hb[iA[i]*ncomp+iA[j]]);
                 }
-                delta_ij[idxa] = ghs[iA[j]]*(exp(eABij[idxa]/t)-1)*pow(s_ij[iA[i]*ncomp+iA[j]], 3)*volABij[idxa];
+                delta_ij[idxa] = ghs[iA[i]*ncomp+iA[j]]*(exp(eABij[idxa]/t)-1)*pow(s_ij[iA[i]*ncomp+iA[j]], 3)*volABij[idxa];
                 for (int k = 0; k < ncomp; k++) {
                     idx_ddelta += 1;
                     dghsd_dd = PI/6.*m[k]*(pow(d[k], 3)/(1-zeta[3])/(1-zeta[3]) + 3*d[iA[i]]*d[iA[j]]/
@@ -493,7 +493,7 @@ double pcsaft_Z_cpp(vector<double> x, vector<double> m, vector<double> s, vector
         }
     }
 
-    double Z = Zid + Zhc + Zdisp + Zpolar + Zassoc + Zion;
+    double Z = Zid + Zhc + Zdisp + Zpolar + Zassoc + Zion; 
     return Z;
 }
 
@@ -582,8 +582,8 @@ vector<double> pcsaft_fugcoef_cpp(vector<double> x, vector<double> m, vector<dou
         m_avg += x[i]*m[i];
     }
 
-    vector<double> ghs(ncomp, 0);
-    vector<double> denghs(ncomp, 0);
+    vector<double> ghs(ncomp*ncomp, 0);
+    vector<double> denghs(ncomp*ncomp, 0);
     vector<double> e_ij(ncomp*ncomp, 0);
     vector<double> s_ij(ncomp*ncomp, 0);
     double m2es3 = 0.;
@@ -617,14 +617,14 @@ vector<double> pcsaft_fugcoef_cpp(vector<double> x, vector<double> m, vector<dou
             }
             m2es3 = m2es3 + x[i]*x[j]*m[i]*m[j]*e_ij[idx]/t*pow(s_ij[idx], 3);
             m2e2s3 = m2e2s3 + x[i]*x[j]*m[i]*m[j]*pow(e_ij[idx]/t,2)*pow(s_ij[idx], 3);
+            ghs[idx] = 1/(1-zeta[3]) + (d[i]*d[j]/(d[i]+d[j]))*3*zeta[2]/(1-zeta[3])/(1-zeta[3]) + 
+                    pow(d[i]*d[j]/(d[i]+d[j]), 2)*2*zeta[2]*zeta[2]/pow(1-zeta[3], 3);
+            denghs[idx] = zeta[3]/(1-zeta[3])/(1-zeta[3]) + 
+                (d[i]*d[j]/(d[i]+d[j]))*(3*zeta[2]/(1-zeta[3])/(1-zeta[3]) +
+                6*zeta[2]*zeta[3]/pow(1-zeta[3], 3)) + 
+                pow(d[i]*d[j]/(d[i]+d[j]), 2)*(4*zeta[2]*zeta[2]/pow(1-zeta[3], 3) +
+                6*zeta[2]*zeta[2]*zeta[3]/pow(1-zeta[3], 4));
         }
-        ghs[i] = 1/(1-zeta[3]) + (d[i]*d[i]/(d[i]+d[i]))*3*zeta[2]/(1-zeta[3])/(1-zeta[3]) + 
-            pow(d[i]*d[i]/(d[i]+d[i]), 2)*2*zeta[2]*zeta[2]/pow(1-zeta[3], 3);
-        denghs[i] = zeta[3]/(1-zeta[3])/(1-zeta[3]) + 
-            (d[i]*d[i]/(d[i]+d[i]))*(3*zeta[2]/(1-zeta[3])/(1-zeta[3]) +
-            6*zeta[2]*zeta[3]/pow(1-zeta[3], 3)) + 
-            pow(d[i]*d[i]/(d[i]+d[i]), 2)*(4*zeta[2]*zeta[2]/pow(1-zeta[3], 3) +
-            6*zeta[2]*zeta[2]*zeta[3]/pow(1-zeta[3], 4));
     }
 
     double ares_hs = 1/zeta[0]*(3*zeta[1]*zeta[2]/(1-zeta[3]) + pow(zeta[2], 3.)/(zeta[3]*pow(1-zeta[3],2)) 
@@ -661,7 +661,7 @@ vector<double> pcsaft_fugcoef_cpp(vector<double> x, vector<double> m, vector<dou
 
     summ = 0.0;
     for (int i = 0; i < ncomp; i++) {
-        summ += x[i]*(m[i]-1)*log(ghs[i]);
+        summ += x[i]*(m[i]-1)*log(ghs[i*ncomp+i]);
     }
 
     double ares_hc = m_avg*ares_hs - summ;
@@ -669,13 +669,13 @@ vector<double> pcsaft_fugcoef_cpp(vector<double> x, vector<double> m, vector<dou
 
     summ = 0.0;
     for (int i = 0; i < ncomp; i++) {
-        summ += x[i]*(m[i]-1)/ghs[i]*denghs[i];
+        summ += x[i]*(m[i]-1)/ghs[i*ncomp+i]*denghs[i*ncomp+i];
     }
 
     double Zhc = m_avg*Zhs - summ;
     double Zdisp = -2*PI*den*detI1_det*m2es3 - PI*den*m_avg*(C1*detI2_det + C2*eta*I2)*m2e2s3;
 
-    vector<double> dghs_dx(ncomp*ncomp, 0);
+    vector<double> dghsii_dx(ncomp*ncomp, 0);
     vector<double> dahs_dx(ncomp, 0);
     vector<double> dzeta_dx(4, 0);
     idx = -1;
@@ -685,7 +685,7 @@ vector<double> pcsaft_fugcoef_cpp(vector<double> x, vector<double> m, vector<dou
         }
         for (int j = 0; j < ncomp; j++) {
             idx += 1;
-            dghs_dx[idx] = dzeta_dx[3]/(1-zeta[3])/(1-zeta[3]) + (d[j]*d[j]/(d[j]+d[j]))* 
+            dghsii_dx[idx] = dzeta_dx[3]/(1-zeta[3])/(1-zeta[3]) + (d[j]*d[j]/(d[j]+d[j]))* 
                     (3*dzeta_dx[2]/(1-zeta[3])/(1-zeta[3]) + 6*zeta[2]*dzeta_dx[3]/pow(1-zeta[3],3)) 
                     + pow(d[j]*d[j]/(d[j]+d[j]),2)*(4*zeta[2]*dzeta_dx[2]/pow(1-zeta[3],3) 
                     + 6*zeta[2]*zeta[2]*dzeta_dx[3]/pow(1-zeta[3],4));
@@ -717,11 +717,11 @@ vector<double> pcsaft_fugcoef_cpp(vector<double> x, vector<double> m, vector<dou
         for (int j = 0; j < ncomp; j++) {
             dm2es3_dx += x[j]*m[j]*(e_ij[i*ncomp+j]/t)*pow(s_ij[i*ncomp+j],3);
             dm2e2s3_dx += x[j]*m[j]*pow(e_ij[i*ncomp+j]/t,2)*pow(s_ij[i*ncomp+j],3);
-            dahc_dx[i] += x[j]*(m[j]-1)/ghs[j]*dghs_dx[i*ncomp+j];
+            dahc_dx[i] += x[j]*(m[j]-1)/ghs[j*ncomp+j]*dghsii_dx[i*ncomp+j];
         }
         dm2es3_dx = dm2es3_dx*2*m[i];
         dm2e2s3_dx = dm2e2s3_dx*2*m[i];
-        dahc_dx[i] = m[i]*ares_hs + m_avg*dahs_dx[i] - dahc_dx[i] - (m[i]-1)*log(ghs[i]);
+        dahc_dx[i] = m[i]*ares_hs + m_avg*dahs_dx[i] - dahc_dx[i] - (m[i]-1)*log(ghs[i*ncomp+i]);
         dC1_dx = C2*dzeta3_dx - C1*C1*(m[i]*(8*eta-2*eta*eta)/pow(1-eta,4) - 
             m[i]*(20*eta-27*eta*eta+12*pow(eta,3)-2*pow(eta,4))/pow((1-eta)*(2-eta),2));
 
@@ -914,7 +914,7 @@ vector<double> pcsaft_fugcoef_cpp(vector<double> x, vector<double> m, vector<dou
                     volABij[idxa] = sqrt(cppargs.vol_a[iA[i]]*cppargs.vol_a[iA[j]])*pow(sqrt(s_ij[idxi]*
                         s_ij[idxj])/(0.5*(s_ij[idxi]+s_ij[idxj])), 3)*(1-cppargs.k_hb[iA[i]*ncomp+iA[j]]);
                 }
-                delta_ij[idxa] = ghs[iA[j]]*(exp(eABij[idxa]/t)-1)*pow(s_ij[iA[i]*ncomp+iA[j]], 3)*volABij[idxa];
+                delta_ij[idxa] = ghs[iA[i]*ncomp+iA[j]]*(exp(eABij[idxa]/t)-1)*pow(s_ij[iA[i]*ncomp+iA[j]], 3)*volABij[idxa];
                 for (int k = 0; k < ncomp; k++) {
                     idx_ddelta += 1;
                     dghsd_dd = PI/6.*m[k]*(pow(d[k], 3)/(1-zeta[3])/(1-zeta[3]) + 3*d[iA[i]]*d[iA[j]]/
@@ -928,7 +928,7 @@ vector<double> pcsaft_fugcoef_cpp(vector<double> x, vector<double> m, vector<dou
             XA[i*2] = (-1 + sqrt(1+8*den*delta_ij[i*ncA+i]))/(4*den*delta_ij[i*ncA+i]);
             if (!isfinite(XA[i*2])) {
                 XA[i*2] = 0.02;
-            }
+            }            
             XA[i*2+1] = XA[i*2];
         }
 
@@ -956,7 +956,7 @@ vector<double> pcsaft_fugcoef_cpp(vector<double> x, vector<double> m, vector<dou
         for (int i = 0; i < ncomp; i++) {
             for (int j = 0; j < ncA; j++) {
                 for (int k = 0; k < a_sites; k++) {
-                    mu_assoc[i] += x[iA[j]]*den*dXA_dd[i*(ncA*a_sites)+j*(a_sites)+k]*(1/XA[j*a_sites+k]-0.5);
+                    mu_assoc[i] += x[iA[j]]*den*dXA_dd[i*(ncA*a_sites)+j*a_sites+k]*(1/XA[j*a_sites+k]-0.5);
                 }
             }
         }
@@ -1161,7 +1161,7 @@ double pcsaft_ares_cpp(vector<double> x, vector<double> m, vector<double> s, vec
         m_avg += x[i]*m[i];
     }
 
-    vector<double> ghs (ncomp, 0);
+    vector<double> ghs (ncomp*ncomp, 0);
     vector<double> e_ij (ncomp*ncomp, 0);
     vector<double> s_ij (ncomp*ncomp, 0);
     double m2es3 = 0.;
@@ -1195,9 +1195,9 @@ double pcsaft_ares_cpp(vector<double> x, vector<double> m, vector<double> s, vec
             }
             m2es3 = m2es3 + x[i]*x[j]*m[i]*m[j]*e_ij[idx]/t*pow(s_ij[idx], 3);
             m2e2s3 = m2e2s3 + x[i]*x[j]*m[i]*m[j]*pow(e_ij[idx]/t,2)*pow(s_ij[idx], 3);
+            ghs[idx] = 1/(1-zeta[3]) + (d[i]*d[j]/(d[i]+d[j]))*3*zeta[2]/(1-zeta[3])/(1-zeta[3]) + 
+                pow(d[i]*d[j]/(d[i]+d[j]), 2)*2*zeta[2]*zeta[2]/pow(1-zeta[3], 3);
         }
-        ghs[i] = 1/(1-zeta[3]) + (d[i]*d[i]/(d[i]+d[i]))*3*zeta[2]/(1-zeta[3])/(1-zeta[3]) + 
-            pow(d[i]*d[i]/(d[i]+d[i]), 2)*2*zeta[2]*zeta[2]/pow(1-zeta[3], 3);
     }
 
     double ares_hs = 1/zeta[0]*(3*zeta[1]*zeta[2]/(1-zeta[3]) + pow(zeta[2], 3.)/(zeta[3]*pow(1-zeta[3],2)) 
@@ -1227,7 +1227,7 @@ double pcsaft_ares_cpp(vector<double> x, vector<double> m, vector<double> s, vec
     
     summ = 0.0;
     for (int i = 0; i < ncomp; i++) {
-        summ += x[i]*(m[i]-1)*log(ghs[i]);
+        summ += x[i]*(m[i]-1)*log(ghs[i*ncomp+i]);
     }
 
     double ares_hc = m_avg*ares_hs - summ;
@@ -1340,12 +1340,12 @@ double pcsaft_ares_cpp(vector<double> x, vector<double> m, vector<double> s, vec
                     volABij[idxa] = sqrt(cppargs.vol_a[iA[i]]*cppargs.vol_a[iA[j]])*pow(sqrt(s_ij[idxi]*
                         s_ij[idxj])/(0.5*(s_ij[idxi]+s_ij[idxj])), 3)*(1-cppargs.k_hb[iA[i]*ncomp+iA[j]]);
                 }
-                delta_ij[idxa] = ghs[iA[j]]*(exp(eABij[idxa]/t)-1)*pow(s_ij[iA[i]*ncomp+iA[j]], 3)*volABij[idxa];
+                delta_ij[idxa] = ghs[iA[i]*ncomp+iA[j]]*(exp(eABij[idxa]/t)-1)*pow(s_ij[iA[i]*ncomp+iA[j]], 3)*volABij[idxa];
             }           
             XA[i*2] = (-1 + sqrt(1+8*den*delta_ij[i*ncA+i]))/(4*den*delta_ij[i*ncA+i]);
             if (!isfinite(XA[i*2])) {
                 XA[i*2] = 0.02;
-            }
+            }            
             XA[i*2+1] = XA[i*2];
         }
 
@@ -1369,10 +1369,8 @@ double pcsaft_ares_cpp(vector<double> x, vector<double> m, vector<double> s, vec
         
         ares_assoc = 0.;
         for (int i = 0; i < ncA; i++) {
-            for (int j = 0; j < ncA; j++) {
-                for (int k = 0; k < a_sites; k++) {
-                    ares_assoc += x[iA[i]]*(log(XA[j*a_sites+k])  -0.5*XA[j*a_sites+k] + 0.5);
-                }
+            for (int k = 0; k < a_sites; k++) {
+                ares_assoc += x[iA[i]]*(log(XA[i*a_sites+k])-0.5*XA[i*a_sites+k] + 0.5);
             }
         }
     }
@@ -1506,8 +1504,8 @@ double pcsaft_dadt_cpp(vector<double> x, vector<double> m, vector<double> s, vec
         m_avg += x[i]*m[i];
     }
 
-    vector<double> ghs (ncomp, 0);
-    vector<double> dghs_dt (ncomp, 0);
+    vector<double> ghs (ncomp*ncomp, 0);
+    vector<double> dghs_dt (ncomp*ncomp, 0);
     vector<double> e_ij (ncomp*ncomp, 0);
     vector<double> s_ij (ncomp*ncomp, 0);
     double m2es3 = 0.;
@@ -1542,15 +1540,15 @@ double pcsaft_dadt_cpp(vector<double> x, vector<double> m, vector<double> s, vec
             }
             m2es3 = m2es3 + x[i]*x[j]*m[i]*m[j]*e_ij[idx]/t*pow(s_ij[idx], 3);
             m2e2s3 = m2e2s3 + x[i]*x[j]*m[i]*m[j]*pow(e_ij[idx]/t,2)*pow(s_ij[idx], 3);
+            ghs[idx] = 1/(1-zeta[3]) + (d[i]*d[j]/(d[i]+d[j]))*3*zeta[2]/(1-zeta[3])/(1-zeta[3]) + 
+                    pow(d[i]*d[j]/(d[i]+d[j]), 2)*2*zeta[2]*zeta[2]/pow(1-zeta[3], 3);
+            ddij_dt = (d[i]*d[i]/(d[i]+d[i]))*(dd_dt[i]/d[i]+dd_dt[i]/d[i]-(dd_dt[i]+dd_dt[i])/(d[i]+d[i]));
+            dghs_dt[idx] = dzeta_dt[3]/pow(1-zeta[3], 2.) 
+                + 3*(ddij_dt*zeta[2]+(d[i]*d[j]/(d[i]+d[j]))*dzeta_dt[2])/pow(1-zeta[3], 2.) 
+                + 4*(d[i]*d[j]/(d[i]+d[j]))*zeta[2]*(1.5*dzeta_dt[3]+ddij_dt*zeta[2]
+                + (d[i]*d[j]/(d[i]+d[j]))*dzeta_dt[2])/pow(1-zeta[3], 3.)
+                + 6*pow((d[i]*d[j]/(d[i]+d[j]))*zeta[2], 2.)*dzeta_dt[3]/pow(1-zeta[3], 4.);
         }
-        ghs[i] = 1/(1-zeta[3]) + (d[i]*d[i]/(d[i]+d[i]))*3*zeta[2]/(1-zeta[3])/(1-zeta[3]) + 
-            pow(d[i]*d[i]/(d[i]+d[i]), 2)*2*zeta[2]*zeta[2]/pow(1-zeta[3], 3);
-        ddij_dt = (d[i]*d[i]/(d[i]+d[i]))*(dd_dt[i]/d[i]+dd_dt[i]/d[i]-(dd_dt[i]+dd_dt[i])/(d[i]+d[i]));
-        dghs_dt[i] = dzeta_dt[3]/pow(1-zeta[3], 2.) 
-            + 3*(ddij_dt*zeta[2]+(d[i]*d[i]/(d[i]+d[i]))*dzeta_dt[2])/pow(1-zeta[3], 2.) 
-            + 4*(d[i]*d[i]/(d[i]+d[i]))*zeta[2]*(1.5*dzeta_dt[3]+ddij_dt*zeta[2]
-            + (d[i]*d[i]/(d[i]+d[i]))*dzeta_dt[2])/pow(1-zeta[3], 3.)
-            + 6*pow((d[i]*d[i]/(d[i]+d[i]))*zeta[2], 2.)*dzeta_dt[3]/pow(1-zeta[3], 4.);
     }
  
     double dadt_hs = 1/zeta[0]*(3*(dzeta_dt[1]*zeta[2] + zeta[1]*dzeta_dt[2])/(1-zeta[3])
@@ -1590,7 +1588,7 @@ double pcsaft_dadt_cpp(vector<double> x, vector<double> m, vector<double> s, vec
     
     summ = 0.;
     for (int i = 0; i < ncomp; i++) {
-        summ += x[i]*(m[i]-1)*dghs_dt[i]/ghs[i];
+        summ += x[i]*(m[i]-1)*dghs_dt[i*ncomp+i]/ghs[i*ncomp+i];
     }
 
     double dadt_hc = m_avg*dadt_hs - summ;
@@ -1722,9 +1720,9 @@ double pcsaft_dadt_cpp(vector<double> x, vector<double> m, vector<double> s, vec
                     volABij[idxa] = sqrt(cppargs.vol_a[iA[i]]*cppargs.vol_a[iA[j]])*pow(sqrt(s_ij[idxi]*
                         s_ij[idxj])/(0.5*(s_ij[idxi]+s_ij[idxj])), 3)*(1-cppargs.k_hb[iA[i]*ncomp+iA[j]]);
                 }
-                delta_ij[idxa] = ghs[iA[j]]*(exp(eABij[idxa]/t)-1)*pow(s_ij[iA[i]*ncomp+iA[j]], 3)*volABij[idxa];
+                delta_ij[idxa] = ghs[iA[i]*ncomp+iA[j]]*(exp(eABij[idxa]/t)-1)*pow(s_ij[iA[i]*ncomp+iA[j]], 3)*volABij[idxa];
                 ddelta_dt[idxa] = pow(s_ij[idxj],3)*volABij[idxa]*(-eABij[idxa]/pow(t,2)
-                    *exp(eABij[idxa]/t)*ghs[iA[j]] + dghs_dt[iA[j]]
+                    *exp(eABij[idxa]/t)*ghs[iA[i]*ncomp+iA[j]] + dghs_dt[iA[i]*ncomp+iA[j]]
                     *(exp(eABij[idxa]/t)-1));
             }           
             XA[i*2] = (-1 + sqrt(1+8*den*delta_ij[i*ncA+i]))/(4*den*delta_ij[i*ncA+i]);
