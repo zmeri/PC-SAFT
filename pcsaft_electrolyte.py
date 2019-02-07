@@ -2416,7 +2416,7 @@ def XA_find(XA_guess, ncomp, delta_ij, den, x):
     for i in range(ncomp):
         summ2 = 0*summ2
         for j in range(ncomp):
-            summ2 += den*x[j]*np.matmul(XA_guess[j,:],delta_ij[i,j]*ABmatrix)
+            summ2 = summ2 + den*x[j]*np.matmul(XA_guess[j,:],delta_ij[i,j]*ABmatrix)
         XA[i,:] = 1/(1+summ2)
     
     return XA
