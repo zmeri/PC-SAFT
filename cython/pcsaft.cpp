@@ -1542,7 +1542,7 @@ double pcsaft_dadt_cpp(vector<double> x, vector<double> m, vector<double> s, vec
             m2e2s3 = m2e2s3 + x[i]*x[j]*m[i]*m[j]*pow(e_ij[idx]/t,2)*pow(s_ij[idx], 3);
             ghs[idx] = 1/(1-zeta[3]) + (d[i]*d[j]/(d[i]+d[j]))*3*zeta[2]/(1-zeta[3])/(1-zeta[3]) + 
                     pow(d[i]*d[j]/(d[i]+d[j]), 2)*2*zeta[2]*zeta[2]/pow(1-zeta[3], 3);
-            ddij_dt = (d[i]*d[i]/(d[i]+d[i]))*(dd_dt[i]/d[i]+dd_dt[i]/d[i]-(dd_dt[i]+dd_dt[i])/(d[i]+d[i]));
+            ddij_dt = (d[i]*d[j]/(d[i]+d[j]))*(dd_dt[i]/d[i]+dd_dt[j]/d[j]-(dd_dt[i]+dd_dt[j])/(d[i]+d[j]));
             dghs_dt[idx] = dzeta_dt[3]/pow(1-zeta[3], 2.) 
                 + 3*(ddij_dt*zeta[2]+(d[i]*d[j]/(d[i]+d[j]))*dzeta_dt[2])/pow(1-zeta[3], 2.) 
                 + 4*(d[i]*d[j]/(d[i]+d[j]))*zeta[2]*(1.5*dzeta_dt[3]+ddij_dt*zeta[2]
