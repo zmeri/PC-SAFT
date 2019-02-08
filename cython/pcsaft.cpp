@@ -2078,9 +2078,11 @@ double pcsaft_den_cpp(vector<double> x, vector<double> m, vector<double> s, vect
         P_fit = pcsaft_p_cpp(x, m, s, e, t, rho, cppargs);
         y2 = pow((P_fit-p)/p*100, 2.);
         if (y2 == y1) {
-            break;
+            rho = rho2-y2/(y2-y1+1e-6)*(rho2-rho1);
         }
-        rho = rho2-y2/(y2-y1)*(rho2-rho1);  
+        else {
+            rho = rho2-y2/(y2-y1)*(rho2-rho1);
+        } 
         if (rho < x_lo) {
             rho = (x_lo + rho2)/2;
         }
@@ -2099,9 +2101,11 @@ double pcsaft_den_cpp(vector<double> x, vector<double> m, vector<double> s, vect
         while (iter < maxiter && y2 > 1.0e-8) {
             P_fit = pcsaft_p_cpp(x, m, s, e, t, rho, cppargs);
             y2 = pow((P_fit-p)/p*100, 2.);
-            rho = rho2-y2/(y2-y1)*(rho2-rho1);
             if (y2 == y1) {
-                break;
+                rho = rho2-y2/(y2-y1+1e-6)*(rho2-rho1);
+            }
+            else {
+                rho = rho2-y2/(y2-y1)*(rho2-rho1);
             }
             if (rho < x_lo) {
                 rho = (x_lo + rho2)/2;
@@ -2115,7 +2119,7 @@ double pcsaft_den_cpp(vector<double> x, vector<double> m, vector<double> s, vect
             iter += 1;
         }
     }
-    else if (phase == 0 && y2 > 1.0e-3 && (rho - x_lo) < 1e-3) {
+    else if (phase == 0 && y2 > 1.0e-3 && (rho - x_lo) < 100) {
         iter = 1;        
         rho_guess = 0.73;
         rho_guess = 6/PI*rho_guess/summ*1.0e30/N_AV;
@@ -2128,9 +2132,11 @@ double pcsaft_den_cpp(vector<double> x, vector<double> m, vector<double> s, vect
             P_fit = pcsaft_p_cpp(x, m, s, e, t, rho, cppargs);
             y2 = pow((P_fit-p)/p*100, 2.);
             if (y2 == y1) {
-                break;
+                rho = rho2-0.5*y2/(y2-y1+1e-6)*(rho2-rho1); 
             }
-            rho = rho2-0.7*y2/(y2-y1)*(rho2-rho1);  
+            else {
+                rho = rho2-0.5*y2/(y2-y1)*(rho2-rho1);  
+            } 
             if (rho < x_lo) {
                 rho = (x_lo + rho2)/2;
             }
