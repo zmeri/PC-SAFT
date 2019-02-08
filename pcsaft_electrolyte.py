@@ -763,10 +763,10 @@ def pcsaft_dadt(x, m, s, e, t, rho, k_ij=None, e_assoc=None, vol_a=None, dipm=No
 
     zeta = np.zeros((4,), dtype='float_')
     dzeta_dt = np.zeros_like(zeta)
-    ghs = np.zeros((ncomp), dtype='float_')
+    ghs = np.zeros((ncomp,ncomp), dtype='float_')
     dghs_dt = np.zeros_like(ghs)
-    e_ij = np.zeros((ncomp,ncomp), dtype='float_')
-    s_ij = np.zeros_like(e_ij)
+    e_ij = np.zeros_like(ghs)
+    s_ij = np.zeros_like(ghs)
     m2es3 = 0.
     m2e2s3 = 0.
     a0 = np.asarray([0.910563145, 0.636128145, 2.686134789, -26.54736249, 97.75920878, -159.5915409, 91.29777408])
@@ -795,14 +795,14 @@ def pcsaft_dadt(x, m, s, e, t, rho, k_ij=None, e_assoc=None, vol_a=None, dipm=No
                 e_ij[i,j] = np.sqrt(e[i]*e[j])*(1-k_ij[i,j])
             m2es3 = m2es3 + x[i]*x[j]*m[i]*m[j]*e_ij[i,j]/t*s_ij[i,j]**3
             m2e2s3 = m2e2s3 + x[i]*x[j]*m[i]*m[j]*(e_ij[i,j]/t)**2*s_ij[i,j]**3  
-        ghs[i] = 1/(1-zeta[3]) + (d[i]*d[i]/(d[i]+d[i]))*3*zeta[2]/(1-zeta[3])**2 + \
-            (d[i]*d[i]/(d[i]+d[i]))**2*2*zeta[2]**2/(1-zeta[3])**3
-        ddij_dt = (d[i]*d[i]/(d[i]+d[i]))*(dd_dt[i]/d[i]+dd_dt[i]/d[i]-(dd_dt[i]+dd_dt[i])/(d[i]+d[i]))
-        dghs_dt[i] = dzeta_dt[3]/(1-zeta[3])**2 \
-            + 3*(ddij_dt*zeta[2]+(d[i]*d[i]/(d[i]+d[i]))*dzeta_dt[2])/(1-zeta[3])**2 \
-            + 4*(d[i]*d[i]/(d[i]+d[i]))*zeta[2]*(1.5*dzeta_dt[3]+ddij_dt*zeta[2] \
-            +(d[i]*d[i]/(d[i]+d[i]))*dzeta_dt[2])/(1-zeta[3])**3 \
-            + 6*((d[i]*d[i]/(d[i]+d[i]))*zeta[2])**2*dzeta_dt[3]/(1-zeta[3])**4
+            ghs[i,j] = 1/(1-zeta[3]) + (d[i]*d[j]/(d[i]+d[j]))*3*zeta[2]/(1-zeta[3])**2 + \
+                (d[i]*d[j]/(d[i]+d[j]))**2*2*zeta[2]**2/(1-zeta[3])**3
+            ddij_dt = (d[i]*d[j]/(d[i]+d[j]))*(dd_dt[i]/d[i]+dd_dt[j]/d[j]-(dd_dt[i]+dd_dt[j])/(d[i]+d[j]))
+            dghs_dt[i,j] = dzeta_dt[3]/(1-zeta[3])**2 \
+                + 3*(ddij_dt*zeta[2]+(d[i]*d[j]/(d[i]+d[j]))*dzeta_dt[2])/(1-zeta[3])**2 \
+                + 4*(d[i]*d[j]/(d[i]+d[j]))*zeta[2]*(1.5*dzeta_dt[3]+ddij_dt*zeta[2] \
+                +(d[i]*d[j]/(d[i]+d[j]))*dzeta_dt[2])/(1-zeta[3])**3 \
+                + 6*((d[i]*d[j]/(d[i]+d[j]))*zeta[2])**2*dzeta_dt[3]/(1-zeta[3])**4
             
     dadt_hs = 1/zeta[0]*(3*(dzeta_dt[1]*zeta[2] + zeta[1]*dzeta_dt[2])/(1-zeta[3]) \
         + 3*zeta[1]*zeta[2]*dzeta_dt[3]/(1-zeta[3])**2 \
@@ -826,7 +826,7 @@ def pcsaft_dadt(x, m, s, e, t, rho, k_ij=None, e_assoc=None, vol_a=None, dipm=No
     
     summ = 0.    
     for i in range(ncomp):
-        summ += x[i]*(m[i]-1)*dghs_dt[i]/ghs[i]
+        summ += x[i]*(m[i]-1)*dghs_dt[i,i]/ghs[i,i]
 
     dadt_hc = m_avg*dadt_hs - summ
     dadt_disp = -2*np.pi*den*(dI1_dt-I1/t)*m2es3 - np.pi*den*m_avg*(dC1_dt*I2+C1*dI2_dt-2*C1*I2/t)*m2e2s3
@@ -921,10 +921,10 @@ def pcsaft_dadt(x, m, s, e, t, rho, k_ij=None, e_assoc=None, vol_a=None, dipm=No
                 eABij[i,j] = (e_assoc[iA[i]]+e_assoc[iA[j]])/2.
                 volABij[i,j] = np.sqrt(vol_a[iA[i]]*vol_a[iA[j]])*(np.sqrt(s_ij[iA[i],iA[i]] \
                     *s_ij[iA[j],iA[j]])/(0.5*(s_ij[iA[i],iA[i]]+s_ij[iA[j],iA[j]])))**3
-                delta_ij[i,j] = ghs[iA[j]]*(np.exp(eABij[i,j]/t)-1)*s_ij[iA[i],iA[j]]**3*volABij[i,j]
+                delta_ij[i,j] = ghs[iA[i],iA[j]]*(np.exp(eABij[i,j]/t)-1)*s_ij[iA[i],iA[j]]**3*volABij[i,j]
                 XA[i,:] = (-1 + np.sqrt(1+8*den*delta_ij[i,i]))/(4*den*delta_ij[i,i])
                 ddelta_dt[i,j] = s_ij[iA[j],iA[j]]**3*volABij[i,j]*(-eABij[i,j]/t**2 \
-                    *np.exp(eABij[i,j]/t)*ghs[iA[j]] + dghs_dt[iA[j]] \
+                    *np.exp(eABij[i,j]/t)*ghs[iA[i],iA[j]] + dghs_dt[iA[i],iA[j]] \
                     *(np.exp(eABij[i,j]/t)-1))
 
         ctr = 0
@@ -935,7 +935,7 @@ def pcsaft_dadt(x, m, s, e, t, rho, k_ij=None, e_assoc=None, vol_a=None, dipm=No
             XA = XA_find(XA, ncA, delta_ij, den, x[iA])
             dif = np.sum(abs(XA - XA_old))
             XA_old[:] = XA
-        XA = XA.flatten('F')
+        XA = XA.flatten()
         
         dXA_dt = dXAdt_find(ncA, delta_ij, den, XA, ddelta_dt, x[iA], a_sites)
 
@@ -1211,9 +1211,9 @@ def pcsaft_fugcoef(x, m, s, e, t, rho, k_ij=None, e_assoc=None, vol_a=None, dipm
         k_ij = np.zeros((ncomp,ncomp), dtype='float_')
         
     zeta = np.zeros((4,), dtype='float_')
-    ghs = np.zeros((ncomp), dtype='float_')
-    e_ij = np.zeros((ncomp,ncomp), dtype='float_')
-    s_ij = np.zeros_like(e_ij)
+    ghs = np.zeros((ncomp,ncomp), dtype='float_')
+    e_ij = np.zeros_like(ghs)
+    s_ij = np.zeros_like(ghs)
     denghs = np.zeros_like(ghs)
     dghs_dx = np.zeros((ncomp,ncomp), dtype='float_')
     dahs_dx = np.zeros_like(x)
@@ -1247,11 +1247,11 @@ def pcsaft_fugcoef(x, m, s, e, t, rho, k_ij=None, e_assoc=None, vol_a=None, dipm
                 e_ij[i,j] = np.sqrt(e[i]*e[j])*(1-k_ij[i,j])
             m2es3 = m2es3 + x[i]*x[j]*m[i]*m[j]*e_ij[i,j]/t*s_ij[i,j]**3
             m2e2s3 = m2e2s3 + x[i]*x[j]*m[i]*m[j]*(e_ij[i,j]/t)**2*s_ij[i,j]**3
-        ghs[i] = 1/(1-zeta[3]) + (d[i]*d[i]/(d[i]+d[i]))*3*zeta[2]/(1-zeta[3])**2 + \
-            (d[i]*d[i]/(d[i]+d[i]))**2*2*zeta[2]**2/(1-zeta[3])**3
-        denghs[i] = zeta[3]/(1-zeta[3])**2 + (d[i]*d[i]/(d[i]+d[i]))*(3*zeta[2]/(1-zeta[3])**2 + \
-            6*zeta[2]*zeta[3]/(1-zeta[3])**3) + (d[i]*d[i]/(d[i]+d[i]))**2*(4*zeta[2]**2/(1-zeta[3])**3 + \
-            6*zeta[2]**2*zeta[3]/(1-zeta[3])**4)
+            ghs[i,j] = 1/(1-zeta[3]) + (d[i]*d[j]/(d[i]+d[j]))*3*zeta[2]/(1-zeta[3])**2 + \
+                    (d[i]*d[j]/(d[i]+d[j]))**2*2*zeta[2]**2/(1-zeta[3])**3
+            denghs[i,j] = zeta[3]/(1-zeta[3])**2 + (d[i]*d[j]/(d[i]+d[j]))*(3*zeta[2]/(1-zeta[3])**2 + \
+                6*zeta[2]*zeta[3]/(1-zeta[3])**3) + (d[i]*d[j]/(d[i]+d[j]))**2*(4*zeta[2]**2/(1-zeta[3])**3 + \
+                6*zeta[2]**2*zeta[3]/(1-zeta[3])**4)
 
     ares_hs = 1/zeta[0]*(3*zeta[1]*zeta[2]/(1-zeta[3]) + zeta[2]**3/(zeta[3]*(1-zeta[3])**2) \
             + (zeta[2]**3/zeta[3]**2 - zeta[0])*np.log(1-zeta[3]))
@@ -1269,7 +1269,7 @@ def pcsaft_fugcoef(x, m, s, e, t, rho, k_ij=None, e_assoc=None, vol_a=None, dipm
 
     summ = 0.    
     for i in range(ncomp):
-        summ += x[i]*(m[i]-1)*np.log(ghs[i])
+        summ += x[i]*(m[i]-1)*np.log(ghs[i,i])
 
     ares_hc = m_avg*ares_hs - summ
     ares_disp = -2*np.pi*den*I1*m2es3 - np.pi*den*m_avg*C1*I2*m2e2s3
@@ -1279,7 +1279,7 @@ def pcsaft_fugcoef(x, m, s, e, t, rho, k_ij=None, e_assoc=None, vol_a=None, dipm
     
     summ = 0.    
     for i in range(ncomp):
-        summ += x[i]*(m[i]-1)/ghs[i]*denghs[i]
+        summ += x[i]*(m[i]-1)/ghs[i,i]*denghs[i,i]
 
     Zhc = m_avg*Zhs - summ
     Zdisp = -2*np.pi*den*detI1_det*m2es3 - np.pi*den*m_avg*(C1*detI2_det + C2*eta*I2)*m2e2s3
@@ -1310,14 +1310,13 @@ def pcsaft_fugcoef(x, m, s, e, t, rho, k_ij=None, e_assoc=None, vol_a=None, dipm
         dm2e2s3_dx = 2*m[i]*np.sum(x*m*(e_ij[i,:]/t)**2*s_ij[i,:]**3)
         dC1_dx = C2*dzeta3_dx - C1**2*(m[i]*(8*eta-2*eta**2)/(1-eta)**4 - \
             m[i]*(20*eta-27*eta**2+12*eta**3-2*eta**4)/((1-eta)*(2-eta))**2)
-        
-        dahc_dx[i] = m[i]*ares_hs + m_avg*dahs_dx[i] - np.sum(x*(m-1)/ghs*dghs_dx[:,i]) \
-            - (m[i]-1)*np.log(ghs[i])
+        dahc_dx[i] = m[i]*ares_hs + m_avg*dahs_dx[i] - np.sum(x*(m-1)/ghs.diagonal()*dghs_dx[:,i]) \
+            - (m[i]-1)*np.log(ghs[i,i])
         dadisp_dx[i] = -2*np.pi*den*(dI1_dx*m2es3 + I1*dm2es3_dx) - np.pi*den \
             *((m[i]*C1*I2 + m_avg*dC1_dx*I2 + m_avg*C1*dI2_dx)*m2e2s3 \
             + m_avg*C1*I2*dm2e2s3_dx)
-   
-    for i in range(ncomp):            
+
+    for i in range(ncomp):
         mu_hc[i] = ares_hc + Zhc + dahc_dx[i] - np.sum(x*dahc_dx)
         mu_disp[i] = ares_disp + Zdisp + dadisp_dx[i] - np.sum(x*dadisp_dx)
 
@@ -1443,7 +1442,7 @@ def pcsaft_fugcoef(x, m, s, e, t, rho, k_ij=None, e_assoc=None, vol_a=None, dipm
                 eABij[i,j] = (e_assoc[iA[i]]+e_assoc[iA[j]])/2.
                 volABij[i,j] = np.sqrt(vol_a[iA[i]]*vol_a[iA[j]])*(np.sqrt(s_ij[iA[i],iA[i]] \
                     *s_ij[iA[j],iA[j]])/(0.5*(s_ij[iA[i],iA[i]]+s_ij[iA[j],iA[j]])))**3
-                delta_ij[i,j] = ghs[iA[j]]*(np.exp(eABij[i,j]/t)-1)*s_ij[iA[i],iA[j]]**3*volABij[i,j]
+                delta_ij[i,j] = ghs[iA[i],iA[j]]*(np.exp(eABij[i,j]/t)-1)*s_ij[iA[i],iA[j]]**3*volABij[i,j]
                 for k in range(ncomp):
                     dghsd_dd = np.pi/6.*m[k]*(d[k]**3/(1-zeta[3])**2 + 3*d[iA[i]]*d[iA[j]] \
                         /(d[iA[i]]+d[iA[j]])*(d[k]**2/(1-zeta[3])**2+2*d[k]**3* \
@@ -1461,18 +1460,18 @@ def pcsaft_fugcoef(x, m, s, e, t, rho, k_ij=None, e_assoc=None, vol_a=None, dipm
             XA = XA_find(XA, ncA, delta_ij, den, x[iA])
             dif = np.sum(abs(XA - XA_old))
             XA_old[:] = XA
-        XA = XA.flatten('F')
+        XA = XA.flatten()
       
         dXA_dd = dXA_find(ncA, ncomp, iA, delta_ij, den, XA, ddelta_dd, x[iA], a_sites)
 
         for i in range(ncomp):
             for j in range(ncA):
                 for k in range(a_sites):
-                    mu_assoc[i] += x[iA[j]]*den*dXA_dd[(j+1)*k,i]*(1/XA[(j+1)*k]-0.5)
+                    mu_assoc[i] += x[iA[j]]*den*dXA_dd[j*a_sites+k,i]*(1/XA[j*a_sites+k]-0.5)
 
         for i in range(ncA):
             for l in range(a_sites):
-                mu_assoc[iA[i]] += np.log(XA[(i+1)*l])-0.5*XA[(i+1)*l]
+                mu_assoc[iA[i]] += np.log(XA[i*a_sites+l])-0.5*XA[i*a_sites+l]
             mu_assoc[iA[i]] += 0.5*a_sites
 
     # Ion term ---------------------------------------------------------------
@@ -1569,10 +1568,10 @@ def pcsaft_Z(x, m, s, e, t, rho, k_ij=None, e_assoc=None, vol_a=None, dipm=None,
         k_ij = np.zeros((ncomp,ncomp), dtype='float_')
 
     zeta = np.zeros((4,), dtype='float_')
-    ghs = np.zeros((ncomp), dtype='float_')
+    ghs = np.zeros((ncomp,ncomp), dtype='float_')
+    e_ij = np.zeros_like(ghs)
+    s_ij = np.zeros_like(ghs)
     denghs = np.zeros_like(ghs)
-    e_ij = np.zeros((ncomp,ncomp), dtype='float_')
-    s_ij = np.zeros_like(e_ij)
     m2es3 = 0.
     m2e2s3 = 0.
     a0 = np.asarray([0.910563145, 0.636128145, 2.686134789, -26.54736249, 97.75920878, -159.5915409, 91.29777408])
@@ -1598,11 +1597,11 @@ def pcsaft_Z(x, m, s, e, t, rho, k_ij=None, e_assoc=None, vol_a=None, dipm=None,
                 e_ij[i,j] = np.sqrt(e[i]*e[j])*(1-k_ij[i,j])
             m2es3 = m2es3 + x[i]*x[j]*m[i]*m[j]*e_ij[i,j]/t*s_ij[i,j]**3
             m2e2s3 = m2e2s3 + x[i]*x[j]*m[i]*m[j]*(e_ij[i,j]/t)**2*s_ij[i,j]**3      
-        ghs[i] = 1/(1-zeta[3]) + (d[i]*d[i]/(d[i]+d[i]))*3*zeta[2]/(1-zeta[3])**2 + \
-            (d[i]*d[i]/(d[i]+d[i]))**2*2*zeta[2]**2/(1-zeta[3])**3
-        denghs[i] = zeta[3]/(1-zeta[3])**2 + (d[i]*d[i]/(d[i]+d[i]))*(3*zeta[2]/(1-zeta[3])**2 + \
-            6*zeta[2]*zeta[3]/(1-zeta[3])**3) + (d[i]*d[i]/(d[i]+d[i]))**2*(4*zeta[2]**2/(1-zeta[3])**3 + \
-            6*zeta[2]**2*zeta[3]/(1-zeta[3])**4)
+            ghs[i,j] = 1/(1-zeta[3]) + (d[i]*d[j]/(d[i]+d[j]))*3*zeta[2]/(1-zeta[3])**2 + \
+                    (d[i]*d[j]/(d[i]+d[j]))**2*2*zeta[2]**2/(1-zeta[3])**3
+            denghs[i,j] = zeta[3]/(1-zeta[3])**2 + (d[i]*d[j]/(d[i]+d[j]))*(3*zeta[2]/(1-zeta[3])**2 + \
+                6*zeta[2]*zeta[3]/(1-zeta[3])**3) + (d[i]*d[j]/(d[i]+d[j]))**2*(4*zeta[2]**2/(1-zeta[3])**3 + \
+                6*zeta[2]**2*zeta[3]/(1-zeta[3])**4)
 
     Zhs = zeta[3]/(1-zeta[3]) + 3*zeta[1]*zeta[2]/zeta[0]/(1-zeta[3])**2 + \
         (3*zeta[2]**3 - zeta[3]*zeta[2]**3)/zeta[0]/(1-zeta[3])**3
@@ -1617,10 +1616,9 @@ def pcsaft_Z(x, m, s, e, t, rho, k_ij=None, e_assoc=None, vol_a=None, dipm=None,
     C1 = 1/(1 + m_avg*(8*eta-2*eta**2)/(1-eta)**4 + (1-m_avg)*(20*eta-27*eta**2+12*eta**3-2*eta**4)/((1-eta)*(2-eta))**2)
     C2 = -1*C1**2*(m_avg*(-4*eta**2+20*eta+8)/(1-eta)**5 + (1-m_avg)*(2*eta**3+12*eta**2-48*eta+40)/((1-eta)*(2-eta))**3)
     
-    summ = 0.    
-    
+    summ = 0.
     for i in range(ncomp):
-        summ += x[i]*(m[i]-1)/ghs[i]*denghs[i]
+        summ += x[i]*(m[i]-1)/ghs[i,i]*denghs[i,i]
     
     Zid = 1
     Zhc = m_avg*Zhs - summ
@@ -1709,7 +1707,7 @@ def pcsaft_Z(x, m, s, e, t, rho, k_ij=None, e_assoc=None, vol_a=None, dipm=None,
                 eABij[i,j] = (e_assoc[iA[i]]+e_assoc[iA[j]])/2.
                 volABij[i,j] = np.sqrt(vol_a[iA[i]]*vol_a[iA[j]])*(np.sqrt(s_ij[iA[i],iA[i]] \
                     *s_ij[iA[j],iA[j]])/(0.5*(s_ij[iA[i],iA[i]]+s_ij[iA[j],iA[j]])))**3
-                delta_ij[i,j] = ghs[iA[j]]*(np.exp(eABij[i,j]/t)-1)*s_ij[iA[i],iA[j]]**3*volABij[i,j]              
+                delta_ij[i,j] = ghs[iA[i],iA[j]]*(np.exp(eABij[i,j]/t)-1)*s_ij[iA[i],iA[j]]**3*volABij[i,j]              
                 for k in range(ncomp):
                     dghsd_dd = np.pi/6.*m[k]*(d[k]**3/(1-zeta[3])**2 + 3*d[iA[i]]*d[iA[j]] \
                         /(d[iA[i]]+d[iA[j]])*(d[k]**2/(1-zeta[3])**2+2*d[k]**3* \
@@ -1727,7 +1725,7 @@ def pcsaft_Z(x, m, s, e, t, rho, k_ij=None, e_assoc=None, vol_a=None, dipm=None,
             XA = XA_find(XA, ncA, delta_ij, den, x[iA])
             dif = np.sum(abs(XA - XA_old))
             XA_old[:] = XA
-        XA = XA.flatten('F')
+        XA = XA.flatten()
         
         dXA_dd = dXA_find(ncA, ncomp, iA, delta_ij, den, XA, ddelta_dd, x[iA], a_sites)
 
@@ -1735,7 +1733,7 @@ def pcsaft_Z(x, m, s, e, t, rho, k_ij=None, e_assoc=None, vol_a=None, dipm=None,
         for i in range(ncomp):
             for j in range(ncA):
                 for k in range(a_sites):
-                    summ += x[i]*den*x[iA[j]]*(1/XA[(j+1)*k]-0.5)*dXA_dd[(j+1)*k,i]
+                    summ += x[i]*den*x[iA[j]]*(1/XA[j*a_sites+k]-0.5)*dXA_dd[j*a_sites+k,i]
 
         Zassoc = summ
 
@@ -1828,9 +1826,9 @@ def pcsaft_ares(x, m, s, e, t, rho, k_ij=None, e_assoc=None, vol_a=None, dipm=No
         k_ij = np.zeros((ncomp,ncomp), dtype='float_')
 
     zeta = np.zeros((4,), dtype='float_')
-    ghs = np.zeros((ncomp), dtype='float_')
-    e_ij = np.zeros((ncomp,ncomp), dtype='float_')
-    s_ij = np.zeros_like(e_ij)
+    ghs = np.zeros((ncomp,ncomp), dtype='float_')
+    e_ij = np.zeros_like(ghs)
+    s_ij = np.zeros_like(ghs)
     m2es3 = 0.
     m2e2s3 = 0.
     a0 = np.asarray([0.910563145, 0.636128145, 2.686134789, -26.54736249, 97.75920878, -159.5915409, 91.29777408])
@@ -1856,8 +1854,8 @@ def pcsaft_ares(x, m, s, e, t, rho, k_ij=None, e_assoc=None, vol_a=None, dipm=No
                 e_ij[i,j] = np.sqrt(e[i]*e[j])*(1-k_ij[i,j])
             m2es3 = m2es3 + x[i]*x[j]*m[i]*m[j]*e_ij[i,j]/t*s_ij[i,j]**3
             m2e2s3 = m2e2s3 + x[i]*x[j]*m[i]*m[j]*(e_ij[i,j]/t)**2*s_ij[i,j]**3    
-        ghs[i] = 1/(1-zeta[3]) + (d[i]*d[i]/(d[i]+d[i]))*3*zeta[2]/(1-zeta[3])**2 + \
-            (d[i]*d[i]/(d[i]+d[i]))**2*2*zeta[2]**2/(1-zeta[3])**3
+            ghs[i,j] = 1/(1-zeta[3]) + (d[i]*d[j]/(d[i]+d[j]))*3*zeta[2]/(1-zeta[3])**2 + \
+                    (d[i]*d[j]/(d[i]+d[j]))**2*2*zeta[2]**2/(1-zeta[3])**3
 
     ares_hs = 1/zeta[0]*(3*zeta[1]*zeta[2]/(1-zeta[3]) + zeta[2]**3/(zeta[3]*(1-zeta[3])**2) \
             + (zeta[2]**3/zeta[3]**2 - zeta[0])*np.log(1-zeta[3]))
@@ -1872,7 +1870,7 @@ def pcsaft_ares(x, m, s, e, t, rho, k_ij=None, e_assoc=None, vol_a=None, dipm=No
     
     summ = 0.    
     for i in range(ncomp):
-        summ += x[i]*(m[i]-1)*np.log(ghs[i])
+        summ += x[i]*(m[i]-1)*np.log(ghs[i,i])
 
     ares_hc = m_avg*ares_hs - summ
     ares_disp = -2*np.pi*den*I1*m2es3 - np.pi*den*m_avg*C1*I2*m2e2s3
@@ -1949,7 +1947,7 @@ def pcsaft_ares(x, m, s, e, t, rho, k_ij=None, e_assoc=None, vol_a=None, dipm=No
                 eABij[i,j] = (e_assoc[iA[i]]+e_assoc[iA[j]])/2.
                 volABij[i,j] = np.sqrt(vol_a[iA[i]]*vol_a[iA[j]])*(np.sqrt(s_ij[iA[i],iA[i]] \
                     *s_ij[iA[j],iA[j]])/(0.5*(s_ij[iA[i],iA[i]]+s_ij[iA[j],iA[j]])))**3
-                delta_ij[i,j] = ghs[iA[j]]*(np.exp(eABij[i,j]/t)-1)*s_ij[iA[i],iA[j]]**3*volABij[i,j]
+                delta_ij[i,j] = ghs[iA[i],iA[j]]*(np.exp(eABij[i,j]/t)-1)*s_ij[iA[i],iA[j]]**3*volABij[i,j]
                 XA[i,:] = (-1 + np.sqrt(1+8*den*delta_ij[i,i]))/(4*den*delta_ij[i,i])
 
         ctr = 0
@@ -1960,13 +1958,12 @@ def pcsaft_ares(x, m, s, e, t, rho, k_ij=None, e_assoc=None, vol_a=None, dipm=No
             XA = XA_find(XA, ncA, delta_ij, den, x[iA])
             dif = np.sum(abs(XA - XA_old))
             XA_old[:] = XA
-        XA = XA.flatten('F')
+        XA = XA.flatten()
         
         summ = 0.
         for i in range(ncA):
-            for j in range(ncA):
-                for k in range(a_sites):
-                    summ += x[iA[i]]*(np.log(XA[(j+1)*k]) - 0.5*XA[(j+1)*k] + 0.5)
+            for k in range(a_sites):
+                summ += x[iA[i]]*(np.log(XA[i*a_sites+k]) - 0.5*XA[i*a_sites+k] + 0.5)
         
         ares_assoc = summ
 
