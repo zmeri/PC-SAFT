@@ -1471,13 +1471,13 @@ def create_struct(pyargs):
 
     if 'k_ij' in pyargs:
         cppargs.k_ij = np_to_vector(pyargs['k_ij'])
-    if 'e_assoc' in pyargs:
+    if ('e_assoc' in pyargs) and np.any(pyargs['e_assoc']):
         cppargs.e_assoc = np_to_vector(pyargs['e_assoc'])
-    if 'vol_a' in pyargs:
+    if ('vol_a' in pyargs) and np.any(pyargs['vol_a']):
         cppargs.vol_a = np_to_vector(pyargs['vol_a'])
-    if 'dipm' in pyargs:
+    if ('dipm' in pyargs) and np.any(pyargs['dip_num']) and np.any(pyargs['dipm']):
         cppargs.dipm = np_to_vector(pyargs['dipm'])
-    if 'dip_num' in pyargs:
+    if ('dip_num' in pyargs) and np.any(pyargs['dip_num']):
         cppargs.dip_num = np_to_vector(pyargs['dip_num'])
     if 'z' in pyargs:
         cppargs.z = np_to_vector(pyargs['z'])
