@@ -2404,7 +2404,7 @@ double PTzfit_cpp(double p_guess, vector<double> x_guess, double beta_guess, dou
         }
         while ((dif>1e-9) && (itr<100)) {
             if (itr < 3) {
-                xl = chem_equil_cpp(xl, m, s, e, t, p_guess, cppargs);
+//                xl = chem_equil_cpp(xl, m, s, e, t, p_guess, cppargs); // chemical equilibrium can be included if reactions occur
                 for (int i = 0; i < ncomp; i++) {
                     x_total[i] = xl[i] + xv[i];
                 }
