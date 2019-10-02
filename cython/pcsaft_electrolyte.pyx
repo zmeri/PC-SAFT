@@ -894,7 +894,7 @@ def pcsaft_PTz(p_guess, x_guess, beta_guess, mol, vol, x_total, m, s, e, t, pyar
         xv[np.where(z != 0)[0]] = 0.
         xv = xv/np.sum(xv)
         while (dif>1e-9) and (itr<100):
-            xl = chem_equil(xl, m, s, e, t, p, pyargs)
+ #           xl = chem_equil(xl, m, s, e, t, p, pyargs)
             x_total = xl + xv
             beta_old = beta
             rhol = pcsaft_den_cpp(xl, m, s, e, t, p, 0, cppargs)        
