@@ -962,3 +962,131 @@ def test_cp():
     print('    Relative deviation:', (calc-ref)/ref*100, '%')     
     
     return None
+
+
+def test_pressure():
+    """Test the pressure function to see if it is working correctly."""
+#     Toluene
+    print('##########  Test with toluene  ##########')
+    x = np.asarray([1.])
+    m = np.asarray([2.8149])
+    s = np.asarray([3.7169])
+    e = np.asarray([285.69])
+    pyargs = {}
+
+    ref = 101325 # Pa
+    t = 320 # K
+    rho = 9033.11420899 # mol m^-3 From density calculation with working PC-SAFT density function
+    calc = pcsaft_p(x, m, s, e, t, rho, pyargs)
+    print('----- Pressure at {} K -----'.format(t))
+    print('    Reference:', ref, 'Pa')
+    print('    PC-SAFT:', calc, 'Pa')
+    print('    Relative deviation:', (calc-ref)/ref*100, '%')
+
+    # Water
+    print('\n##########  Test with water  ##########')
+    m = np.asarray([1.2047])
+    e = np.asarray([353.95])
+    volAB = np.asarray([0.0451])
+    eAB = np.asarray([2425.67])
+    pyargs = {'e_assoc':eAB, 'vol_a':volAB}
+
+    ref = 101325 # Pa
+    t = 274 # K
+    s = np.asarray([2.7927 + 10.11*np.exp(-0.01775*t) - 1.417*np.exp(-0.01146*t)])
+    rho = 55476.44200944 # mol m^-3 From density calculation with working PC-SAFT density function
+    calc = pcsaft_p(x, m, s, e, t, rho, pyargs)
+    print('----- Pressure at {} K -----'.format(t))
+    print('    Reference:', ref, 'Pa')
+    print('    PC-SAFT:', calc, 'Pa')
+    print('    Relative deviation:', (calc-ref)/ref*100, '%')
+
+    # Acetic acid
+    print('\n##########  Test with acetic acid  ##########')
+    m = np.asarray([1.3403])
+    s = np.asarray([3.8582])
+    e = np.asarray([211.59])
+    volAB = np.asarray([0.075550])
+    eAB = np.asarray([3044.4])
+    pyargs = {'e_assoc':eAB, 'vol_a':volAB}
+
+    ref = 101325 # Pa
+    t = 305 # K
+    rho = 16965.43663595 # mol m^-3 From density calculation with working PC-SAFT density function
+    calc = pcsaft_p(x, m, s, e, t, rho, pyargs)
+    print('----- Pressure at {} K -----'.format(t))
+    print('    Reference:', ref, 'Pa')
+    print('    PC-SAFT:', calc, 'Pa')
+    print('    Relative deviation:', (calc-ref)/ref*100, '%')
+
+    # dimethyl ether
+    print('\n##########  Test with dimethyl ether  ##########')
+    m = np.asarray([2.2634])
+    s = np.asarray([3.2723])
+    e = np.asarray([210.29])
+    dpm = np.asarray([1.3])
+    dip_num = np.asarray([1.0])
+    pyargs = {'dipm':dpm, 'dip_num':dip_num}
+
+    ref = 101325 # Pa
+    t = 240 # K
+    rho = 15865.69021378 # mol m^-3 From density calculation with working PC-SAFT density function
+    calc = pcsaft_p(x, m, s, e, t, rho, pyargs)
+    print('----- Pressure at {} K -----'.format(t))
+    print('    Reference:', ref, 'Pa')
+    print('    PC-SAFT:', calc, 'Pa')
+    print('    Relative deviation:', (calc-ref)/ref*100, '%')
+
+    # Binary mixture: methanol-cyclohexane
+    print('\n##########  Test with methanol-cyclohexane mixture  ##########')
+    #0 = methanol, 1 = cyclohexane
+    x = np.asarray([0.0550, 0.945])
+    m = np.asarray([1.5255, 2.5303])
+    s = np.asarray([3.2300, 3.8499])
+    e = np.asarray([188.90, 278.11])
+    volAB = np.asarray([0.035176, 0.])
+    eAB = np.asarray([2899.5, 0.])
+    k_ij = np.asarray([[0, 0.051],
+                       [0.051, 0]])
+    pyargs = {'e_assoc':eAB, 'vol_a':volAB, 'k_ij':k_ij}
+
+    ref = 101325 # Pa
+    t = 298.15 # K
+    rho = 9368.9036823 # mol m^-3 From density calculation with working PC-SAFT density function
+    calc = pcsaft_p(x, m, s, e, t, rho, pyargs)
+    print('----- Pressure at {} K -----'.format(t))
+    print('    Reference:', ref, 'Pa')
+    print('    PC-SAFT:', calc, 'Pa')
+    print('    Relative deviation:', (calc-ref)/ref*100, '%')
+
+    # NaCl in water
+    print('\n##########  Test with aqueous NaCl  ##########')
+    # 0 = Na+, 1 = Cl-, 2 = H2O
+    x = np.asarray([0.010579869455908, 0.010579869455908, 0.978840261088184])
+    m = np.asarray([1, 1, 1.2047])
+    s = np.asarray([2.8232, 2.7599589, 0.])
+    e = np.asarray([230.00, 170.00, 353.9449])
+    volAB = np.asarray([0, 0, 0.0451])
+    eAB = np.asarray([0, 0, 2425.67])
+    k_ij = np.asarray([[0, 0.317, 0],
+                       [0.317, 0, -0.25],
+                        [0, -0.25, 0]])
+    z = np.asarray([1., -1., 0.])
+
+    ref = 101325 # Pa
+    t = 298.15 # K
+    s[2] = 2.7927 + 10.11*np.exp(-0.01775*t) - 1.417*np.exp(-0.01146*t) # temperature dependent segment diameter for water
+    k_ij[0,2] = -0.007981*t + 2.37999
+    k_ij[2,0] = -0.007981*t + 2.37999
+    dielc = dielc_water(t)
+    rho = 55756.67269771 # mol m^-3 From density calculation with working PC-SAFT density function
+
+    pyargs = {'e_assoc':eAB, 'vol_a':volAB, 'k_ij':k_ij, 'z':z, 'dielc':dielc}
+
+    calc = pcsaft_p(x, m, s, e, t, rho, pyargs)
+    print('----- Pressure at {} K -----'.format(t))
+    print('    Reference:', ref, 'Pa')
+    print('    PC-SAFT:', calc, 'Pa')
+    print('    Relative deviation:', (calc-ref)/ref*100, '%')
+
+    return None
