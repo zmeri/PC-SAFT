@@ -8,7 +8,7 @@ import numpy as np
 import timeit
 from pcsaft_electrolyte import pcsaft_den, pcsaft_hres, pcsaft_gres, pcsaft_sres, pcsaft_Hvap
 from pcsaft_electrolyte import pcsaft_vaporP, pcsaft_bubbleP, dielc_water, pcsaft_PTz, pcsaft_osmoticC
-from pcsaft_electrolyte import pcsaft_dadt, pcsaft_d2adt, pcsaft_cp, pcsaft_ares, pcsaft_p, pcsaft_fugcoef
+from pcsaft_electrolyte import pcsaft_dadt, pcsaft_cp, pcsaft_ares, pcsaft_p, pcsaft_fugcoef
 import pylab as pl
 
 def test_hres():
