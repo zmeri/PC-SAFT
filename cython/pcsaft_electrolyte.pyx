@@ -3,8 +3,8 @@
 """
 PC-SAFT with electrolyte term
 
-These functions implement the PC-SAFT equation of state. In addition to the 
-hard chain and dispersion terms, these functions also include dipole, 
+These functions implement the PC-SAFT equation of state. In addition to the
+hard chain and dispersion terms, these functions also include dipole,
 association and ion terms for use with these types of compounds.
 
 @author: Zach Baird
@@ -40,45 +40,45 @@ Functions
 - dielc_water : returns the dielectric constant of water
 - np_to_vector : converts a numpy array to a C++ vector
 - create_struct : converts additional arguments to a C++ struct
-    
+
 References
 ----------
-* J. Gross and G. Sadowski, “Perturbed-Chain SAFT:  An Equation of State 
-Based on a Perturbation Theory for Chain Molecules,” Ind. Eng. Chem. 
+* J. Gross and G. Sadowski, “Perturbed-Chain SAFT:  An Equation of State
+Based on a Perturbation Theory for Chain Molecules,” Ind. Eng. Chem.
 Res., vol. 40, no. 4, pp. 1244–1260, Feb. 2001.
 * M. Kleiner and G. Sadowski, “Modeling of Polar Systems Using PCP-SAFT: 
-An Approach to Account for Induced-Association Interactions,” J. Phys. 
+An Approach to Account for Induced-Association Interactions,” J. Phys.
 Chem. C, vol. 111, no. 43, pp. 15544–15553, Nov. 2007.
-* Gross Joachim and Vrabec Jadran, “An equation‐of‐state contribution 
-for polar components: Dipolar molecules,” AIChE J., vol. 52, no. 3, 
+* Gross Joachim and Vrabec Jadran, “An equation‐of‐state contribution
+for polar components: Dipolar molecules,” AIChE J., vol. 52, no. 3,
 pp. 1194–1204, Feb. 2006.
-* A. J. de Villiers, C. E. Schwarz, and A. J. Burger, “Improving 
-vapour–liquid-equilibria predictions for mixtures with non-associating polar 
-components using sPC-SAFT extended with two dipolar terms,” Fluid Phase 
+* A. J. de Villiers, C. E. Schwarz, and A. J. Burger, “Improving
+vapour–liquid-equilibria predictions for mixtures with non-associating polar
+components using sPC-SAFT extended with two dipolar terms,” Fluid Phase
 Equilibria, vol. 305, no. 2, pp. 174–184, Jun. 2011.
-* S. H. Huang and M. Radosz, “Equation of state for small, large, 
+* S. H. Huang and M. Radosz, “Equation of state for small, large,
 polydisperse, and associating molecules,” Ind. Eng. Chem. Res., vol. 29,
 no. 11, pp. 2284–2294, Nov. 1990.
-* S. H. Huang and M. Radosz, “Equation of state for small, large, 
-polydisperse, and associating molecules: extension to fluid mixtures,” 
+* S. H. Huang and M. Radosz, “Equation of state for small, large,
+polydisperse, and associating molecules: extension to fluid mixtures,”
 Ind. Eng. Chem. Res., vol. 30, no. 8, pp. 1994–2005, Aug. 1991.
-* S. H. Huang and M. Radosz, “Equation of state for small, large, 
-polydisperse, and associating molecules: extension to fluid mixtures. 
-[Erratum to document cited in CA115(8):79950j],” Ind. Eng. Chem. Res., 
+* S. H. Huang and M. Radosz, “Equation of state for small, large,
+polydisperse, and associating molecules: extension to fluid mixtures.
+[Erratum to document cited in CA115(8):79950j],” Ind. Eng. Chem. Res.,
 vol. 32, no. 4, pp. 762–762, Apr. 1993.
-* J. Gross and G. Sadowski, “Application of the Perturbed-Chain SAFT 
-Equation of State to Associating Systems,” Ind. Eng. Chem. Res., vol. 
+* J. Gross and G. Sadowski, “Application of the Perturbed-Chain SAFT
+Equation of State to Associating Systems,” Ind. Eng. Chem. Res., vol.
 41, no. 22, pp. 5510–5515, Oct. 2002.
-* L. F. Cameretti, G. Sadowski, and J. M. Mollerup, “Modeling of Aqueous 
-Electrolyte Solutions with Perturbed-Chain Statistical Associated Fluid 
+* L. F. Cameretti, G. Sadowski, and J. M. Mollerup, “Modeling of Aqueous
+Electrolyte Solutions with Perturbed-Chain Statistical Associated Fluid
 Theory,” Ind. Eng. Chem. Res., vol. 44, no. 9, pp. 3355–3362, Apr. 2005.
-* L. F. Cameretti, G. Sadowski, and J. M. Mollerup, “Modeling of Aqueous 
-Electrolyte Solutions with Perturbed-Chain Statistical Association Fluid 
+* L. F. Cameretti, G. Sadowski, and J. M. Mollerup, “Modeling of Aqueous
+Electrolyte Solutions with Perturbed-Chain Statistical Association Fluid
 Theory,” Ind. Eng. Chem. Res., vol. 44, no. 23, pp. 8944–8944, Nov. 2005.
-* C. Held, L. F. Cameretti, and G. Sadowski, “Modeling aqueous 
-electrolyte solutions: Part 1. Fully dissociated electrolytes,” Fluid 
+* C. Held, L. F. Cameretti, and G. Sadowski, “Modeling aqueous
+electrolyte solutions: Part 1. Fully dissociated electrolytes,” Fluid
 Phase Equilibria, vol. 270, no. 1, pp. 87–96, Aug. 2008.
-* C. Held, T. Reschke, S. Mohammad, A. Luza, and G. Sadowski, “ePC-SAFT 
+* C. Held, T. Reschke, S. Mohammad, A. Luza, and G. Sadowski, “ePC-SAFT
 revised,” Chem. Eng. Res. Des., vol. 92, no. 12, pp. 2884–2897, Dec. 2014.
 """
 
@@ -87,13 +87,29 @@ from scipy.optimize import fsolve
 from scipy.optimize import minimize
 from libcpp.vector cimport vector
 cimport pcsaft_electrolyte
-import pylab as pl
+
+import matplotlib.pyplot as plt
+
+class InputError(Exception):
+    """Exception raised for errors in the input.
+    """
+    def __init__(self, message):
+        self.message = message
+
+def check_input(x, name1, var1, name2, var2):
+    ''' Perform a few basic checks to make sure the input is reasonable. '''
+    if np.sum(x) != 1:
+        raise InputError('The mole fractions do not sum to 1. x = {}'.format(x))
+    if var1 <= 0:
+        raise InputError('The {} must be a positive number. {} = {}'.format(name1, name1, var1))
+    if var2 <= 0:
+        raise InputError('The {} must be a positive number. {} = {}'.format(name2, name2, var2))
 
 
 def pcsaft_p(x, m, s, e, t, rho, pyargs):
     """
     Calculate pressure.
-    
+
     Parameters
     ----------
     x : ndarray, shape (n,)
@@ -112,37 +128,37 @@ def pcsaft_p(x, m, s, e, t, rho, pyargs):
     rho : float
         Molar density (mol m^{-3})
     pyargs : dict
-        A dictionary containing additional arguments that can be passed for 
+        A dictionary containing additional arguments that can be passed for
         use in PC-SAFT:
-        
+
         k_ij : ndarray, shape (n,n)
-            Binary interaction parameters between components in the mixture. 
+            Binary interaction parameters between components in the mixture.
             (dimensions: ncomp x ncomp)
         e_assoc : ndarray, shape (n,)
             Association energy of the associating components. For non associating
             compounds this is set to 0. Units of K.
         vol_a : ndarray, shape (n,)
-            Effective association volume of the associating components. For non 
+            Effective association volume of the associating components. For non
             associating compounds this is set to 0.
         dipm : ndarray, shape (n,)
-            Dipole moment of the polar components. For components where the dipole 
+            Dipole moment of the polar components. For components where the dipole
             term is not used this is set to 0. Units of Debye.
         dip_num : ndarray, shape (n,)
-            The effective number of dipole functional groups on each component 
-            molecule. Some implementations use this as an adjustable parameter 
+            The effective number of dipole functional groups on each component
+            molecule. Some implementations use this as an adjustable parameter
             that is fit to data.
         z : ndarray, shape (n,)
-            Charge number of the ions          
+            Charge number of the ions
         dielc : float
             Dielectric constant of the medium to be used for electrolyte
             calculations.
-        
+
     Returns
     -------
     P : float
         Pressure (Pa)
-    """ 
-    
+    """
+    check_input(x, 'density', rho, 'temperature', t)
     cppargs = create_struct(pyargs)
     if type(m) == np.float_:
         m = np.asarray([m])
@@ -151,12 +167,12 @@ def pcsaft_p(x, m, s, e, t, rho, pyargs):
     if type(e) == np.float_:
         e = np.asarray([e])
     return pcsaft_p_cpp(x, m, s, e, t, rho, cppargs)
-    
-    
+
+
 def pcsaft_fugcoef(x, m, s, e, t, rho, pyargs):
     """
     Calculate the fugacity coefficients for one phase of the system.
-    
+
     Parameters
     ----------
     x : ndarray, shape (n,)
@@ -175,36 +191,37 @@ def pcsaft_fugcoef(x, m, s, e, t, rho, pyargs):
     rho : float
         Molar density (mol m^{-3})
     pyargs : dict
-        A dictionary containing additional arguments that can be passed for 
+        A dictionary containing additional arguments that can be passed for
         use in PC-SAFT:
-        
+
         k_ij : ndarray, shape (n,n)
-            Binary interaction parameters between components in the mixture. 
+            Binary interaction parameters between components in the mixture.
             (dimensions: ncomp x ncomp)
         e_assoc : ndarray, shape (n,)
             Association energy of the associating components. For non associating
             compounds this is set to 0. Units of K.
         vol_a : ndarray, shape (n,)
-            Effective association volume of the associating components. For non 
+            Effective association volume of the associating components. For non
             associating compounds this is set to 0.
         dipm : ndarray, shape (n,)
-            Dipole moment of the polar components. For components where the dipole 
+            Dipole moment of the polar components. For components where the dipole
             term is not used this is set to 0. Units of Debye.
         dip_num : ndarray, shape (n,)
-            The effective number of dipole functional groups on each component 
-            molecule. Some implementations use this as an adjustable parameter 
+            The effective number of dipole functional groups on each component
+            molecule. Some implementations use this as an adjustable parameter
             that is fit to data.
         z : ndarray, shape (n,)
-            Charge number of the ions          
+            Charge number of the ions
         dielc : float
             Dielectric constant of the medium to be used for electrolyte
             calculations.
-        
+
     Returns
     -------
     fugcoef : ndarray, shape (n,)
         Fugacity coefficients of each component.
-    """    
+    """
+    check_input(x, 'density', rho, 'temperature', t)
     cppargs = create_struct(pyargs)
     if type(m) == np.float_:
         m = np.asarray([m])
@@ -213,7 +230,7 @@ def pcsaft_fugcoef(x, m, s, e, t, rho, pyargs):
     if type(e) == np.float_:
         e = np.asarray([e])
     return pcsaft_fugcoef_cpp(x, m, s, e, t, rho, cppargs)
-    
+
 
 def pcsaft_Z(x, m, s, e, t, rho, pyargs):
     """
@@ -237,36 +254,37 @@ def pcsaft_Z(x, m, s, e, t, rho, pyargs):
     rho : float
         Molar density (mol m^{-3})
     pyargs : dict
-        A dictionary containing additional arguments that can be passed for 
+        A dictionary containing additional arguments that can be passed for
         use in PC-SAFT:
-        
+
         k_ij : ndarray, shape (n,n)
-            Binary interaction parameters between components in the mixture. 
+            Binary interaction parameters between components in the mixture.
             (dimensions: ncomp x ncomp)
         e_assoc : ndarray, shape (n,)
             Association energy of the associating components. For non associating
             compounds this is set to 0. Units of K.
         vol_a : ndarray, shape (n,)
-            Effective association volume of the associating components. For non 
+            Effective association volume of the associating components. For non
             associating compounds this is set to 0.
         dipm : ndarray, shape (n,)
-            Dipole moment of the polar components. For components where the dipole 
+            Dipole moment of the polar components. For components where the dipole
             term is not used this is set to 0. Units of Debye.
         dip_num : ndarray, shape (n,)
-            The effective number of dipole functional groups on each component 
-            molecule. Some implementations use this as an adjustable parameter 
+            The effective number of dipole functional groups on each component
+            molecule. Some implementations use this as an adjustable parameter
             that is fit to data.
         z : ndarray, shape (n,)
-            Charge number of the ions          
+            Charge number of the ions
         dielc : float
             Dielectric constant of the medium to be used for electrolyte
             calculations.
-        
+
     Returns
     -------
     Z : float
         Compressibility factor
     """
+    check_input(x, 'density', rho, 'temperature', t)
     cppargs = create_struct(pyargs)
     if type(m) == np.float_:
         m = np.asarray([m])
@@ -276,15 +294,15 @@ def pcsaft_Z(x, m, s, e, t, rho, pyargs):
         e = np.asarray([e])
     return pcsaft_Z_cpp(x, m, s, e, t, rho, cppargs)
 
-   
+
 def pcsaft_vaporP(p_guess, x, m, s, e, t, pyargs):
     """
     Wrapper around solver that determines the vapor pressure.
-    
+
     Parameters
     ----------
     p_guess : float
-        Guess for the vapor pressure (Pa)    
+        Guess for the vapor pressure (Pa)
     x : ndarray, shape (n,)
         Mole fractions of each component. It has a length of n, where n is
         the number of components in the system.
@@ -299,37 +317,38 @@ def pcsaft_vaporP(p_guess, x, m, s, e, t, pyargs):
     t : float
         Temperature (K)
     pyargs : dict
-        A dictionary containing additional arguments that can be passed for 
+        A dictionary containing additional arguments that can be passed for
         use in PC-SAFT:
-        
+
         k_ij : ndarray, shape (n,n)
-            Binary interaction parameters between components in the mixture. 
+            Binary interaction parameters between components in the mixture.
             (dimensions: ncomp x ncomp)
         e_assoc : ndarray, shape (n,)
             Association energy of the associating components. For non associating
             compounds this is set to 0. Units of K.
         vol_a : ndarray, shape (n,)
-            Effective association volume of the associating components. For non 
+            Effective association volume of the associating components. For non
             associating compounds this is set to 0.
         dipm : ndarray, shape (n,)
-            Dipole moment of the polar components. For components where the dipole 
+            Dipole moment of the polar components. For components where the dipole
             term is not used this is set to 0. Units of Debye.
         dip_num : ndarray, shape (n,)
-            The effective number of dipole functional groups on each component 
-            molecule. Some implementations use this as an adjustable parameter 
+            The effective number of dipole functional groups on each component
+            molecule. Some implementations use this as an adjustable parameter
             that is fit to data.
         z : ndarray, shape (n,)
-            Charge number of the ions          
+            Charge number of the ions
         dielc : float
             Dielectric constant of the medium to be used for electrolyte
             calculations.
-        
+
     Returns
     -------
     Pvap : float
-        Vapor pressure (Pa)    
+        Vapor pressure (Pa)
     """
-    cppargs = create_struct(pyargs)  
+    check_input(x, 'guess pressure', p_guess, 'temperature', t)
+    cppargs = create_struct(pyargs)
     if type(m) == np.float_:
         m = np.asarray([m])
     if type(s) == np.float_:
@@ -344,11 +363,11 @@ def pcsaft_vaporP(p_guess, x, m, s, e, t, pyargs):
 def pcsaft_bubbleT(t_guess, xv_guess, x, m, s, e, p, pyargs):
     """
     Calculate the bubble point temperature of a mixture and the vapor composition.
-    
+
     Parameters
     ----------
     t_guess : float
-        Guess for the bubble point temperature (K)    
+        Guess for the bubble point temperature (K)
     x : ndarray, shape (n,)
         Mole fractions of each component. It has a length of n, where n is
         the number of components in the system.
@@ -363,31 +382,31 @@ def pcsaft_bubbleT(t_guess, xv_guess, x, m, s, e, p, pyargs):
     p : float
         Pressure (Pa)
     pyargs : dict
-        A dictionary containing additional arguments that can be passed for 
+        A dictionary containing additional arguments that can be passed for
         use in PC-SAFT:
-        
+
         k_ij : ndarray, shape (n,n)
-            Binary interaction parameters between components in the mixture. 
+            Binary interaction parameters between components in the mixture.
             (dimensions: ncomp x ncomp)
         e_assoc : ndarray, shape (n,)
             Association energy of the associating components. For non associating
             compounds this is set to 0. Units of K.
         vol_a : ndarray, shape (n,)
-            Effective association volume of the associating components. For non 
+            Effective association volume of the associating components. For non
             associating compounds this is set to 0.
         dipm : ndarray, shape (n,)
-            Dipole moment of the polar components. For components where the dipole 
+            Dipole moment of the polar components. For components where the dipole
             term is not used this is set to 0. Units of Debye.
         dip_num : ndarray, shape (n,)
-            The effective number of dipole functional groups on each component 
-            molecule. Some implementations use this as an adjustable parameter 
+            The effective number of dipole functional groups on each component
+            molecule. Some implementations use this as an adjustable parameter
             that is fit to data.
         z : ndarray, shape (n,)
-            Charge number of the ions          
+            Charge number of the ions
         dielc : float
             Dielectric constant of the medium to be used for electrolyte
             calculations.
-        
+
     Returns
     -------
     results : list
@@ -395,6 +414,7 @@ def pcsaft_bubbleT(t_guess, xv_guess, x, m, s, e, p, pyargs):
             0 : Bubble point temperature (K)
             1 : Composition of the liquid phase
     """
+    check_input(x, 'pressure', p, 'guess temperature', t_guess)
     cppargs = create_struct(pyargs)
     if type(m) == np.float_:
         m = np.asarray([m])
@@ -402,32 +422,15 @@ def pcsaft_bubbleT(t_guess, xv_guess, x, m, s, e, p, pyargs):
         s = np.asarray([s])
     if type(e) == np.float_:
         e = np.asarray([e])
-    
+
     result = minimize(bubbleTfit, t_guess, args=(xv_guess, x, m, s, e, p, cppargs), tol=1e-10, method='Nelder-Mead', options={'maxiter': 100})
     bubT = result.x
 
-#   Determine vapor phase composition at bubble pressure    
-    if cppargs['z'] == []: # Check that the mixture does not contain electrolytes. For electrolytes, a different equilibrium criterion should be used. 
-        rho = pcsaft_den_cpp(x, m, s, e, bubT, p, 0, cppargs)        
+#   Determine vapor phase composition at bubble pressure
+    if cppargs['z'] == []: # Check that the mixture does not contain electrolytes. For electrolytes, a different equilibrium criterion should be used.
+        rho = pcsaft_den_cpp(x, m, s, e, bubT, p, 0, cppargs)
         fugcoef_l = np.asarray(pcsaft_fugcoef_cpp(x, m, s, e, bubT, rho, cppargs))
-        
-        itr = 0
-        dif = 10000.
-        xv = np.copy(xv_guess)
-        xv_old = np.zeros_like(xv)
-        while (dif>1e-9) and (itr<100):
-            xv_old[:] = xv
-            rho = pcsaft_den_cpp(xv, m, s, e, bubT, p, 1, cppargs)        
-            fugcoef_v = np.asarray(pcsaft_fugcoef_cpp(xv, m, s, e, bubT, rho, cppargs))
-            xv = fugcoef_l*x/fugcoef_v
-            xv = xv/np.sum(xv)
-            dif = np.sum(abs(xv - xv_old))
-            itr += 1
-    else:
-        z = np.asarray(cppargs['z'])
-        rho = pcsaft_den_cpp(x, m, s, e, bubT, p, 0, cppargs)        
-        fugcoef_l = np.asarray(pcsaft_fugcoef_cpp(x, m, s, e, bubT, rho, cppargs))       
-        
+
         itr = 0
         dif = 10000.
         xv = np.copy(xv_guess)
@@ -436,12 +439,29 @@ def pcsaft_bubbleT(t_guess, xv_guess, x, m, s, e, p, pyargs):
             xv_old[:] = xv
             rho = pcsaft_den_cpp(xv, m, s, e, bubT, p, 1, cppargs)
             fugcoef_v = np.asarray(pcsaft_fugcoef_cpp(xv, m, s, e, bubT, rho, cppargs))
-       
+            xv = fugcoef_l*x/fugcoef_v
+            xv = xv/np.sum(xv)
+            dif = np.sum(abs(xv - xv_old))
+            itr += 1
+    else:
+        z = np.asarray(cppargs['z'])
+        rho = pcsaft_den_cpp(x, m, s, e, bubT, p, 0, cppargs)
+        fugcoef_l = np.asarray(pcsaft_fugcoef_cpp(x, m, s, e, bubT, rho, cppargs))
+
+        itr = 0
+        dif = 10000.
+        xv = np.copy(xv_guess)
+        xv_old = np.zeros_like(xv)
+        while (dif>1e-9) and (itr<100):
+            xv_old[:] = xv
+            rho = pcsaft_den_cpp(xv, m, s, e, bubT, p, 1, cppargs)
+            fugcoef_v = np.asarray(pcsaft_fugcoef_cpp(xv, m, s, e, bubT, rho, cppargs))
+
             xv[np.where(z == 0)[0]] = (fugcoef_l*x/fugcoef_v)[np.where(z == 0)[0]] # here it is assumed that the ionic compounds are nonvolatile
             xv = xv/np.sum(xv)
             dif = np.sum(abs(xv - xv_old))
             itr += 1
-    
+
     results = [bubT, xv]
     return results
 
@@ -449,11 +469,11 @@ def pcsaft_bubbleT(t_guess, xv_guess, x, m, s, e, p, pyargs):
 def pcsaft_bubbleP(p_guess, xv_guess, x, m, s, e, t, pyargs):
     """
     Calculate the bubble point pressure of a mixture and the vapor composition.
-    
+
     Parameters
     ----------
     p_guess : float
-        Guess for the vapor pressure (Pa)    
+        Guess for the vapor pressure (Pa)
     x : ndarray, shape (n,)
         Mole fractions of each component. It has a length of n, where n is
         the number of components in the system.
@@ -468,31 +488,31 @@ def pcsaft_bubbleP(p_guess, xv_guess, x, m, s, e, t, pyargs):
     t : float
         Temperature (K)
     pyargs : dict
-        A dictionary containing additional arguments that can be passed for 
+        A dictionary containing additional arguments that can be passed for
         use in PC-SAFT:
-        
+
         k_ij : ndarray, shape (n,n)
-            Binary interaction parameters between components in the mixture. 
+            Binary interaction parameters between components in the mixture.
             (dimensions: ncomp x ncomp)
         e_assoc : ndarray, shape (n,)
             Association energy of the associating components. For non associating
             compounds this is set to 0. Units of K.
         vol_a : ndarray, shape (n,)
-            Effective association volume of the associating components. For non 
+            Effective association volume of the associating components. For non
             associating compounds this is set to 0.
         dipm : ndarray, shape (n,)
-            Dipole moment of the polar components. For components where the dipole 
+            Dipole moment of the polar components. For components where the dipole
             term is not used this is set to 0. Units of Debye.
         dip_num : ndarray, shape (n,)
-            The effective number of dipole functional groups on each component 
-            molecule. Some implementations use this as an adjustable parameter 
+            The effective number of dipole functional groups on each component
+            molecule. Some implementations use this as an adjustable parameter
             that is fit to data.
         z : ndarray, shape (n,)
-            Charge number of the ions          
+            Charge number of the ions
         dielc : float
             Dielectric constant of the medium to be used for electrolyte
             calculations.
-        
+
     Returns
     -------
     results : list
@@ -500,6 +520,7 @@ def pcsaft_bubbleP(p_guess, xv_guess, x, m, s, e, t, pyargs):
             0 : Bubble point pressure (Pa)
             1 : Composition of the liquid phase
     """
+    check_input(x, 'guess pressure', p_guess, 'temperature', t)
     cppargs = create_struct(pyargs)
     if type(m) == np.float_:
         m = np.asarray([m])
@@ -507,22 +528,22 @@ def pcsaft_bubbleP(p_guess, xv_guess, x, m, s, e, t, pyargs):
         s = np.asarray([s])
     if type(e) == np.float_:
         e = np.asarray([e])
-    
+
     result = minimize(bubblePfit, p_guess, args=(xv_guess, x, m, s, e, t, cppargs), tol=1e-10, method='Nelder-Mead', options={'maxiter': 100})
     bubP = result.x
 
-#     Determine vapor phase composition at bubble pressure    
-    if cppargs['z'] == []: # Check that the mixture does not contain electrolytes. For electrolytes, a different equilibrium criterion should be used. 
-        rho = pcsaft_den_cpp(x, m, s, e, t, p_guess, 0, cppargs)        
+#     Determine vapor phase composition at bubble pressure
+    if cppargs['z'] == []: # Check that the mixture does not contain electrolytes. For electrolytes, a different equilibrium criterion should be used.
+        rho = pcsaft_den_cpp(x, m, s, e, t, p_guess, 0, cppargs)
         fugcoef_l = np.asarray(pcsaft_fugcoef_cpp(x, m, s, e, t, rho, cppargs))
-        
+
         itr = 0
         dif = 10000.
         xv = np.copy(xv_guess)
         xv_old = np.zeros_like(xv)
         while (dif>1e-9) and (itr<100):
             xv_old[:] = xv
-            rho = pcsaft_den_cpp(xv, m, s, e, t, p_guess, 1, cppargs)        
+            rho = pcsaft_den_cpp(xv, m, s, e, t, p_guess, 1, cppargs)
             fugcoef_v = np.asarray(pcsaft_fugcoef_cpp(xv, m, s, e, t, rho, cppargs))
             xv = fugcoef_l*x/fugcoef_v
             xv = xv/np.sum(xv)
@@ -530,23 +551,23 @@ def pcsaft_bubbleP(p_guess, xv_guess, x, m, s, e, t, pyargs):
             itr += 1
     else:
         z = np.asarray(cppargs['z'])
-        rho = pcsaft_den_cpp(x, m, s, e, t, p_guess, 0, cppargs)        
-        fugcoef_l = np.asarray(pcsaft_fugcoef_cpp(x, m, s, e, t, rho, cppargs))       
-        
+        rho = pcsaft_den_cpp(x, m, s, e, t, p_guess, 0, cppargs)
+        fugcoef_l = np.asarray(pcsaft_fugcoef_cpp(x, m, s, e, t, rho, cppargs))
+
         itr = 0
         dif = 10000.
         xv = np.copy(xv_guess)
         xv_old = np.zeros_like(xv)
         while (dif>1e-9) and (itr<100):
             xv_old[:] = xv
-            rho = pcsaft_den_cpp(xv, m, s, e, t, p_guess, 1, cppargs)        
+            rho = pcsaft_den_cpp(xv, m, s, e, t, p_guess, 1, cppargs)
             fugcoef_v = np.asarray(pcsaft_fugcoef_cpp(xv, m, s, e, t, rho, cppargs))
-       
+
             xv[np.where(z == 0)[0]] = (fugcoef_l*x/fugcoef_v)[np.where(z == 0)[0]] # here it is assumed that the ionic compounds are nonvolatile
             xv = xv/np.sum(xv)
             dif = np.sum(abs(xv - xv_old))
             itr += 1
-    
+
     results = [bubP, xv]
     return results
 
@@ -554,11 +575,11 @@ def pcsaft_bubbleP(p_guess, xv_guess, x, m, s, e, t, pyargs):
 def pcsaft_Hvap(p_guess, x, m, s, e, t, pyargs):
     """
     Calculate the enthalpy of vaporization.
-    
+
     Parameters
     ----------
     p_guess : float
-        Guess for the vapor pressure (Pa)    
+        Guess for the vapor pressure (Pa)
     x : ndarray, shape (n,)
         Mole fractions of each component. It has a length of n, where n is
         the number of components in the system.
@@ -573,38 +594,39 @@ def pcsaft_Hvap(p_guess, x, m, s, e, t, pyargs):
     t : float
         Temperature (K)
     pyargs : dict
-        A dictionary containing additional arguments that can be passed for 
+        A dictionary containing additional arguments that can be passed for
         use in PC-SAFT:
-        
+
         k_ij : ndarray, shape (n,n)
-            Binary interaction parameters between components in the mixture. 
+            Binary interaction parameters between components in the mixture.
             (dimensions: ncomp x ncomp)
         e_assoc : ndarray, shape (n,)
             Association energy of the associating components. For non associating
             compounds this is set to 0. Units of K.
         vol_a : ndarray, shape (n,)
-            Effective association volume of the associating components. For non 
+            Effective association volume of the associating components. For non
             associating compounds this is set to 0.
         dipm : ndarray, shape (n,)
-            Dipole moment of the polar components. For components where the dipole 
+            Dipole moment of the polar components. For components where the dipole
             term is not used this is set to 0. Units of Debye.
         dip_num : ndarray, shape (n,)
-            The effective number of dipole functional groups on each component 
-            molecule. Some implementations use this as an adjustable parameter 
+            The effective number of dipole functional groups on each component
+            molecule. Some implementations use this as an adjustable parameter
             that is fit to data.
         z : ndarray, shape (n,)
-            Charge number of the ions          
+            Charge number of the ions
         dielc : float
             Dielectric constant of the medium to be used for electrolyte
             calculations.
-        
+
     Returns
     -------
     output : list
         A list containing the following results:
-            0 : enthalpy of vaporization (J/mol), float            
+            0 : enthalpy of vaporization (J/mol), float
             1 : vapor pressure (Pa), float
     """
+    check_input(x, 'guess pressure', p_guess, 'temperature', t)
     cppargs = create_struct(pyargs)
     if type(m) == np.float_:
         m = np.asarray([m])
@@ -612,23 +634,23 @@ def pcsaft_Hvap(p_guess, x, m, s, e, t, pyargs):
         s = np.asarray([s])
     if type(e) == np.float_:
         e = np.asarray([e])
-    
+
     Pvap = minimize(vaporPfit, p_guess, args=(x, m, s, e, t, cppargs), tol=1e-10, method='Nelder-Mead', options={'maxiter': 100}).x
 
-    rho = pcsaft_den_cpp(x, m, s, e, t, Pvap, 0, cppargs)        
+    rho = pcsaft_den_cpp(x, m, s, e, t, Pvap, 0, cppargs)
     hres_l = pcsaft_hres_cpp(x, m, s, e, t, rho, cppargs)
     rho = pcsaft_den_cpp(x, m, s, e, t, Pvap, 1, cppargs)
     hres_v = pcsaft_hres_cpp(x, m, s, e, t, rho, cppargs)
     Hvap = hres_v - hres_l
-    
-    output = [Hvap, Pvap]    
+
+    output = [Hvap, Pvap]
     return output
 
-    
+
 def pcsaft_osmoticC(x, m, s, e, t, rho, pyargs):
     """
     Calculate the osmotic coefficient.
-    
+
     Parameters
     ----------
     x : ndarray, shape (n,)
@@ -647,50 +669,51 @@ def pcsaft_osmoticC(x, m, s, e, t, rho, pyargs):
     rho : float
         Molar density (mol m^{-3})
     pyargs : dict
-        A dictionary containing additional arguments that can be passed for 
+        A dictionary containing additional arguments that can be passed for
         use in PC-SAFT:
-        
+
         k_ij : ndarray, shape (n,n)
-            Binary interaction parameters between components in the mixture. 
+            Binary interaction parameters between components in the mixture.
             (dimensions: ncomp x ncomp)
         e_assoc : ndarray, shape (n,)
             Association energy of the associating components. For non associating
             compounds this is set to 0. Units of K.
         vol_a : ndarray, shape (n,)
-            Effective association volume of the associating components. For non 
+            Effective association volume of the associating components. For non
             associating compounds this is set to 0.
         dipm : ndarray, shape (n,)
-            Dipole moment of the polar components. For components where the dipole 
+            Dipole moment of the polar components. For components where the dipole
             term is not used this is set to 0. Units of Debye.
         dip_num : ndarray, shape (n,)
-            The effective number of dipole functional groups on each component 
-            molecule. Some implementations use this as an adjustable parameter 
+            The effective number of dipole functional groups on each component
+            molecule. Some implementations use this as an adjustable parameter
             that is fit to data.
         z : ndarray, shape (n,)
-            Charge number of the ions          
+            Charge number of the ions
         dielc : float
             Dielectric constant of the medium to be used for electrolyte
             calculations.
-        
+
     Returns
     -------
     osmC : float
         Molal osmotic coefficient
     """
-    cppargs = create_struct(pyargs)    
+    check_input(x, 'density', rho, 'temperature', t)
+    cppargs = create_struct(pyargs)
     if type(m) == np.float_:
         m = np.asarray([m])
     if type(s) == np.float_:
         s = np.asarray([s])
     if type(e) == np.float_:
         e = np.asarray([e])
-    
-    indx_water = np.where(e == 353.9449)[0] # to find index for water    
+
+    indx_water = np.where(e == 353.9449)[0] # to find index for water
     molality = x/(x[indx_water]*18.0153/1000.)
     molality[indx_water] = 0
     x0 = np.zeros_like(x)
     x0[indx_water] = 1.
-    
+
     fugcoef = np.asarray(pcsaft_fugcoef_cpp(x, m, s, e, t, rho, cppargs))
     p = pcsaft_p_cpp(x, m, s, e, t, rho, cppargs)
     if rho < 900:
@@ -699,15 +722,15 @@ def pcsaft_osmoticC(x, m, s, e, t, rho, pyargs):
         ph = 0
     rho0 = pcsaft_den_cpp(x0, m, s, e, t, p, ph, cppargs)
     fugcoef0 = np.asarray(pcsaft_fugcoef_cpp(x0, m, s, e, t, rho0, cppargs))
-    gamma = fugcoef[indx_water]/fugcoef0[indx_water]    
-    
+    gamma = fugcoef[indx_water]/fugcoef0[indx_water]
+
     osmC = -1000*np.log(x[indx_water]*gamma)/18.0153/np.sum(molality)
     return osmC
-    
+
 def pcsaft_cp(x, m, s, e, t, rho, params, pyargs):
     """
     Calculate the specific molar isobaric heat capacity.
-    
+
     Parameters
     ----------
     x : ndarray, shape (n,)
@@ -730,41 +753,43 @@ def pcsaft_cp(x, m, s, e, t, rho, params, pyargs):
         another equation if the ideal gas heat capacity is given using a different
         equation.
     pyargs : dict
-        A dictionary containing additional arguments that can be passed for 
+        A dictionary containing additional arguments that can be passed for
         use in PC-SAFT:
-        
+
             k_ij : ndarray, shape (n,n)
-                Binary interaction parameters between components in the mixture. 
+                Binary interaction parameters between components in the mixture.
                 (dimensions: ncomp x ncomp)
             e_assoc : ndarray, shape (n,)
                 Association energy of the associating components. For non associating
                 compounds this is set to 0. Units of K.
             vol_a : ndarray, shape (n,)
-                Effective association volume of the associating components. For non 
+                Effective association volume of the associating components. For non
                 associating compounds this is set to 0.
             dipm : ndarray, shape (n,)
-                Dipole moment of the polar components. For components where the dipole 
+                Dipole moment of the polar components. For components where the dipole
                 term is not used this is set to 0. Units of Debye.
             dip_num : ndarray, shape (n,)
-                The effective number of dipole functional groups on each component 
-                molecule. Some implementations use this as an adjustable parameter 
+                The effective number of dipole functional groups on each component
+                molecule. Some implementations use this as an adjustable parameter
                 that is fit to data.
             z : ndarray, shape (n,)
-                Charge number of the ions          
+                Charge number of the ions
             dielc : float
                 Dielectric constant of the medium to be used for electrolyte
                 calculations.
-        
+
     Returns
     -------
     cp : float
         Specific molar isobaric heat capacity (J mol^-1 K^-1)
     """
+    check_input(x, 'density', rho, 'temperature', t)
+
     if rho > 900:
         ph = 0
     else:
         ph = 1
-    
+
     cppargs = create_struct(pyargs)
     if type(m) == np.float_:
         m = np.asarray([m])
@@ -786,9 +811,9 @@ def pcsaft_cp(x, m, s, e, t, rho, params, pyargs):
 def pcsaft_PTz(p_guess, x_guess, beta_guess, mol, vol, x_total, m, s, e, t, pyargs):
     """
     Calculate the pressure and compositions of each phase when given the overall
-    composition and the total volume and number of moles. This allows PTz data 
+    composition and the total volume and number of moles. This allows PTz data
     to be used in fitting PC-SAFT parameters.
-    
+
     Parameters
     ----------
     p_guess : float
@@ -802,7 +827,7 @@ def pcsaft_PTz(p_guess, x_guess, beta_guess, mol, vol, x_total, m, s, e, t, pyar
     vol : float
         Total volume of the system (m^{3})
     x_total : ndarray, shape (n,)
-        Overall mole fraction of each component in the system as a whole. It 
+        Overall mole fraction of each component in the system as a whole. It
         has a length of n, where n is the number of components in the system.
     m : ndarray, shape (n,)
         Segment number for each component.
@@ -815,31 +840,31 @@ def pcsaft_PTz(p_guess, x_guess, beta_guess, mol, vol, x_total, m, s, e, t, pyar
     t : float
         Temperature (K)
     pyargs : dict
-        A dictionary containing additional arguments that can be passed for 
+        A dictionary containing additional arguments that can be passed for
         use in PC-SAFT:
-        
+
         k_ij : ndarray, shape (n,n)
-            Binary interaction parameters between components in the mixture. 
+            Binary interaction parameters between components in the mixture.
             (dimensions: ncomp x ncomp)
         e_assoc : ndarray, shape (n,)
             Association energy of the associating components. For non associating
             compounds this is set to 0. Units of K.
         vol_a : ndarray, shape (n,)
-            Effective association volume of the associating components. For non 
+            Effective association volume of the associating components. For non
             associating compounds this is set to 0.
         dipm : ndarray, shape (n,)
-            Dipole moment of the polar components. For components where the dipole 
+            Dipole moment of the polar components. For components where the dipole
             term is not used this is set to 0. Units of Debye.
         dip_num : ndarray, shape (n,)
-            The effective number of dipole functional groups on each component 
-            molecule. Some implementations use this as an adjustable parameter 
+            The effective number of dipole functional groups on each component
+            molecule. Some implementations use this as an adjustable parameter
             that is fit to data.
         z : ndarray, shape (n,)
-            Charge number of the ions          
+            Charge number of the ions
         dielc : float
             Dielectric constant of the medium to be used for electrolyte
             calculations.
-        
+
     Returns
     -------
     output : list
@@ -848,8 +873,9 @@ def pcsaft_PTz(p_guess, x_guess, beta_guess, mol, vol, x_total, m, s, e, t, pyar
             1 : composition of the liquid phase, ndarray, shape (n,)
             2 : composition of the vapor phase, ndarray, shape (n,)
             3 : mole fraction of the mixture vaporized
-    """ 
-    cppargs = create_struct(pyargs)    
+    """
+    check_input(x_total, 'guess pressure', p_guess, 'temperature', t)
+    cppargs = create_struct(pyargs)
     if type(m) == np.float_:
         m = np.asarray([m])
     if type(s) == np.float_:
@@ -868,11 +894,11 @@ def pcsaft_PTz(p_guess, x_guess, beta_guess, mol, vol, x_total, m, s, e, t, pyar
         xv = (mol*x_total - (1-beta)*mol*xl)/beta/mol
         while (dif>1e-9) and (itr<100):
             beta_old = beta
-            rhol = pcsaft_den_cpp(xl, m, s, e, t, p, 0, cppargs)        
+            rhol = pcsaft_den_cpp(xl, m, s, e, t, p, 0, cppargs)
             fugcoef_l = np.asarray(pcsaft_fugcoef_cpp(xl, m, s, e, t, rhol, cppargs))
-            rhov = pcsaft_den_cpp(xv, m, s, e, t, p, 1, cppargs)        
+            rhov = pcsaft_den_cpp(xv, m, s, e, t, p, 1, cppargs)
             fugcoef_v = np.asarray(pcsaft_fugcoef_cpp(xv, m, s, e, t, rhov, cppargs))
-            if beta > 0.5:     
+            if beta > 0.5:
                 xl = fugcoef_v*xv/fugcoef_l
                 xl = xl/np.sum(xl)
                 xv = (mol*x_total - (1-beta)*mol*xl)/beta/mol # if beta is close to zero then this equation behaves poorly, and that is why we use this if statement to switch the equation around
@@ -894,12 +920,12 @@ def pcsaft_PTz(p_guess, x_guess, beta_guess, mol, vol, x_total, m, s, e, t, pyar
         xv[np.where(z != 0)[0]] = 0.
         xv = xv/np.sum(xv)
         while (dif>1e-9) and (itr<100):
- #           xl = chem_equil(xl, m, s, e, t, p, pyargs)
+#            xl = chem_equil_cpp(xl, m, s, e, t, p, cppargs)
             x_total = xl + xv
             beta_old = beta
-            rhol = pcsaft_den_cpp(xl, m, s, e, t, p, 0, cppargs)        
+            rhol = pcsaft_den_cpp(xl, m, s, e, t, p, 0, cppargs)
             fugcoef_l = np.asarray(pcsaft_fugcoef_cpp(xl, m, s, e, t, rhol, cppargs))
-            rhov = pcsaft_den_cpp(xv, m, s, e, t, p, 1, cppargs)        
+            rhov = pcsaft_den_cpp(xv, m, s, e, t, p, 1, cppargs)
             fugcoef_v = np.asarray(pcsaft_fugcoef_cpp(xv, m, s, e, t, rhov, cppargs))
             if beta > 0.5:
                 xl = fugcoef_v*xv/fugcoef_l
@@ -921,9 +947,9 @@ def pcsaft_PTz(p_guess, x_guess, beta_guess, mol, vol, x_total, m, s, e, t, pyar
 
 def pcsaft_den(x, m, s, e, t, p, pyargs, phase='liq'):
     """
-    Wrapper for C++ pcsaft_den_cpp function because a C++ struct is needed for 
+    Wrapper for C++ pcsaft_den_cpp function because a C++ struct is needed for
     that function.
-    
+
     Parameters
     ----------
     x : ndarray, shape (n,)
@@ -945,42 +971,43 @@ def pcsaft_den(x, m, s, e, t, p, pyargs, phase='liq'):
         The phase for which the calculation is performed. Options: "liq" (liquid),
         "vap" (vapor).
     pyargs : dict
-        A dictionary containing additional arguments that can be passed for 
+        A dictionary containing additional arguments that can be passed for
         use in PC-SAFT:
-        
+
         k_ij : ndarray, shape (n,n)
-            Binary interaction parameters between components in the mixture. 
+            Binary interaction parameters between components in the mixture.
             (dimensions: ncomp x ncomp)
         e_assoc : ndarray, shape (n,)
             Association energy of the associating components. For non associating
             compounds this is set to 0. Units of K.
         vol_a : ndarray, shape (n,)
-            Effective association volume of the associating components. For non 
+            Effective association volume of the associating components. For non
             associating compounds this is set to 0.
         dipm : ndarray, shape (n,)
-            Dipole moment of the polar components. For components where the dipole 
+            Dipole moment of the polar components. For components where the dipole
             term is not used this is set to 0. Units of Debye.
         dip_num : ndarray, shape (n,)
-            The effective number of dipole functional groups on each component 
-            molecule. Some implementations use this as an adjustable parameter 
+            The effective number of dipole functional groups on each component
+            molecule. Some implementations use this as an adjustable parameter
             that is fit to data.
         z : ndarray, shape (n,)
-            Charge number of the ions          
+            Charge number of the ions
         dielc : float
             Dielectric constant of the medium to be used for electrolyte
             calculations.
-        
+
     Returns
     -------
     rho : float
         Molar density (mol m^{-3})
-    """    
-    cppargs = create_struct(pyargs)    
+    """
+    check_input(x, 'pressure', p, 'temperature', t)
+    cppargs = create_struct(pyargs)
     if phase == 'liq':
         phase_num = 0
     else:
         phase_num = 1
-        
+
     if type(m) == np.float_:
         m = np.asarray([m])
     if type(s) == np.float_:
@@ -988,12 +1015,12 @@ def pcsaft_den(x, m, s, e, t, p, pyargs, phase='liq'):
     if type(e) == np.float_:
         e = np.asarray([e])
     return pcsaft_den_cpp(x, m, s, e, t, p, phase_num, cppargs)
-    
+
 
 def pcsaft_hres(x, m, s, e, t, rho, pyargs):
     """
     Calculate the residual enthalpy for one phase of the system.
-    
+
     Parameters
     ----------
     x : ndarray, shape (n,)
@@ -1012,36 +1039,37 @@ def pcsaft_hres(x, m, s, e, t, rho, pyargs):
     rho : float
         Molar density (mol m^{-3})
     pyargs : dict
-        A dictionary containing additional arguments that can be passed for 
+        A dictionary containing additional arguments that can be passed for
         use in PC-SAFT:
-        
+
         k_ij : ndarray, shape (n,n)
-            Binary interaction parameters between components in the mixture. 
+            Binary interaction parameters between components in the mixture.
             (dimensions: ncomp x ncomp)
         e_assoc : ndarray, shape (n,)
             Association energy of the associating components. For non associating
             compounds this is set to 0. Units of K.
         vol_a : ndarray, shape (n,)
-            Effective association volume of the associating components. For non 
+            Effective association volume of the associating components. For non
             associating compounds this is set to 0.
         dipm : ndarray, shape (n,)
-            Dipole moment of the polar components. For components where the dipole 
+            Dipole moment of the polar components. For components where the dipole
             term is not used this is set to 0. Units of Debye.
         dip_num : ndarray, shape (n,)
-            The effective number of dipole functional groups on each component 
-            molecule. Some implementations use this as an adjustable parameter 
+            The effective number of dipole functional groups on each component
+            molecule. Some implementations use this as an adjustable parameter
             that is fit to data.
         z : ndarray, shape (n,)
-            Charge number of the ions          
+            Charge number of the ions
         dielc : float
             Dielectric constant of the medium to be used for electrolyte
             calculations.
-        
+
     Returns
     -------
     hres : float
         Residual enthalpy (J mol^{-1})
     """
+    check_input(x, 'density', rho, 'temperature', t)
     cppargs = create_struct(pyargs)
     if type(m) == np.float_:
         m = np.asarray([m])
@@ -1054,7 +1082,7 @@ def pcsaft_hres(x, m, s, e, t, rho, pyargs):
 def pcsaft_sres(x, m, s, e, t, rho, pyargs):
     """
     Calculate the residual entropy (constant volume) for one phase of the system.
-    
+
     Parameters
     ----------
     x : ndarray, shape (n,)
@@ -1073,36 +1101,37 @@ def pcsaft_sres(x, m, s, e, t, rho, pyargs):
     rho : float
         Molar density (mol m^{-3})
     pyargs : dict
-        A dictionary containing additional arguments that can be passed for 
+        A dictionary containing additional arguments that can be passed for
         use in PC-SAFT:
-        
+
         k_ij : ndarray, shape (n,n)
-            Binary interaction parameters between components in the mixture. 
+            Binary interaction parameters between components in the mixture.
             (dimensions: ncomp x ncomp)
         e_assoc : ndarray, shape (n,)
             Association energy of the associating components. For non associating
             compounds this is set to 0. Units of K.
         vol_a : ndarray, shape (n,)
-            Effective association volume of the associating components. For non 
+            Effective association volume of the associating components. For non
             associating compounds this is set to 0.
         dipm : ndarray, shape (n,)
-            Dipole moment of the polar components. For components where the dipole 
+            Dipole moment of the polar components. For components where the dipole
             term is not used this is set to 0. Units of Debye.
         dip_num : ndarray, shape (n,)
-            The effective number of dipole functional groups on each component 
-            molecule. Some implementations use this as an adjustable parameter 
+            The effective number of dipole functional groups on each component
+            molecule. Some implementations use this as an adjustable parameter
             that is fit to data.
         z : ndarray, shape (n,)
-            Charge number of the ions          
+            Charge number of the ions
         dielc : float
             Dielectric constant of the medium to be used for electrolyte
             calculations.
-        
+
     Returns
     -------
     sres : float
         Residual entropy (J mol^{-1} K^{-1})
-    """    
+    """
+    check_input(x, 'density', rho, 'temperature', t)
     cppargs = create_struct(pyargs)
     if type(m) == np.float_:
         m = np.asarray([m])
@@ -1115,7 +1144,7 @@ def pcsaft_sres(x, m, s, e, t, rho, pyargs):
 def pcsaft_gres(x, m, s, e, t, rho, pyargs):
     """
     Calculate the residual Gibbs energy for one phase of the system.
-    
+
     Parameters
     ----------
     x : ndarray, shape (n,)
@@ -1134,36 +1163,37 @@ def pcsaft_gres(x, m, s, e, t, rho, pyargs):
     rho : float
         Molar density (mol m^{-3})
     pyargs : dict
-        A dictionary containing additional arguments that can be passed for 
+        A dictionary containing additional arguments that can be passed for
         use in PC-SAFT:
-        
+
         k_ij : ndarray, shape (n,n)
-            Binary interaction parameters between components in the mixture. 
+            Binary interaction parameters between components in the mixture.
             (dimensions: ncomp x ncomp)
         e_assoc : ndarray, shape (n,)
             Association energy of the associating components. For non associating
             compounds this is set to 0. Units of K.
         vol_a : ndarray, shape (n,)
-            Effective association volume of the associating components. For non 
+            Effective association volume of the associating components. For non
             associating compounds this is set to 0.
         dipm : ndarray, shape (n,)
-            Dipole moment of the polar components. For components where the dipole 
+            Dipole moment of the polar components. For components where the dipole
             term is not used this is set to 0. Units of Debye.
         dip_num : ndarray, shape (n,)
-            The effective number of dipole functional groups on each component 
-            molecule. Some implementations use this as an adjustable parameter 
+            The effective number of dipole functional groups on each component
+            molecule. Some implementations use this as an adjustable parameter
             that is fit to data.
         z : ndarray, shape (n,)
-            Charge number of the ions          
+            Charge number of the ions
         dielc : float
             Dielectric constant of the medium to be used for electrolyte
             calculations.
-        
+
     Returns
     -------
     gres : float
         Residual Gibbs energy (J mol^{-1})
     """
+    check_input(x, 'density', rho, 'temperature', t)
     cppargs = create_struct(pyargs)
     if type(m) == np.float_:
         m = np.asarray([m])
@@ -1196,36 +1226,37 @@ def pcsaft_ares(x, m, s, e, t, rho, pyargs):
     rho : float
         Molar density (mol m^{-3})
     pyargs : dict
-        A dictionary containing additional arguments that can be passed for 
+        A dictionary containing additional arguments that can be passed for
         use in PC-SAFT:
-        
+
         k_ij : ndarray, shape (n,n)
-            Binary interaction parameters between components in the mixture. 
+            Binary interaction parameters between components in the mixture.
             (dimensions: ncomp x ncomp)
         e_assoc : ndarray, shape (n,)
             Association energy of the associating components. For non associating
             compounds this is set to 0. Units of K.
         vol_a : ndarray, shape (n,)
-            Effective association volume of the associating components. For non 
+            Effective association volume of the associating components. For non
             associating compounds this is set to 0.
         dipm : ndarray, shape (n,)
-            Dipole moment of the polar components. For components where the dipole 
+            Dipole moment of the polar components. For components where the dipole
             term is not used this is set to 0. Units of Debye.
         dip_num : ndarray, shape (n,)
-            The effective number of dipole functional groups on each component 
-            molecule. Some implementations use this as an adjustable parameter 
+            The effective number of dipole functional groups on each component
+            molecule. Some implementations use this as an adjustable parameter
             that is fit to data.
         z : ndarray, shape (n,)
-            Charge number of the ions          
+            Charge number of the ions
         dielc : float
             Dielectric constant of the medium to be used for electrolyte
             calculations.
-        
+
     Returns
     -------
     ares : float
         Residual Helmholtz energy (J mol^{-1})
-    """    
+    """
+    check_input(x, 'density', rho, 'temperature', t)
     cppargs = create_struct(pyargs)
     if type(m) == np.float_:
         m = np.asarray([m])
@@ -1234,7 +1265,7 @@ def pcsaft_ares(x, m, s, e, t, rho, pyargs):
     if type(e) == np.float_:
         e = np.asarray([e])
     return pcsaft_ares_cpp(x, m, s, e, t, rho, cppargs)
-    
+
 
 def pcsaft_dadt(x, m, s, e, t, rho, pyargs):
     """
@@ -1258,36 +1289,37 @@ def pcsaft_dadt(x, m, s, e, t, rho, pyargs):
     rho : float
         Molar density (mol m^{-3})
     pyargs : dict
-        A dictionary containing additional arguments that can be passed for 
+        A dictionary containing additional arguments that can be passed for
         use in PC-SAFT:
-        
+
         k_ij : ndarray, shape (n,n)
-            Binary interaction parameters between components in the mixture. 
+            Binary interaction parameters between components in the mixture.
             (dimensions: ncomp x ncomp)
         e_assoc : ndarray, shape (n,)
             Association energy of the associating components. For non associating
             compounds this is set to 0. Units of K.
         vol_a : ndarray, shape (n,)
-            Effective association volume of the associating components. For non 
+            Effective association volume of the associating components. For non
             associating compounds this is set to 0.
         dipm : ndarray, shape (n,)
-            Dipole moment of the polar components. For components where the dipole 
+            Dipole moment of the polar components. For components where the dipole
             term is not used this is set to 0. Units of Debye.
         dip_num : ndarray, shape (n,)
-            The effective number of dipole functional groups on each component 
-            molecule. Some implementations use this as an adjustable parameter 
+            The effective number of dipole functional groups on each component
+            molecule. Some implementations use this as an adjustable parameter
             that is fit to data.
         z : ndarray, shape (n,)
-            Charge number of the ions          
+            Charge number of the ions
         dielc : float
             Dielectric constant of the medium to be used for electrolyte
             calculations.
-        
+
     Returns
     -------
     dadt : float
         Temperature derivative of the residual Helmholtz energy (J mol^{-1})
-    """    
+    """
+    check_input(x, 'density', rho, 'temperature', t)
     cppargs = create_struct(pyargs)
     if type(m) == np.float_:
         m = np.asarray([m])
@@ -1330,7 +1362,7 @@ def bubbleTfit(t_guess, xv_guess, x, m, s, e, p, cppargs):
     """Minimize this function to calculate the bubble point temperature."""
     error = bubbleTfit_cpp(t_guess, xv_guess, x, m, s, e, p, cppargs)
     return error
-    
+
 def vaporPfit(p_guess, x, m, s, e, t, cppargs):
     """Minimize this function to calculate the vapor pressure."""
     if p_guess <= 0:
@@ -1341,10 +1373,10 @@ def vaporPfit(p_guess, x, m, s, e, t, cppargs):
         rho = pcsaft_den_cpp(x, m, s, e, t, p_guess, 1, cppargs)
         fugcoef_v = np.asarray(pcsaft_fugcoef_cpp(x, m, s, e, t, rho, cppargs))
         error = 100000*np.sum((fugcoef_l-fugcoef_v)**2)
-        if np.isnan(error):
-            error = 100000000.
+        if not np.isfinite(error):
+            error = 1e20
     return error
-    
+
 def PTzfit(p_guess, x_guess, beta_guess, mol, vol, x_total, m, s, e, t, cppargs):
     """Minimize this function to solve for the pressure to compare with PTz data."""
     error = PTzfit_cpp(p_guess, x_guess, beta_guess, mol, vol, x_total, m, s, e, t, cppargs)
@@ -1358,9 +1390,9 @@ def PTzfit(p_guess, x_guess, beta_guess, mol, vol, x_total, m, s, e, t, cppargs)
         xv = (mol*x_total - (1-beta)*mol*xl)/beta/mol
         while (dif>1e-9) and (itr<100):
             beta_old = beta
-            rhol = pcsaft_den_cpp(xl, m, s, e, t, p_guess, 0, cppargs)        
+            rhol = pcsaft_den_cpp(xl, m, s, e, t, p_guess, 0, cppargs)
             fugcoef_l = np.asarray(pcsaft_fugcoef_cpp(xl, m, s, e, t, rhol, cppargs))
-            rhov = pcsaft_den_cpp(xv, m, s, e, t, p_guess, 1, cppargs)        
+            rhov = pcsaft_den_cpp(xv, m, s, e, t, p_guess, 1, cppargs)
             fugcoef_v = np.asarray(pcsaft_fugcoef_cpp(xv, m, s, e, t, rhov, cppargs))
             xl = fugcoef_v*xv/fugcoef_l
             xl = xl/np.sum(xl)
@@ -1383,9 +1415,9 @@ def PTzfit(p_guess, x_guess, beta_guess, mol, vol, x_total, m, s, e, t, cppargs)
         xv = xv/np.sum(xv)
         while (dif>1e-9) and (itr<100):
             beta_old = beta
-            rhol = pcsaft_den_cpp(xl, m, s, e, t, p_guess, 0, cppargs)        
+            rhol = pcsaft_den_cpp(xl, m, s, e, t, p_guess, 0, cppargs)
             fugcoef_l = np.asarray(pcsaft_fugcoef_cpp(xl, m, s, e, t, rhol, cppargs))
-            rhov = pcsaft_den_cpp(xv, m, s, e, t, p_guess, 1, cppargs)        
+            rhov = pcsaft_den_cpp(xv, m, s, e, t, p_guess, 1, cppargs)
             fugcoef_v = np.asarray(pcsaft_fugcoef_cpp(xv, m, s, e, t, rhov, cppargs))
             xl = fugcoef_v*xv/fugcoef_l
             xl = xl/np.sum(xl)
@@ -1406,24 +1438,24 @@ def PTzfit(p_guess, x_guess, beta_guess, mol, vol, x_total, m, s, e, t, cppargs)
 def aly_lee(t, c):
     """
     Calculate the ideal gas isobaric heat capacity using the Aly-Lee equation.
-    
+
     Parameters
     ----------
     t : float
         Temperature (K)
     c : ndarray, shape (5,)
         Constants for the Aly-Lee equation
-    
+
     Returns
-    -------    
+    -------
     cp_ideal : float
         Ideal gas isobaric heat capacity (J mol^-1 K^-1)
-    
+
     Reference:
-    F. A. Aly and L. L. Lee, “Self-consistent equations for calculating the ideal 
-    gas heat capacity, enthalpy, and entropy,” Fluid Phase Equilibria, vol. 6, 
+    F. A. Aly and L. L. Lee, “Self-consistent equations for calculating the ideal
+    gas heat capacity, enthalpy, and entropy,” Fluid Phase Equilibria, vol. 6,
     no. 3–4, pp. 169–179, 1981.
-    
+
     """
     cp_ideal = (c[0] + c[1]*(c[2]/t/np.sinh(c[2]/t))**2 + c[3]*(c[4]/t/np.cosh(c[4]/t))**2)/1000.
     return cp_ideal
@@ -1431,17 +1463,17 @@ def aly_lee(t, c):
 def dielc_water(t):
     """
     Return the dielectric constant of water at the given temperature.
-    
+
     t : float
         Temperature (K)
-    
+
     This equation was fit to values given in the reference. For temperatures
     from 263.15 to 368.15 K values at 1 bar were used. For temperatures from
     368.15 to 443.15 K values at 10 bar were used.
-    
+
     Reference:
-    D. G. Archer and P. Wang, “The Dielectric Constant of Water and Debye‐Hückel 
-    Limiting Law Slopes,” J. Phys. Chem. Ref. Data, vol. 19, no. 2, pp. 371–411, 
+    D. G. Archer and P. Wang, “The Dielectric Constant of Water and Debye‐Hückel
+    Limiting Law Slopes,” J. Phys. Chem. Ref. Data, vol. 19, no. 2, pp. 371–411,
     Mar. 1990.
     """
     if t <= 368.15:
@@ -1449,8 +1481,8 @@ def dielc_water(t):
     else:
         dielc = 0.0005003272124*t**2 - 0.6285556029*t + 220.4467027
     return dielc
-    
-    
+
+
 def np_to_vector(np_array):
     """Take a numpy array and return a C++ vector."""
     cdef vector[double] cpp_vector
@@ -1459,12 +1491,12 @@ def np_to_vector(np_array):
         np_array = np_array.flatten()
         N = np_array.shape[0]
         for i in range(N):
-            cpp_vector.push_back(np_array[i]) 
+            cpp_vector.push_back(np_array[i])
     except TypeError:
         cpp_vector.push_back(np_array)
-      
+
     return cpp_vector
-    
+
 def create_struct(pyargs):
     """Convert additional arguments to a C++ struct."""
     cdef add_args cppargs
@@ -1487,5 +1519,5 @@ def create_struct(pyargs):
         cppargs.k_hb = np_to_vector(pyargs['k_hb'])
     if 'l_ij' in pyargs:
         cppargs.l_ij = np_to_vector(pyargs['l_ij'])
-    
+
     return cppargs
