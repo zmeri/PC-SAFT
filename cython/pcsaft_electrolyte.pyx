@@ -88,8 +88,6 @@ from scipy.optimize import minimize
 from libcpp.vector cimport vector
 cimport pcsaft_electrolyte
 
-import matplotlib.pyplot as plt
-
 class InputError(Exception):
     """Exception raised for errors in the input.
     """
