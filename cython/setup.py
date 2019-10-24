@@ -14,4 +14,4 @@ ext_modules = [
         language="c++")]
 
 setup(name='PC-SAFT electrolyte',
-      ext_modules=cythonize(ext_modules))
+      ext_modules=cythonize(ext_modules, language_level="3"))
