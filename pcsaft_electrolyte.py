@@ -79,6 +79,21 @@ revised,” Chem. Eng. Res. Des., vol. 92, no. 12, pp. 2884–2897, Dec. 2014.
 import numpy as np
 from scipy.optimize import fsolve
 from scipy.optimize import minimize
+
+class InputError(Exception):
+    """Exception raised for errors in the input.
+    """
+    def __init__(self, message):
+        self.message = message
+
+def check_input(x, name1, var1, name2, var2):
+    ''' Perform a few basic checks to make sure the input is reasonable. '''
+    if np.sum(x) != 1:
+        raise InputError('The mole fractions do not sum to 1. x = {}'.format(x))
+    if var1 <= 0:
+        raise InputError('The {} must be a positive number. {} = {}'.format(name1, name1, var1))
+    if var2 <= 0:
+        raise InputError('The {} must be a positive number. {} = {}'.format(name2, name2, var2))
    
 def pcsaft_vaporP(p_guess, x, m, s, e, t, **kwargs):
     """
@@ -132,6 +147,7 @@ def pcsaft_vaporP(p_guess, x, m, s, e, t, **kwargs):
     Pvap : float
         Vapor pressure (Pa)    
     """
+    check_input(x, 'guess pressure', p_guess, 'temperature', t)
     Pvap = minimize(vaporPfit, p_guess, args=(x, m, s, e, t, kwargs), tol=1e-10, method='Nelder-Mead', options={'maxiter': 100}).x
     return Pvap
     
@@ -189,6 +205,7 @@ def pcsaft_bubbleP(p_guess, xv_guess, x, m, s, e, t, **kwargs):
             0 : Bubble point pressure (Pa)
             1 : Composition of the liquid phase
     """
+    check_input(x, 'guess pressure', p_guess, 'temperature', t)
     result = minimize(bubblePfit, p_guess, args=(xv_guess, x, m, s, e, t, kwargs), tol=1e-10, method='Nelder-Mead', options={'maxiter': 100})
     bubP = result.x
 
@@ -286,6 +303,7 @@ def pcsaft_Hvap(p_guess, x, m, s, e, t, **kwargs):
             0 : enthalpy of vaporization (J/mol), float            
             1 : vapor pressure (Pa), float
     """
+    check_input(x, 'guess pressure', p_guess, 'temperature', t)
     Pvap = minimize(vaporPfit, p_guess, args=(x, m, s, e, t, kwargs), tol=1e-10, method='Nelder-Mead', options={'maxiter': 100}).x
 
     rho = pcsaft_den(x, m, s, e, t, Pvap, phase='liq', **kwargs)        
@@ -350,6 +368,7 @@ def pcsaft_osmoticC(x, m, s, e, t, rho, **kwargs):
     osmC : float
         Molal osmotic coefficient
     """
+    check_input(x, 'density', rho, 'temperature', t)
     indx_water = np.where(e == 353.9449)[0] # to find index for water    
     molality = x/(x[indx_water]*18.0153/1000.)
     molality[indx_water] = 0
@@ -425,6 +444,8 @@ def pcsaft_cp(x, m, s, e, t, rho, params, **kwargs):
     cp : float
         Specific molar isobaric heat capacity (J mol^-1 K^-1)
     """
+    check_input(x, 'density', rho, 'temperature', t)
+
     if rho > 900:
         ph = 'liq'
     else:
@@ -506,6 +527,7 @@ def pcsaft_PTz(p_guess, x_guess, beta_guess, mol, vol, x_total, m, s, e, t, **kw
             2 : composition of the vapor phase, ndarray, shape (n,)
             3 : mole fraction of the mixture vaporized
     """ 
+    check_input(x_total, 'guess pressure', p_guess, 'temperature', t)
     result = minimize(PTzfit, p_guess, args=(x_guess, beta_guess, mol, vol, x_total, m, s, e, t, kwargs), tol=1e-10, method='Nelder-Mead', options={'maxiter': 100})
     p = result.x
 
@@ -621,6 +643,7 @@ def pcsaft_den(x, m, s, e, t, p, phase='liq', **kwargs):
     rho : float
         Molar density (mol m^{-3})
     """
+    check_input(x, 'pressure', p, 'temperature', t)
     if phase == 'liq':
         eta_guess = 0.5
     elif phase == 'vap':
@@ -687,6 +710,8 @@ def pcsaft_p(x, m, s, e, t, rho, k_ij=None, e_assoc=None, vol_a=None, dipm=None,
     P : float
         Pressure (Pa)
     """ 
+    check_input(x, 'density', rho, 'temperature', t)
+
     kb = 1.380648465952442093e-23 # Boltzmann constant, J K^-1
     N_AV = 6.022140857e23 # Avagadro's number
     den = rho*N_AV/1.0e30 # number density, units of Angstrom^-3
@@ -746,6 +771,8 @@ def pcsaft_dadt(x, m, s, e, t, rho, k_ij=None, e_assoc=None, vol_a=None, dipm=No
     dadt : float
         Temperature derivative of residual Helmholtz energy at constant density (J mol^{-1} K^{-1})
     """
+    check_input(x, 'density', rho, 'temperature', t)
+
     ncomp = x.shape[0] # number of components
     kb = 1.380648465952442093e-23 # Boltzmann constant, J K^-1
     N_AV = 6.022140857e23 # Avagadro's number
@@ -1024,6 +1051,8 @@ def pcsaft_hres(x, m, s, e, t, rho, k_ij=None, e_assoc=None, vol_a=None, dipm=No
     hres : float
         Residual enthalpy (J mol^{-1})
     """
+    check_input(x, 'density', rho, 'temperature', t)
+
     kb = 1.380648465952442093e-23 # Boltzmann constant, J K^-1
     N_AV = 6.022140857e23 # Avagadro's number
 
@@ -1083,6 +1112,8 @@ def pcsaft_sres(x, m, s, e, t, rho, k_ij=None, e_assoc=None, vol_a=None, dipm=No
     sres : float
         Residual entropy (J mol^{-1} K^{-1})
     """    
+    check_input(x, 'density', rho, 'temperature', t)
+
     gres = pcsaft_gres(x, m, s, e, t, rho, k_ij, e_assoc, vol_a, dipm, dip_num, z, dielc)
     hres = pcsaft_hres(x, m, s, e, t, rho, k_ij, e_assoc, vol_a, dipm, dip_num, z, dielc)
 
@@ -1138,6 +1169,8 @@ def pcsaft_gres(x, m, s, e, t, rho, k_ij=None, e_assoc=None, vol_a=None, dipm=No
     gres : float
         Residual Gibbs energy (J mol^{-1})
     """
+    check_input(x, 'density', rho, 'temperature', t)
+
     kb = 1.380648465952442093e-23 # Boltzmann constant, J K^-1
     N_AV = 6.022140857e23 # Avagadro's number
     
@@ -1197,6 +1230,8 @@ def pcsaft_fugcoef(x, m, s, e, t, rho, k_ij=None, e_assoc=None, vol_a=None, dipm
     fugcoef : ndarray, shape (n,)
         Fugacity coefficients of each component.
     """ 
+    check_input(x, 'density', rho, 'temperature', t)
+
     ncomp = x.shape[0] # number of components
     kb = 1.380648465952442093e-23 # Boltzmann constant, J K^-1
     N_AV = 6.022140857e23 # Avagadro's number
@@ -1554,6 +1589,8 @@ def pcsaft_Z(x, m, s, e, t, rho, k_ij=None, e_assoc=None, vol_a=None, dipm=None,
     Z : float
         Compressibility factor
     """    
+    check_input(x, 'density', rho, 'temperature', t)
+
     ncomp = x.shape[0] # number of components
     kb = 1.380648465952442093e-23 # Boltzmann constant, J K^-1
     N_AV = 6.022140857e23 # Avagadro's number
@@ -1811,7 +1848,9 @@ def pcsaft_ares(x, m, s, e, t, rho, k_ij=None, e_assoc=None, vol_a=None, dipm=No
     -------
     ares : float
         Residual Helmholtz energy (J mol^{-1})
-    """    
+    """
+    check_input(x, 'density', rho, 'temperature', t)
+    
     ncomp = x.shape[0] # number of components
     kb = 1.380648465952442093e-23 # Boltzmann constant, J K^-1
     N_AV = 6.022140857e23 # Avagadro's number
