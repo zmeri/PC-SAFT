@@ -88,7 +88,7 @@ class InputError(Exception):
 
 def check_input(x, name1, var1, name2, var2):
     ''' Perform a few basic checks to make sure the input is reasonable. '''
-    if np.sum(x) != 1:
+    if abs(np.sum(x) - 1) > 1e-7:
         raise InputError('The mole fractions do not sum to 1. x = {}'.format(x))
     if var1 <= 0:
         raise InputError('The {} must be a positive number. {} = {}'.format(name1, name1, var1))
