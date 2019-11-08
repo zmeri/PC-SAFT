@@ -148,7 +148,16 @@ def pcsaft_vaporP(p_guess, x, m, s, e, t, **kwargs):
         Vapor pressure (Pa)    
     """
     check_input(x, 'guess pressure', p_guess, 'temperature', t)
-    Pvap = minimize(vaporPfit, p_guess, args=(x, m, s, e, t, kwargs), tol=1e-10, method='Nelder-Mead', options={'maxiter': 100}).x
+    result = minimize(vaporPfit, p_guess, args=(x, m, s, e, t, cppargs), tol=1e-10, method='Nelder-Mead', options={'maxiter': 100})
+    if result.fun > 1e-5: # Sometimes optimization doesn't work if p_guess is too large
+        result2 = minimize(vaporPfit, 1, args=(x, m, s, e, t, cppargs), tol=1e-10, method='Nelder-Mead', options={'maxiter': 100})
+
+        if result2.fun < result.fun:
+            Pvap = result2.x
+        else:
+            Pvap = result.x
+    else:
+        Pvap = result.x
     return Pvap
     
 def pcsaft_bubbleP(p_guess, xv_guess, x, m, s, e, t, **kwargs):
@@ -207,7 +216,15 @@ def pcsaft_bubbleP(p_guess, xv_guess, x, m, s, e, t, **kwargs):
     """
     check_input(x, 'guess pressure', p_guess, 'temperature', t)
     result = minimize(bubblePfit, p_guess, args=(xv_guess, x, m, s, e, t, kwargs), tol=1e-10, method='Nelder-Mead', options={'maxiter': 100})
-    bubP = result.x
+    if result.fun > 1e-5: # in case initial p_guess doesn't result in a good solution
+        result2 = minimize(bubblePfit, 1, args=(xv_guess, x, m, s, e, t, cppargs), tol=1e-10, method='Nelder-Mead', options={'maxiter': 100})
+
+        if result2.fun < result.fun:
+            bubP = result2.x
+        else:
+            bubP = result.x
+    else:
+        bubP = result.x
 
     # Determine vapor phase composition at bubble pressure    
     if not ('z' in kwargs): # Check that the mixture does not contain electrolytes. For electrolytes, a different equilibrium criterion should be used. 
