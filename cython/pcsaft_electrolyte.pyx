@@ -14,7 +14,6 @@ Functions
 - pcsaft_vaporP : calculate the vapor pressure
 - pcsaft_bubbleT : calculate the bubble point temperature of a mixture
 - pcsaft_bubbleP : calculate the bubble point pressure of a mixture
-- pcsaft_bubblePfit : used for fitting using bubble point pressure data
 - pcsaft_Hvap : calculate the enthalpy of vaporization
 - pcsaft_osmoticC : calculate the osmotic coefficient for the mixture
 - pcsaft_cp : calculate the heat capacity
@@ -537,7 +536,15 @@ def pcsaft_bubbleP(p_guess, xv_guess, x, m, s, e, t, pyargs):
         e = np.asarray([e])
 
     result = minimize(bubblePfit, p_guess, args=(xv_guess, x, m, s, e, t, cppargs), tol=1e-10, method='Nelder-Mead', options={'maxiter': 100})
-    bubP = result.x
+    if result.fun > 1e-5: # in case initial p_guess doesn't result in a good solution
+        result2 = minimize(bubblePfit, 1, args=(xv_guess, x, m, s, e, t, cppargs), tol=1e-10, method='Nelder-Mead', options={'maxiter': 100})
+
+        if result2.fun < result.fun:
+            bubP = result2.x
+        else:
+            bubP = result.x
+    else:
+        bubP = result.x
 
 #     Determine vapor phase composition at bubble pressure
     if cppargs['z'] == []: # Check that the mixture does not contain electrolytes. For electrolytes, a different equilibrium criterion should be used.
