@@ -354,7 +354,16 @@ def pcsaft_vaporP(p_guess, x, m, s, e, t, pyargs):
     if type(e) == np.float_:
         e = np.asarray([e])
 
-    Pvap = minimize(vaporPfit, p_guess, args=(x, m, s, e, t, cppargs), tol=1e-10, method='Nelder-Mead', options={'maxiter': 100}).x
+    result = minimize(vaporPfit, p_guess, args=(x, m, s, e, t, cppargs), tol=1e-10, method='Nelder-Mead', options={'maxiter': 100})
+    if result.fun > 1e-5: # Sometimes optimization doesn't work if p_guess is too large
+        result2 = minimize(vaporPfit, 1, args=(x, m, s, e, t, cppargs), tol=1e-10, method='Nelder-Mead', options={'maxiter': 100})
+
+        if result2.fun < result.fun:
+            Pvap = result2.x
+        else:
+            Pvap = result.x
+    else:
+        Pvap = result.x
     return Pvap
 
 
