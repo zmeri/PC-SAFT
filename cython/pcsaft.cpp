@@ -2095,7 +2095,7 @@ double pcsaft_den_cpp(vector<double> x, vector<double> m, vector<double> s, vect
         iter += 1;
     }
 
-    if (phase == 1 && y2 > 1.0e-3 && (rho - x_hi) < 1e-5) {
+    if (phase == 1 && y2 > 1.0e-3 && (x_hi - rho) < 1e-5) {
         x_hi = 0.14;
         x_hi = 6/PI*x_hi/summ*1.0e30/N_AV;
         while (iter < maxiter && y2 > 1.0e-8) {
