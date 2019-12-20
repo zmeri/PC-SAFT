@@ -19,7 +19,7 @@ Functions
 - pcsaft_den : calculate the molar density
 - pcsaft_p : calculate the pressure
 - pcsaft_hres : calculate the residual enthalpy
-- pcsaft_sres : calculate the residual entropy
+- pcsaft_sres : calculate the residual entropy (as a function of temperature and pressure)
 - pcsaft_gres : calculate the residual Gibbs free energy
 - pcsaft_fugcoef : calculate the fugacity coefficients
 - pcsaft_Z : calculate the compressibility factor
@@ -1079,7 +1079,9 @@ def pcsaft_hres(x, m, s, e, t, rho, k_ij=None, e_assoc=None, vol_a=None, dipm=No
 def pcsaft_sres(x, m, s, e, t, rho, k_ij=None, e_assoc=None, vol_a=None, dipm=None, \
             dip_num=None, z=None, dielc=None):
     """
-    Calculate the residual entropy (constant volume) for one phase of the system.
+    Calculate the residual entropy (as a function of temperature and pressure) for one phase of the system.
+    Note that the residual entropy in terms of the variables temperature and density is different.
+    See Equation A.47 in Gross and Sadowski 2001.
     
     Parameters
     ----------
