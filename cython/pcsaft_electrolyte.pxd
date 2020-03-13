@@ -8,35 +8,25 @@ Created on Thu Jul 19 14:23:00 2018
 from libcpp.vector cimport vector
 
 cdef extern from "pcsaft.cpp":
-    double pcsaft_p_cpp(vector[double] x, vector[double] m, vector[double] s, vector[double] e, \
-        double t, double rho, add_args &cppargs)
-    double pcsaft_Z_cpp(vector[double] x, vector[double] m, vector[double] s, vector[double] e, \
-        double t, double rho, add_args &cppargs)
-    vector[double] pcsaft_fugcoef_cpp(vector[double] x, vector[double] m, vector[double] s, vector[double] e, \
-        double t, double rho, add_args &cppargs)
-    double pcsaft_den_cpp(vector[double] x, vector[double] m, vector[double] s, vector[double] e, \
-        double t, double p, int phase, add_args &cppargs)
-    double bubblePfit_cpp(double p_guess, vector[double] xv_guess, vector[double] x, vector[double] m, \
-        vector[double] s, vector[double] e, double t, add_args &cppargs)
-    double bubbleTfit_cpp(double t_guess, vector[double] xv_guess, vector[double] x, vector[double] m, \
-        vector[double] s, vector[double] e, double p, add_args &cppargs)
-    double PTzfit_cpp(double p_guess, vector[double] x_guess, double beta_guess, double mol, \
-        double vol, vector[double] x_total, vector[double] m, vector[double] s, vector[double] e, \
-        double t, add_args &cppargs)
-#    vector[double] chem_equil_cpp(vector[double] x_guess, vector[double] m, vector[double] s, \
-#        vector[double] e, double t, double p, add_args &cppargs)
-    double pcsaft_ares_cpp(vector[double] x, vector[double] m, vector[double] s, vector[double] e, \
-        double t, double rho, add_args &cppargs)
-    double pcsaft_dadt_cpp(vector[double] x, vector[double] m, vector[double] s, vector[double] e, \
-        double t, double rho, add_args &cppargs)
-    double pcsaft_hres_cpp(vector[double] x, vector[double] m, vector[double] s, vector[double] e, \
-        double t, double rho, add_args &cppargs)
-    double pcsaft_sres_cpp(vector[double] x, vector[double] m, vector[double] s, vector[double] e, \
-        double t, double rho, add_args &cppargs)
-    double pcsaft_gres_cpp(vector[double] x, vector[double] m, vector[double] s, vector[double] e, \
-        double t, double rho, add_args &cppargs)
-   
-    ctypedef struct add_args: 
+    double pcsaft_p_cpp(double t, double rho, add_args &cppargs)
+    double pcsaft_Z_cpp(double t, double rho, add_args &cppargs)
+    vector[double] pcsaft_fugcoef_cpp(double t, double rho, add_args &cppargs)
+    double pcsaft_den_cpp(double t, double p, int phase, add_args &cppargs)
+    double pcsaft_ares_cpp(double t, double rho, add_args &cppargs)
+    double pcsaft_dadt_cpp(double t, double rho, add_args &cppargs)
+    double pcsaft_hres_cpp(double t, double rho, add_args &cppargs)
+    double pcsaft_sres_cpp(double t, double rho, add_args &cppargs)
+    double pcsaft_gres_cpp(double t, double rho, add_args &cppargs)
+    double flashTQ_cpp(double t, double Q, add_args &cppargs) except +
+    double flashTQ_cpp(double t, double Q, add_args &cppargs, double p_guess) except +
+    double flashPQ_cpp(double p, double Q, add_args &cppargs) except +
+    double flashPQ_cpp(double p, double Q, add_args &cppargs, double t_guess) except +
+
+    ctypedef struct add_args:
+        vector[double] x
+        vector[double] m
+        vector[double] s
+        vector[double] e
         vector[double] k_ij
         vector[double] e_assoc
         vector[double] vol_a
