@@ -4,12 +4,13 @@ These functions implement the PC-SAFT equation of state. In addition to the hard
 
 ## Dependencies
 
-The Numpy and Scipy packages are required.
-When using the faster C++ functions [Cython](http://cython.org/) is needed, along with the [Eigen](https://github.com/eigenteam/eigen-git-mirror) package for linear algebra.
+The Numpy and Scipy packages are required. The core functions have been written in C++ to improve calculation speed, so [Cython](http://cython.org/) is needed, along with the [Eigen](https://github.com/eigenteam/eigen-git-mirror) package for linear algebra. For unit testing pytest is used.
 
-## Cython version
+## Compiling with Cython
 
-To speed up the original Python code the core functions have been rewritten in C++. These are then connected with the remaining Python code by using Cython. Using the Cython version gives a significant improvement in speed. The Cython code needs to be compiled before use, and for instructions on how to do this see the [Cython documentation](http://docs.cython.org/en/latest/src/quickstart/build.html).
+To speed up the original Python code the core functions have been rewritten in C++. These are then connected with the remaining Python code using Cython. This gave a significant improvement in speed. The Cython code needs to be compiled before use, and for instructions on how to do this see the [Cython documentation](http://docs.cython.org/en/latest/src/quickstart/build.html).
+
+The original Python-only code has been removed from the repository. If you still want to use the original Python-only functions, go back to an [earlier version](https://github.com/zmeri/PC-SAFT/tree/b43bf568c4dc1907316422d5c3f7b809e9725848) of the repository. Note that the Python-only code is no longer maintained, so it may not be as reliable as the Cython code.
 
 ## Author
 
