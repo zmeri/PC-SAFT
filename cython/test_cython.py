@@ -1112,13 +1112,3 @@ def test_pressure(print_result=False):
         print('    Reference:', ref, 'Pa')
         print('    PC-SAFT:', calc, 'Pa')
         print('    Relative deviation:', (calc-ref)/ref*100, '%')
-
-
-# print('density:', timeit.timeit('test_density()', number=5, setup="from __main__ import test_density"))
-# print('flashTQ:', timeit.timeit('test_flashTQ()', number=5, setup="from __main__ import test_flashTQ"))
-# print('vaporP:', timeit.timeit('test_vaporP()', number=5, setup="from __main__ import test_vaporP"))
-# print('bubbleP', timeit.timeit('test_bubbleP()', number=5, setup="from __main__ import test_bubbleP"))
-# test_osmoticC()
-# test_flashTQ(print_result=True)
-# test_flashPQ(print_result=True)
-# test_Hvap(print_result=True)
