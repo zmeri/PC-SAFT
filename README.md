@@ -4,7 +4,7 @@ These functions implement the PC-SAFT equation of state. In addition to the hard
 
 ## Dependencies
 
-The Numpy and Scipy packages are required. The core functions have been written in C++ to improve calculation speed, so [Cython](http://cython.org/) is needed, along with the [Eigen](https://github.com/eigenteam/eigen-git-mirror) package for linear algebra.
+The Numpy and Scipy packages are required. The core functions have been written in C++ to improve calculation speed, so [Cython](http://cython.org/) is needed, along with the [Eigen](https://github.com/eigenteam/eigen-git-mirror) package for linear algebra. For unit testing pytest is used.
 
 ## Compiling with Cython
 
