@@ -13,5 +13,6 @@ ext_modules = [
         sources=["pcsaft_electrolyte.pyx"],
         language="c++")]
 
-setup(name='PC-SAFT electrolyte',
+setup(name='pcsaft',
+      version='1.0',
       ext_modules=cythonize(ext_modules, language_level="3"))
