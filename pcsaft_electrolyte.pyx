@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# distutils: language=c++
+# setuptools: language=c++
 """
 PC-SAFT with electrolyte term
 

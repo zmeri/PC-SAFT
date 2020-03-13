@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 """
-Distutils setup file for compiling to Cython module
+Setup file for compiling to Cython module
 
 @author: Zach Baird
 """
-from distutils.core import setup, Extension
+from setuptools import setup, Extension
 from Cython.Build import cythonize
 import numpy as np
 

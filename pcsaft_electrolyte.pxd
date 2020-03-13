@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# distutils: language=c++
+# setuptools: language=c++
 """
 Created on Thu Jul 19 14:23:00 2018
 
