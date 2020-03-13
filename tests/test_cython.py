@@ -5,10 +5,10 @@ Tests for checking that the PC-SAFT functions are working correctly.
 @author: Zach Baird
 """
 import numpy as np
-from pcsaft_electrolyte import pcsaft_den, pcsaft_hres, pcsaft_gres, pcsaft_sres
-from pcsaft_electrolyte import flashTQ, flashPQ, pcsaft_Hvap
-from pcsaft_electrolyte import dielc_water, pcsaft_osmoticC
-from pcsaft_electrolyte import pcsaft_cp, pcsaft_ares, pcsaft_dadt, pcsaft_p
+from pcsaft import pcsaft_den, pcsaft_hres, pcsaft_gres, pcsaft_sres
+from pcsaft import flashTQ, flashPQ, pcsaft_Hvap
+from pcsaft import dielc_water, pcsaft_osmoticC
+from pcsaft import pcsaft_cp, pcsaft_ares, pcsaft_dadt, pcsaft_p
 
 def test_hres(print_result=False):
     """Test the residual enthalpy function to see if it is working correctly."""
