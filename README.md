@@ -6,6 +6,10 @@ These functions implement the PC-SAFT equation of state. In addition to the hard
 
 The Numpy and Scipy packages are required. The core functions have been written in C++ to improve calculation speed, so [Cython](http://cython.org/) is needed, along with the [Eigen](https://github.com/eigenteam/eigen-git-mirror) package for linear algebra. For unit testing pytest is used.
 
+## Python package
+
+To make it easier to use this code, it has been added as a package to PyPi ([pcsaft](https://pypi.org/project/pcsaft/)), which means it can be installed using pip. This allows you to use the code without needing to compile the Cython code yourself. Binaries for Linux and Windows have been added, but MacOS is currently not supported.
+
 ## Compiling with Cython
 
 To speed up the original Python code the core functions have been rewritten in C++. These are then connected with the remaining Python code using Cython. This gave a significant improvement in speed. The Cython code needs to be compiled before use, and for instructions on how to do this see the [Cython documentation](http://docs.cython.org/en/latest/src/quickstart/build.html).
