@@ -77,7 +77,7 @@ revised,” Chem. Eng. Res. Des., vol. 92, no. 12, pp. 2884–2897, Dec. 2014.
 import numpy as np
 from libcpp.vector cimport vector
 from copy import deepcopy
-cimport pcsaft_electrolyte
+cimport pcsaft
 
 class InputError(Exception):
     """Exception raised for errors in the input.

@@ -7,7 +7,7 @@ Created on Thu Jul 19 14:23:00 2018
 """
 from libcpp.vector cimport vector
 
-cdef extern from "pcsaft.cpp":
+cdef extern from "pcsaft_electrolyte.cpp":
     double pcsaft_p_cpp(double t, double rho, add_args &cppargs)
     double pcsaft_Z_cpp(double t, double rho, add_args &cppargs)
     vector[double] pcsaft_fugcoef_cpp(double t, double rho, add_args &cppargs)

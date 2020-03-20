@@ -4,7 +4,7 @@
 #include "math.h"
 #include <Eigen/Dense>
 
-#include "pcsaft.h"
+#include "pcsaft_electrolyte.h"
 
 // #include <iostream>
 
@@ -434,7 +434,7 @@ double pcsaft_Z_cpp(double t, double rho, add_args &cppargs) {
                 }
             }
             XA[i*2] = (-1 + sqrt(1+8*den*delta_ij[i*ncA+i]))/(4*den*delta_ij[i*ncA+i]);
-            if (!isfinite(XA[i*2])) {
+            if (!std::isfinite(XA[i*2])) {
                 XA[i*2] = 0.02;
             }
             XA[i*2+1] = XA[i*2];
@@ -933,7 +933,7 @@ vector<double> pcsaft_fugcoef_cpp(double t, double rho, add_args &cppargs) {
                 }
             }
             XA[i*2] = (-1 + sqrt(1+8*den*delta_ij[i*ncA+i]))/(4*den*delta_ij[i*ncA+i]);
-            if (!isfinite(XA[i*2])) {
+            if (!std::isfinite(XA[i*2])) {
                 XA[i*2] = 0.02;
             }
             XA[i*2+1] = XA[i*2];
@@ -1348,7 +1348,7 @@ double pcsaft_ares_cpp(double t, double rho, add_args &cppargs) {
                 delta_ij[idxa] = ghs[iA[i]*ncomp+iA[j]]*(exp(eABij[idxa]/t)-1)*pow(s_ij[iA[i]*ncomp+iA[j]], 3)*volABij[idxa];
             }
             XA[i*2] = (-1 + sqrt(1+8*den*delta_ij[i*ncA+i]))/(4*den*delta_ij[i*ncA+i]);
-            if (!isfinite(XA[i*2])) {
+            if (!std::isfinite(XA[i*2])) {
                 XA[i*2] = 0.02;
             }
             XA[i*2+1] = XA[i*2];
@@ -1730,7 +1730,7 @@ double pcsaft_dadt_cpp(double t, double rho, add_args &cppargs) {
                     *(exp(eABij[idxa]/t)-1));
             }
             XA[i*2] = (-1 + sqrt(1+8*den*delta_ij[i*ncA+i]))/(4*den*delta_ij[i*ncA+i]);
-            if (!isfinite(XA[i*2])) {
+            if (!std::isfinite(XA[i*2])) {
                 XA[i*2] = 0.02;
             }
             XA[i*2+1] = XA[i*2];
@@ -2059,7 +2059,10 @@ vector<double> scan_pressure(double t, double Q, add_args &cppargs, int npts) {
         throw SolutionError("scan_pressure did not find any pressure with a finite error.");
     }
 
-    vector<double> result{ p_guess, x_lo, x_hi };
+    vector<double> result(3);
+    result[0] = p_guess;
+    result[1] = x_lo;
+    result[2] = x_hi;
     return result;
 }
 
@@ -2138,7 +2141,10 @@ vector<double> scan_temp(double p, double Q, add_args &cppargs, int npts) {
         throw SolutionError("scan_temp did not find any temperature with a finite error.");
     }
 
-    vector<double> result{ t_guess, x_lo, x_hi };
+    vector<double> result(3);
+    result[0] = t_guess;
+    result[1] = x_lo;
+    result[2] = x_hi;
     return result;
 }
 
@@ -2471,7 +2477,7 @@ double BrentRho(double t, double p, int phase, add_args &cppargs, double a, doub
 double resid_rho(double rhomolar, double t, double p, add_args &cppargs){
     double peos = pcsaft_p_cpp(t, rhomolar, cppargs);
     double cost = (peos-p)/p;
-    if (isfinite(cost)) {
+    if (std::isfinite(cost)) {
         return cost;
     }
     else {
@@ -2504,7 +2510,7 @@ double BoundedSecantBubPressure(double t, double Q, add_args &cppargs, double x0
         if (iter==1){y1=fval;}
         else
         {
-            if (isfinite(fval)) {
+            if (std::isfinite(fval)) {
                 y2 = fval;
             }
             else {
@@ -2618,7 +2624,7 @@ double resid_bub_pressure(double p, double t, double Q, add_args &cppargs) {
 
     }
 
-    if (!isfinite(error) || (rhol - rhov) < 1e-5) {
+    if (!std::isfinite(error) || (rhol - rhov) < 1e-5) {
         error = _HUGE;
     }
 
@@ -2640,7 +2646,7 @@ double BoundedSecantBubTemp(double p, double Q, add_args &cppargs, double x0, do
         if (iter==1){y1=fval;}
         else
         {
-            if (isfinite(fval)) {
+            if (std::isfinite(fval)) {
                 y2 = fval;
             }
             else {
@@ -2763,7 +2769,7 @@ double resid_bub_temp(double t, double p, double Q, add_args &cppargs) {
         }
     }
 
-    if (!isfinite(error) || (rhol - rhov) < 1e-5) {
+    if (!std::isfinite(error) || (rhol - rhov) < 1e-5) {
         error = _HUGE;
     }
 

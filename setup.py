@@ -9,8 +9,8 @@ from Cython.Build import cythonize
 import numpy as np
 
 ext_modules = [
-    Extension("pcsaft_electrolyte",
-        sources=["pcsaft_electrolyte.pyx"],
+    Extension("pcsaft",
+        sources=["pcsaft.pyx"],
         language="c++")]
 
 with open("README.md", "r") as fh:
