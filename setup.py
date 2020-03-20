@@ -9,15 +9,15 @@ from Cython.Build import cythonize
 import numpy as np
 
 ext_modules = [
-    Extension("pcsaft_electrolyte",
-        sources=["pcsaft_electrolyte.pyx"],
+    Extension("pcsaft",
+        sources=["pcsaft.pyx"],
         language="c++")]
 
 with open("README.md", "r") as fh:
     long_description = fh.read()
 
 setup(name='pcsaft',
-      version='1.0.0',
+      version='1.0.1',
       author="Zach Baird",
       description="The PC-SAFT equation of state, including dipole, association and ion terms.",
       long_description=long_description,
