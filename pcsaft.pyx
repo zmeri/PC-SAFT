@@ -506,9 +506,11 @@ def pcsaft_Hvap(t, pyargs, p_guess=None):
     q = 0
     try:
         if p_guess is not None:
-            Pvap = flashTQ_cpp(t, q, cppargs, p_guess)
+            result = np.asarray(flashTQ_cpp(t, q, cppargs, p_guess))
+            Pvap = result[0]
         else:
-            Pvap = flashTQ_cpp(t, q, cppargs)
+            result = np.asarray(flashTQ_cpp(t, q, cppargs))
+            Pvap = result[0]
     except:
         raise SolutionError('A solution was not found for flashTQ. T={}'.format(t))
 
