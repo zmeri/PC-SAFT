@@ -347,19 +347,26 @@ def flashPQ(p, q, pyargs, t_guess=None):
     -------
     t : float
         Temperature (K)
+    xl : ndarray, shape (n,)
+        Liquid mole fractions after flash
+    xv : ndarray, shape (n,)
+        Vapor mole fractions after flash
     """
     pyargs = ensure_numpy_input(pyargs)
     check_input(pyargs['x'], {'pressure':p, 'Q':q})
     cppargs = create_struct(pyargs)
     try:
         if t_guess is not None:
-            t = flashPQ_cpp(p, q, cppargs, t_guess)
+            result = flashPQ_cpp(p, q, cppargs, t_guess)
         else:
-            t = flashPQ_cpp(p, q, cppargs)
+            result = flashPQ_cpp(p, q, cppargs)
     except:
         raise SolutionError('A solution was not found for flashPQ. P={}'.format(p))
 
-    return t
+    t = result[0]
+    xl = np.asarray(result[1:])
+    xl, xv = np.split(xl, 2)
+    return t, xl, xv
 
 
 def flashTQ(t, q, pyargs, p_guess=None):
@@ -416,19 +423,26 @@ def flashTQ(t, q, pyargs, p_guess=None):
     -------
     p : float
         Pressure (Pa)
+    xl : ndarray, shape (n,)
+        Liquid mole fractions after flash
+    xv : ndarray, shape (n,)
+        Vapor mole fractions after flash
     """
     pyargs = ensure_numpy_input(pyargs)
     check_input(pyargs['x'], {'temperature':t, 'Q':q})
     cppargs = create_struct(pyargs)
     try:
         if p_guess is not None:
-            p = flashTQ_cpp(t, q, cppargs, p_guess)
+            result = flashTQ_cpp(t, q, cppargs, p_guess)
         else:
-            p = flashTQ_cpp(t, q, cppargs)
+            result = flashTQ_cpp(t, q, cppargs)
     except:
         raise SolutionError('A solution was not found for flashTQ. T={}'.format(t))
 
-    return p
+    p = result[0]
+    xl = np.asarray(result[1:])
+    xl, xv = np.split(xl, 2)
+    return p, xl, xv
 
 def pcsaft_Hvap(t, pyargs, p_guess=None):
     """
@@ -492,9 +506,11 @@ def pcsaft_Hvap(t, pyargs, p_guess=None):
     q = 0
     try:
         if p_guess is not None:
-            Pvap = flashTQ_cpp(t, q, cppargs, p_guess)
+            result = np.asarray(flashTQ_cpp(t, q, cppargs, p_guess))
+            Pvap = result[0]
         else:
-            Pvap = flashTQ_cpp(t, q, cppargs)
+            result = np.asarray(flashTQ_cpp(t, q, cppargs))
+            Pvap = result[0]
     except:
         raise SolutionError('A solution was not found for flashTQ. T={}'.format(t))
 
@@ -651,12 +667,6 @@ def pcsaft_cp(t, rho, params, pyargs):
         ph = 1
 
     cppargs = create_struct(pyargs)
-    # if type(m) == np.float_:
-    #     m = np.asarray([m])
-    # if type(s) == np.float_:
-    #     s = np.asarray([s])
-    # if type(e) == np.float_:
-    #     e = np.asarray([e])
 
     cp_ideal = aly_lee(t, params)
     p = pcsaft_p_cpp(t, rho, cppargs)
@@ -667,143 +677,6 @@ def pcsaft_cp(t, rho, params, pyargs):
     dhdt = (hres1-hres0)/0.002 # a numerical derivative is used for now until analytical derivatives are ready
     return cp_ideal + dhdt
 
-
-# def pcsaft_PTz(p_guess, x_guess, beta_guess, mol, vol, t, pyargs):
-#     """
-#     Calculate the pressure and compositions of each phase when given the overall
-#     composition and the total volume and number of moles. This allows PTz data
-#     to be used in fitting PC-SAFT parameters.
-#
-#     Parameters
-#     ----------
-#     p_guess : float
-#         Guess for the pressure of the system (Pa)
-#     x_guess : ndarray, shape (n,)
-#         Guess for the liquid phase composition
-#     beta_guess : float
-#         Guess for the mole fraction of the system in the vapor phase
-#     mol : float
-#         Total number of moles in the system (mol)
-#     vol : float
-#         Total volume of the system (m^{3})
-#     t : float
-#         Temperature (K)
-#     pyargs : dict
-#         A dictionary containing PC-SAFT parameters that can be passed for
-#         use in PC-SAFT:
-#
-#         x : ndarray, shape (n,)
-#             Overall mole fraction of each component in the system as a whole. It
-#             has a length of n, where n is the number of components in the system.
-#         m : ndarray, shape (n,)
-#             Segment number for each component.
-#         s : ndarray, shape (n,)
-#             Segment diameter for each compopynent. For ions this is the diameter of
-#             the hydrated ion. Units of Angstrom.
-#         e : ndarray, shape (n,)
-#             Dispersion energy of each component. For ions this is the dispersion
-#             energy of the hydrated ion. Units of K.
-#         k_ij : ndarray, shape (n,n)
-#             Binary interaction parameters between components in the mixture.
-#             (dimensions: ncomp x ncomp)
-#         e_assoc : ndarray, shape (n,)
-#             Association energy of the associating components. For non associating
-#             compounds this is set to 0. Units of K.
-#         vol_a : ndarray, shape (n,)
-#             Effective association volume of the associating components. For non
-#             associating compounds this is set to 0.
-#         dipm : ndarray, shape (n,)
-#             Dipole moment of the polar components. For components where the dipole
-#             term is not used this is set to 0. Units of Debye.
-#         dip_num : ndarray, shape (n,)
-#             The effective number of dipole functional groups on each component
-#             molecule. Some implementations use this as an adjustable parameter
-#             that is fit to data.
-#         z : ndarray, shape (n,)
-#             Charge number of the ions
-#         dielc : float
-#             Dielectric constant of the medium to be used for electrolyte
-#             calculations.
-#
-#     Returns
-#     -------
-#     output : list
-#         A list containing the following results:
-#             0 : pressure in the system (Pa), float
-#             1 : composition of the liquid phase, ndarray, shape (n,)
-#             2 : composition of the vapor phase, ndarray, shape (n,)
-#             3 : mole fraction of the mixture vaporized
-#     """
-#     check_input(x_total, 'guess pressure', p_guess, 'temperature', t)
-#     cppargs = create_struct(pyargs)
-#     if type(m) == np.float_:
-#         m = np.asarray([m])
-#     if type(s) == np.float_:
-#         s = np.asarray([s])
-#     if type(e) == np.float_:
-#         e = np.asarray([e])
-#
-#     result = minimize(PTzfit, p_guess, args=(x_guess, beta_guess, mol, vol, x_total, m, s, e, t, cppargs), tol=1e-10, method='Nelder-Mead', options={'maxiter': 100})
-#     p = result.x
-#
-#     if cppargs['z'] == []: # Check that the mixture does not contain electrolytes. For electrolytes, a different equilibrium criterion should be used.
-#         itr = 0
-#         dif = 10000.
-#         xl = np.copy(x_guess)
-#         beta = beta_guess
-#         xv = (mol*x_total - (1-beta)*mol*xl)/beta/mol
-#         while (dif>1e-9) and (itr<100):
-#             beta_old = beta
-#             rhol = pcsaft_den_cpp(xl, m, s, e, t, p, 0, cppargs)
-#             fugcoef_l = np.asarray(pcsaft_fugcoef_cpp(xl, m, s, e, t, rhol, cppargs))
-#             rhov = pcsaft_den_cpp(xv, m, s, e, t, p, 1, cppargs)
-#             fugcoef_v = np.asarray(pcsaft_fugcoef_cpp(xv, m, s, e, t, rhov, cppargs))
-#             if beta > 0.5:
-#                 xl = fugcoef_v*xv/fugcoef_l
-#                 xl = xl/np.sum(xl)
-#                 xv = (mol*x_total - (1-beta)*mol*xl)/beta/mol # if beta is close to zero then this equation behaves poorly, and that is why we use this if statement to switch the equation around
-#             else:
-#                 xv = fugcoef_l*xl/fugcoef_v
-#                 xv = xv/np.sum(xv)
-#                 xl = (mol*x_total - (beta)*mol*xv)/(1-beta)/mol
-#             beta = (vol/mol*rhov*rhol-rhov)/(rhol-rhov)
-#             dif = np.sum(abs(beta - beta_old))
-#             itr += 1
-#     else:
-#         z = np.asarray(cppargs['z'])
-#         # internal iteration loop to solve for compositions
-#         itr = 0
-#         dif = 10000.
-#         xl = np.copy(x_guess)
-#         beta = beta_guess
-#         xv = (mol*x_total - (1-beta)*mol*xl)/beta/mol
-#         xv[np.where(z != 0)[0]] = 0.
-#         xv = xv/np.sum(xv)
-#         while (dif>1e-9) and (itr<100):
-# #            xl = chem_equil_cpp(xl, m, s, e, t, p, cppargs)
-#             x_total = xl + xv
-#             beta_old = beta
-#             rhol = pcsaft_den_cpp(xl, m, s, e, t, p, 0, cppargs)
-#             fugcoef_l = np.asarray(pcsaft_fugcoef_cpp(xl, m, s, e, t, rhol, cppargs))
-#             rhov = pcsaft_den_cpp(xv, m, s, e, t, p, 1, cppargs)
-#             fugcoef_v = np.asarray(pcsaft_fugcoef_cpp(xv, m, s, e, t, rhov, cppargs))
-#             if beta > 0.5:
-#                 xl = fugcoef_v*xv/fugcoef_l
-#                 xl = xl/np.sum(xl)*(((1-beta) - np.sum(x_total[np.where(z != 0)[0]]))/(1-beta)) # ensures that mole fractions add up to 1
-#                 xl[np.where(z != 0)[0]] = x_total[np.where(z != 0)[0]]/(1-beta)
-#                 xv = (mol*x_total - (1-beta)*mol*xl)/beta/mol
-#                 xv[np.where(xv < 0)[0]] = 0.
-#             else:
-#                 xv = fugcoef_l*xl/fugcoef_v
-#                 xv[np.where(z != 0)[0]] = 0. # here it is assumed that the ionic compounds are nonvolatile
-#                 xv = xv/np.sum(xv)
-#                 xl = (mol*x_total - (beta)*mol*xv)/(1-beta)/mol
-#             beta = (vol/mol*rhov*rhol-rhov)/(rhol-rhov)
-#             dif = np.sum(abs(beta - beta_old))
-#             itr += 1
-#
-#     output = [p, xl, xv, beta]
-#     return output
 
 def pcsaft_den(t, p, pyargs, phase='liq'):
     """
@@ -1159,88 +1032,6 @@ def pcsaft_dadt(t, rho, pyargs):
     cppargs = create_struct(pyargs)
     return pcsaft_dadt_cpp(t, rho, cppargs)
 
-
-# def bubblePfit(p_guess, xv_guess, x, m, s, e, t, cppargs):
-#     """Minimize this function to calculate the bubble point pressure."""
-#     error = bubblePfit_cpp(p_guess, xv_guess, x, m, s, e, t, cppargs)
-#     return error
-#
-# def bubbleTfit(t_guess, xv_guess, x, m, s, e, p, cppargs):
-#     """Minimize this function to calculate the bubble point temperature."""
-#     error = bubbleTfit_cpp(t_guess, xv_guess, x, m, s, e, p, cppargs)
-#     return error
-#
-# def vaporPfit(p_guess, x, m, s, e, t, cppargs):
-#     """Minimize this function to calculate the vapor pressure."""
-#     if p_guess <= 0:
-#         error = 10000000000.
-#     else:
-#         rho = pcsaft_den_cpp(x, m, s, e, t, p_guess, 0, cppargs)
-#         fugcoef_l = np.asarray(pcsaft_fugcoef_cpp(x, m, s, e, t, rho, cppargs))
-#         rho = pcsaft_den_cpp(x, m, s, e, t, p_guess, 1, cppargs)
-#         fugcoef_v = np.asarray(pcsaft_fugcoef_cpp(x, m, s, e, t, rho, cppargs))
-#         error = 100000*np.sum((fugcoef_l-fugcoef_v)**2)
-#         if not np.isfinite(error):
-#             error = 1e20
-#     return error
-#
-# def PTzfit(p_guess, x_guess, beta_guess, mol, vol, x_total, m, s, e, t, cppargs):
-#     """Minimize this function to solve for the pressure to compare with PTz data."""
-#     error = PTzfit_cpp(p_guess, x_guess, beta_guess, mol, vol, x_total, m, s, e, t, cppargs)
-#
-#     if cppargs['z'] == []: # Check that the mixture does not contain electrolytes. For electrolytes, a different equilibrium criterion should be used.
-#         # internal iteration loop to solve for compositions
-#         itr = 0
-#         dif = 10000.
-#         xl = np.copy(x_guess)
-#         beta = beta_guess
-#         xv = (mol*x_total - (1-beta)*mol*xl)/beta/mol
-#         while (dif>1e-9) and (itr<100):
-#             beta_old = beta
-#             rhol = pcsaft_den_cpp(xl, m, s, e, t, p_guess, 0, cppargs)
-#             fugcoef_l = np.asarray(pcsaft_fugcoef_cpp(xl, m, s, e, t, rhol, cppargs))
-#             rhov = pcsaft_den_cpp(xv, m, s, e, t, p_guess, 1, cppargs)
-#             fugcoef_v = np.asarray(pcsaft_fugcoef_cpp(xv, m, s, e, t, rhov, cppargs))
-#             xl = fugcoef_v*xv/fugcoef_l
-#             xl = xl/np.sum(xl)
-#             xv = (mol*x_total - (1-beta)*mol*xl)/beta/mol
-#             beta = (vol/mol-rhol)/(rhov-rhol)
-#             dif = np.sum(abs(beta - beta_old))
-#             itr += 1
-#         error = np.sum((vol - rhov*beta*mol - rhol*(1-beta)*mol)**2)
-#         error += np.sum((xl*fugcoef_l - xv*fugcoef_v)**2)
-#         error += np.sum((mol*x_total - beta*mol*xv - (1-beta)*mol*xl)**2)
-#     else:
-#         z = np.asarray(cppargs['z'])
-#         # internal iteration loop to solve for compositions
-#         itr = 0
-#         dif = 10000.
-#         xl = np.copy(x_guess)
-#         beta = beta_guess
-#         xv = (mol*x_total - (1-beta)*mol*xl)/beta/mol
-#         xv[np.where(z == 0)[0]] = 0.
-#         xv = xv/np.sum(xv)
-#         while (dif>1e-9) and (itr<100):
-#             beta_old = beta
-#             rhol = pcsaft_den_cpp(xl, m, s, e, t, p_guess, 0, cppargs)
-#             fugcoef_l = np.asarray(pcsaft_fugcoef_cpp(xl, m, s, e, t, rhol, cppargs))
-#             rhov = pcsaft_den_cpp(xv, m, s, e, t, p_guess, 1, cppargs)
-#             fugcoef_v = np.asarray(pcsaft_fugcoef_cpp(xv, m, s, e, t, rhov, cppargs))
-#             xl = fugcoef_v*xv/fugcoef_l
-#             xl = xl/np.sum(xl)
-#             xv = (mol*x_total - (1-beta)*mol*xl)/beta/mol
-#             xv[np.where(z == 0)[0]] = 0. # here it is assumed that the ionic compounds are nonvolatile
-#             xv = xv/np.sum(xv)
-#             beta = (vol/mol-rhol)/(rhov-rhol)
-#             dif = np.sum(abs(beta - beta_old))
-#             itr += 1
-#         error = (vol - rhov*beta*mol - rhol*(1-beta)*mol)**2
-#         error += np.sum((xl*fugcoef_l - xv*fugcoef_v)[np.where(z == 0)[0]]**2)
-#         error += np.sum((mol*x_total - beta*mol*xv - (1-beta)*mol*xl)**2)
-#
-#     if np.isnan(error):
-#         error = 100000000.
-#     return error
 
 def aly_lee(t, c):
     """

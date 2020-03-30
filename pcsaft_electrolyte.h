@@ -42,10 +42,10 @@ double pcsaft_hres_cpp(double t, double rho, add_args &cppargs);
 double pcsaft_sres_cpp(double t, double rho, add_args &cppargs);
 double pcsaft_gres_cpp(double t, double rho, add_args &cppargs);
 
-double flashTQ_cpp(double t, double Q, add_args &cppargs);
-double flashTQ_cpp(double t, double Q, add_args &cppargs, double p_guess); // used if a guess value is given
-double flashPQ_cpp(double p, double Q, add_args &cppargs);
-double flashPQ_cpp(double p, double Q, add_args &cppargs, double t_guess); // used if a guess value is given
+vector<double> flashTQ_cpp(double t, double Q, add_args &cppargs);
+vector<double> flashTQ_cpp(double t, double Q, add_args &cppargs, double p_guess); // used if a guess value is given
+vector<double> flashPQ_cpp(double p, double Q, add_args &cppargs);
+vector<double> flashPQ_cpp(double p, double Q, add_args &cppargs, double t_guess); // used if a guess value is given
 
 vector<double> XA_find(vector<double> XA_guess, int ncomp, vector<double> delta_ij, double den,
     vector<double> x);
@@ -79,6 +79,8 @@ private:
 
 vector<double> scan_pressure(double t, double Q, add_args &cppargs, int npts);
 vector<double> scan_temp(double p, double Q, add_args &cppargs, int npts);
+vector<double> findx_bub_pressure(double p, double t, double Q, add_args &cppargs);
+vector<double> findx_bub_temp(double t, double p, double Q, add_args &cppargs);
 double resid_rho(double rhomolar, double t, double p, add_args &cppargs);
 double resid_bub_pressure(double p, double t, double Q, add_args &cppargs);
 double resid_bub_temp(double t, double p, double Q, add_args &cppargs);

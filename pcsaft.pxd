@@ -17,10 +17,10 @@ cdef extern from "pcsaft_electrolyte.cpp":
     double pcsaft_hres_cpp(double t, double rho, add_args &cppargs)
     double pcsaft_sres_cpp(double t, double rho, add_args &cppargs)
     double pcsaft_gres_cpp(double t, double rho, add_args &cppargs)
-    double flashTQ_cpp(double t, double Q, add_args &cppargs) except +
-    double flashTQ_cpp(double t, double Q, add_args &cppargs, double p_guess) except +
-    double flashPQ_cpp(double p, double Q, add_args &cppargs) except +
-    double flashPQ_cpp(double p, double Q, add_args &cppargs, double t_guess) except +
+    vector[double] flashTQ_cpp(double t, double Q, add_args &cppargs) except +
+    vector[double] flashTQ_cpp(double t, double Q, add_args &cppargs, double p_guess) except +
+    vector[double] flashPQ_cpp(double p, double Q, add_args &cppargs) except +
+    vector[double] flashPQ_cpp(double p, double Q, add_args &cppargs, double t_guess) except +
 
     ctypedef struct add_args:
         vector[double] x
