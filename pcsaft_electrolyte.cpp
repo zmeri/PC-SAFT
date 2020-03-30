@@ -6,8 +6,6 @@
 
 #include "pcsaft_electrolyte.h"
 
-// #include <iostream>
-
 using std::vector;
 
 #if defined(HUGE_VAL) && !defined(_HUGE)
@@ -1985,7 +1983,7 @@ double pcsaft_gres_cpp(double t, double rho, add_args &cppargs) {
 }
 
 
-double flashTQ_cpp(double t, double Q, add_args &cppargs) {
+vector<double> flashTQ_cpp(double t, double Q, add_args &cppargs) {
     vector<double> result;
     try {
         result = scan_pressure(t, Q, cppargs, 30);
@@ -2015,20 +2013,21 @@ double flashTQ_cpp(double t, double Q, add_args &cppargs) {
 }
 
 
-double flashTQ_cpp(double t, double Q, add_args &cppargs, double p_guess) {
+vector<double> flashTQ_cpp(double t, double Q, add_args &cppargs, double p_guess) {
     double x_lo = p_guess / 5;
     double x_hi = 5 * p_guess;
 
     double p;
+    vector<double> output;
     try {
         p = BoundedSecantBubPressure(t, Q, cppargs, p_guess, x_lo, x_hi, 0.01*p_guess, 1e-8, 200);
+        output = findx_bub_pressure(p, t, Q, cppargs);
+        output[0] = p; // replace error with pressure for final output
     }
     catch (const SolutionError& ex) {
-        p = flashTQ_cpp(t, Q, cppargs); // call function without an initial guess
+        output = flashTQ_cpp(t, Q, cppargs); // call function without an initial guess
     }
 
-    vector<double> output = findx_bub_pressure(p, t, Q, cppargs);
-    output[0] = p; // replace error with pressure for final output
     return output;
 }
 
@@ -2076,6 +2075,7 @@ vector<double> scan_pressure(double t, double Q, add_args &cppargs, int npts) {
 
 vector<double> findx_bub_pressure(double p, double t, double Q, add_args &cppargs) {
     double error = 0;
+    vector<double> result;
 
     int ncomp = cppargs.x.size(); // number of components
     double rhol, rhov;
@@ -2087,6 +2087,10 @@ vector<double> findx_bub_pressure(double p, double t, double Q, add_args &cpparg
         rhov = pcsaft_den_cpp(t, p, 1, cppargs);
         fugcoef_v = pcsaft_fugcoef_cpp(t, rhov, cppargs);
         error += 100000 * pow(fugcoef_l[0] - fugcoef_v[0], 2.);
+
+        result.push_back(error);
+        result.insert(result.end(), cppargs.x.begin(), cppargs.x.end());
+        result.insert(result.end(), cppargs.x.begin(), cppargs.x.end());
     }
     else {
         int itr = 0;
@@ -2094,8 +2098,8 @@ vector<double> findx_bub_pressure(double p, double t, double Q, add_args &cpparg
 
         double summ;
         vector<double> xv_old(ncomp);
-        vector<double> xv = cppargs.x;
-        vector<double> xl = cppargs.x;
+        add_args cppargs_v = cppargs;
+        add_args cppargs_l = cppargs;
         double x_ions = 0.; // overall mole fraction of ions in the system
         for (int i = 0; i < ncomp; i++) {
             if (!cppargs.z.empty() && cppargs.z[i] != 0) {
@@ -2103,28 +2107,28 @@ vector<double> findx_bub_pressure(double p, double t, double Q, add_args &cpparg
             }
         }
         while ((dif>1e-9) && (itr<100)) {
-            xv_old = xv;
-            rhol = pcsaft_den_cpp(t, p, 0, cppargs);
-            fugcoef_l = pcsaft_fugcoef_cpp(t, rhol, cppargs);
-            rhov = pcsaft_den_cpp(t, p, 1, cppargs);
-            fugcoef_v = pcsaft_fugcoef_cpp(t, rhov, cppargs);
+            xv_old = cppargs_v.x;
+            rhol = pcsaft_den_cpp(t, p, 0, cppargs_l);
+            fugcoef_l = pcsaft_fugcoef_cpp(t, rhol, cppargs_l);
+            rhov = pcsaft_den_cpp(t, p, 1, cppargs_v);
+            fugcoef_v = pcsaft_fugcoef_cpp(t, rhov, cppargs_v);
 
             if (Q > 0.5) {
                 summ = 0.;
                 for (int i = 0; i < ncomp; i++) {
                     if (cppargs.z.empty() || cppargs.z[i] == 0) {
-                        xl[i] = fugcoef_v[i]*xv[i]/fugcoef_l[i];
-                        summ += xl[i];
+                        cppargs_l.x[i] = fugcoef_v[i]*cppargs_v.x[i]/fugcoef_l[i];
+                        summ += cppargs_l.x[i];
                     }
                 }
                 for (int i = 0; i < ncomp; i++) {
                     if (cppargs.z.empty() || cppargs.z[i] == 0) {
-                        xl[i] = xl[i]/summ*(((1-Q) - x_ions)/(1-Q)); // ensures that mole fractions add up to 1
-                        xv[i] = (cppargs.x[i] - (1-Q)*xl[i])/Q; // if PCSAFT->_Q is close to zero then this equation behaves poorly, and that is why we use this if statement to switch the equation around
+                        cppargs_l.x[i] = cppargs_l.x[i]/summ*(((1-Q) - x_ions)/(1-Q)); // ensures that mole fractions add up to 1
+                        cppargs_v.x[i] = (cppargs.x[i] - (1-Q)*cppargs_l.x[i])/Q; // if PCSAFT->_Q is close to zero then this equation behaves poorly, and that is why we use this if statement to switch the equation around
                     }
                     else {
-                        xl[i] = cppargs.x[i]/(1-Q);
-                        xv[i] = 0.;
+                        cppargs_l.x[i] = cppargs.x[i]/(1-Q);
+                        cppargs_v.x[i] = 0.;
                     }
                 }
             }
@@ -2132,40 +2136,40 @@ vector<double> findx_bub_pressure(double p, double t, double Q, add_args &cpparg
                 summ = 0.;
                 for (int i = 0; i < ncomp; i++) {
                     if (cppargs.z.empty() || cppargs.z[i] == 0) {
-                        xv[i] = fugcoef_l[i]*xl[i]/fugcoef_v[i];
+                        cppargs_v.x[i] = fugcoef_l[i]*cppargs_l.x[i]/fugcoef_v[i];
                     }
-                    summ += xv[i];
+                    summ += cppargs_v.x[i];
                 }
                 for (int i = 0; i < ncomp; i++) {
-                    xv[i] = xv[i]/summ;
-                    xl[i] = (cppargs.x[i] - (Q)*xv[i])/(1-Q);
+                    cppargs_v.x[i] = cppargs_v.x[i]/summ;
+                    cppargs_l.x[i] = (cppargs.x[i] - (Q)*cppargs_v.x[i])/(1-Q);
                 }
             }
 
             dif = 0;
             for (int i = 0; i < ncomp; i++) {
-                dif += abs(xv[i] - xv_old[i]);
+                dif += abs(cppargs_v.x[i] - xv_old[i]);
             }
             itr += 1;
         }
 
         for (int i = 0; i < ncomp; i++) {
             if (cppargs.z.empty() || cppargs.z[i] == 0) {
-                error += pow(xl[i]*fugcoef_l[i] - xv[i]*fugcoef_v[i], 2.);
+                error += pow(cppargs_l.x[i]*fugcoef_l[i] - cppargs_v.x[i]*fugcoef_v[i], 2.);
             }
-            error += pow((cppargs.x[i] - Q*xv[i] - (1-Q)*xl[i]), 2.);
+            error += pow((cppargs.x[i] - Q*cppargs_v.x[i] - (1-Q)*cppargs_l.x[i]), 2.);
         }
 
+        result.push_back(error);
+        result.insert(result.end(), cppargs_l.x.begin(), cppargs_l.x.end());
+        result.insert(result.end(), cppargs_v.x.begin(), cppargs_v.x.end());
     }
 
     if (!std::isfinite(error) || (rhol - rhov) < 1e-5) {
         error = _HUGE;
+        result[0] = error;
     }
 
-    vector<double> result;
-    result.push_back(error);
-    result.insert(result.end(), xl.begin(), xl.end());
-    result.insert(result.end(), xv.begin(), xv.end());
     return result;
 }
 
@@ -2205,15 +2209,16 @@ vector<double> flashPQ_cpp(double p, double Q, add_args &cppargs, double t_guess
     double x_hi = t_guess + 40;
 
     double t;
+    vector<double> output;
     try {
         t = BoundedSecantBubTemp(p, Q, cppargs, t_guess, x_lo, x_hi, 0.01*t_guess, 1e-8, 200);
+        output = findx_bub_temp(t, p, Q, cppargs);
+        output[0] = t; // replace error with temperature for final output
     }
     catch (const SolutionError& ex) {
-        t = flashPQ_cpp(p, Q, cppargs); // call function without an initial guess
+        output = flashPQ_cpp(p, Q, cppargs); // call function without an initial guess
     }
 
-    vector<double> output = findx_bub_temp(t, p, Q, cppargs);
-    output[0] = t; // replace error with temperature for final output
     return output;
 }
 
@@ -2261,6 +2266,7 @@ vector<double> scan_temp(double p, double Q, add_args &cppargs, int npts) {
 
 vector<double> findx_bub_temp(double t, double p, double Q, add_args &cppargs) {
     double error = 0;
+    vector<double> result;
 
     std::vector<double>::iterator water_iter = std::find(cppargs.e.begin(), cppargs.e.end(), 353.9449);
     if (water_iter != cppargs.e.end()) {
@@ -2269,7 +2275,11 @@ vector<double> findx_bub_temp(double t, double p, double Q, add_args &cppargs) {
             cppargs.s[water_idx] = calc_water_sigma(t);
             cppargs.dielc = dielc_water(t); // Right now only aqueous mixtures are supported. Other solvents could be modeled by replacing the dielc_water function.
         } catch (const ValueError& ex) {
-            return _HUGE;
+            error = _HUGE;
+            result.push_back(error);
+            result.insert(result.end(), cppargs.x.begin(), cppargs.x.end());
+            result.insert(result.end(), cppargs.x.begin(), cppargs.x.end());
+            return result;
         }
     }
 
@@ -2282,6 +2292,10 @@ vector<double> findx_bub_temp(double t, double p, double Q, add_args &cppargs) {
         rhov = pcsaft_den_cpp(t, p, 1, cppargs);
         fugcoef_v = pcsaft_fugcoef_cpp(t, rhov, cppargs);
         error += 100000 * pow(fugcoef_l[0] - fugcoef_v[0], 2.);
+
+        result.push_back(error);
+        result.insert(result.end(), cppargs.x.begin(), cppargs.x.end());
+        result.insert(result.end(), cppargs.x.begin(), cppargs.x.end());
     }
     else {
         int itr = 0;
@@ -2289,8 +2303,8 @@ vector<double> findx_bub_temp(double t, double p, double Q, add_args &cppargs) {
 
         double summ;
         vector<double> xv_old(ncomp);
-        vector<double> xv = cppargs.x;
-        vector<double> xl = cppargs.x;
+        add_args cppargs_v = cppargs;
+        add_args cppargs_l = cppargs;
         double x_ions = 0.; // overall mole fraction of ions in the system
         for (int i = 0; i < ncomp; i++) {
             if (!cppargs.z.empty() && cppargs.z[i] != 0) {
@@ -2298,28 +2312,28 @@ vector<double> findx_bub_temp(double t, double p, double Q, add_args &cppargs) {
             }
         }
         while ((dif>1e-9) && (itr<100)) {
-            xv_old = xv;
-            rhol = pcsaft_den_cpp(t, p, 0, cppargs);
-            fugcoef_l = pcsaft_fugcoef_cpp(t, rhol, cppargs);
-            rhov = pcsaft_den_cpp(t, p, 1, cppargs);
-            fugcoef_v = pcsaft_fugcoef_cpp(t, rhov, cppargs);
+            xv_old = cppargs_v.x;
+            rhol = pcsaft_den_cpp(t, p, 0, cppargs_l);
+            fugcoef_l = pcsaft_fugcoef_cpp(t, rhol, cppargs_l);
+            rhov = pcsaft_den_cpp(t, p, 1, cppargs_v);
+            fugcoef_v = pcsaft_fugcoef_cpp(t, rhov, cppargs_v);
 
             if (Q > 0.5) {
                 summ = 0.;
                 for (int i = 0; i < ncomp; i++) {
                     if (cppargs.z.empty() || cppargs.z[i] == 0) {
-                        xl[i] = fugcoef_v[i]*xv[i]/fugcoef_l[i];
-                        summ += xl[i];
+                        cppargs_l.x[i] = fugcoef_v[i]*cppargs_v.x[i]/fugcoef_l[i];
+                        summ += cppargs_l.x[i];
                     }
                 }
                 for (int i = 0; i < ncomp; i++) {
                     if (cppargs.z.empty() || cppargs.z[i] == 0) {
-                        xl[i] = xl[i]/summ*(((1-Q) - x_ions)/(1-Q)); // ensures that mole fractions add up to 1
-                        xv[i] = (cppargs.x[i] - (1-Q)*xl[i])/Q; // if PCSAFT->_Q is close to zero then this equation behaves poorly, and that is why we use this if statement to switch the equation around
+                        cppargs_l.x[i] = cppargs_l.x[i]/summ*(((1-Q) - x_ions)/(1-Q)); // ensures that mole fractions add up to 1
+                        cppargs_v.x[i] = (cppargs.x[i] - (1-Q)*cppargs_l.x[i])/Q; // if PCSAFT->_Q is close to zero then this equation behaves poorly, and that is why we use this if statement to switch the equation around
                     }
                     else {
-                        xl[i] = cppargs.x[i]/(1-Q);
-                        xv[i] = 0.;
+                        cppargs_l.x[i] = cppargs.x[i]/(1-Q);
+                        cppargs_v.x[i] = 0.;
                     }
                 }
             }
@@ -2327,39 +2341,40 @@ vector<double> findx_bub_temp(double t, double p, double Q, add_args &cppargs) {
                 summ = 0.;
                 for (int i = 0; i < ncomp; i++) {
                     if (cppargs.z.empty() || cppargs.z[i] == 0) {
-                        xv[i] = fugcoef_l[i]*xl[i]/fugcoef_v[i];
+                        cppargs_v.x[i] = fugcoef_l[i]*cppargs_l.x[i]/fugcoef_v[i];
                     }
-                    summ += xv[i];
+                    summ += cppargs_v.x[i];
                 }
                 for (int i = 0; i < ncomp; i++) {
-                    xv[i] = xv[i]/summ;
-                    xl[i] = (cppargs.x[i] - (Q)*xv[i])/(1-Q);
+                    cppargs_v.x[i] = cppargs_v.x[i]/summ;
+                    cppargs_l.x[i] = (cppargs.x[i] - (Q)*cppargs_v.x[i])/(1-Q);
                 }
             }
 
             dif = 0;
             for (int i = 0; i < ncomp; i++) {
-                dif += abs(xv[i] - xv_old[i]);
+                dif += abs(cppargs_v.x[i] - xv_old[i]);
             }
             itr += 1;
         }
 
         for (int i = 0; i < ncomp; i++) {
             if (cppargs.z.empty() || cppargs.z[i] == 0) {
-                error += pow(xl[i]*fugcoef_l[i] - xv[i]*fugcoef_v[i], 2.);
+                error += pow(cppargs_l.x[i]*fugcoef_l[i] - cppargs_v.x[i]*fugcoef_v[i], 2.);
             }
-            error += pow((cppargs.x[i] - Q*xv[i] - (1-Q)*xl[i]), 2.);
+            error += pow((cppargs.x[i] - Q*cppargs_v.x[i] - (1-Q)*cppargs_l.x[i]), 2.);
         }
+
+        result.push_back(error);
+        result.insert(result.end(), cppargs_l.x.begin(), cppargs_l.x.end());
+        result.insert(result.end(), cppargs_v.x.begin(), cppargs_v.x.end());
     }
 
     if (!std::isfinite(error) || (rhol - rhov) < 1e-5) {
         error = _HUGE;
+        result[0] = error;
     }
 
-    vector<double> result;
-    result.push_back(error);
-    result.insert(result.end(), xl.begin(), xl.end());
-    result.insert(result.end(), xv.begin(), xv.end());
     return result;
 }
 

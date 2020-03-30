@@ -355,7 +355,7 @@ def test_flashTQ(print_result=False):
 
     ref = 3255792.76201971 # source: reference EOS in CoolProp
     t = 572.6667
-    calc = flashTQ(t, 0, pyargs)
+    calc, xl, xv = flashTQ(t, 0, pyargs)
     assert abs((calc-ref)/ref*100) < 3
     if print_result:
         print('##########  Test with toluene  ##########')
@@ -374,7 +374,7 @@ def test_flashTQ(print_result=False):
     t = 362
     s = np.asarray([2.7927 + 10.11*np.exp(-0.01775*t) - 1.417*np.exp(-0.01146*t)])
     pyargs = {'x':x, 'm':m, 's':s, 'e':e, 'e_assoc':eAB, 'vol_a':volAB}
-    calc = flashTQ(t, 0, pyargs)
+    calc, xl, xv = flashTQ(t, 0, pyargs)
     assert abs((calc-ref)/ref*100) < 3
     if print_result:
         print('\n##########  Test with water  ##########')
@@ -393,7 +393,7 @@ def test_flashTQ(print_result=False):
 
     ref = 193261.515187248 # source: DIPPR correlation
     t = 413.5385
-    calc = flashTQ(t, 0, pyargs)
+    calc, xl, xv = flashTQ(t, 0, pyargs)
     assert abs((calc-ref)/ref*100) < 3
     if print_result:
         print('\n##########  Test with acetic acid  ##########')
@@ -412,7 +412,7 @@ def test_flashTQ(print_result=False):
 
     ref = 625100. # source: DIPPR correlation
     t = 300
-    calc = flashTQ(t, 0, pyargs)
+    calc, xl, xv = flashTQ(t, 0, pyargs)
     assert abs((calc-ref)/ref*100) < 3
     if print_result:
         print('\n##########  Test with dimethyl ether  ##########')
@@ -430,7 +430,7 @@ def test_flashTQ(print_result=False):
 
     ref = 1.7551e-4 # source: reference EOS in CoolProp
     t = 85.525
-    calc = flashTQ(t, 0, pyargs)
+    calc, xl, xv = flashTQ(t, 0, pyargs)
     assert abs((calc-ref)/ref*100) < 5
     if print_result:
         print('##########  Test with propane  ##########')
@@ -441,7 +441,7 @@ def test_flashTQ(print_result=False):
 
     ref = 8.3324e5 # source: reference EOS in CoolProp
     t = 293
-    calc = flashTQ(t, 0, pyargs)
+    calc, xl, xv = flashTQ(t, 0, pyargs)
     assert abs((calc-ref)/ref*100) < 3
     if print_result:
         print('----- Vapor pressure at {} K -----'.format(t))
@@ -451,7 +451,7 @@ def test_flashTQ(print_result=False):
 
     ref = 42.477e5 # source: reference EOS in CoolProp
     t = 369.82
-    calc = flashTQ(t, 0, pyargs)
+    calc, xl, xv = flashTQ(t, 0, pyargs)
     assert abs((calc-ref)/ref*100) < 3
     if print_result:
         print('----- Vapor pressure at {} K -----'.format(t))
@@ -472,16 +472,18 @@ def test_flashTQ(print_result=False):
     t = 421.05
     ref = 1986983.25 # source: H.-M. Lin, H. M. Sebastian, J. J. Simnick, and K.-C. Chao, “Gas-liquid equilibrium in binary mixtures of methane with N-decane, benzene, and toluene,” J. Chem. Eng. Data, vol. 24, no. 2, pp. 146–149, Apr. 1979.
     xv_ref = np.asarray([0.6516,0.3484])
-    calc = flashTQ(t, 0, pyargs)
-    assert abs((calc-ref)/ref*100) < 21
+    calc, xl, xv = flashTQ(t, 0, pyargs)
+    assert abs((calc-ref)/ref*100) < 10
+    assert np.all(abs((xv-xv_ref)/xv_ref*100) < 10)
     if print_result:
         print('\n##########  Test with methane-benzene mixture  ##########')
         print('----- Bubble point pressure at %s K -----' % t)
         print('    Reference:', ref, 'Pa')
         print('    PC-SAFT:', calc, 'Pa')
         print('    Relative deviation:', (calc-ref)/ref*100, '%')
-    # print('    Vapor composition (reference):', xv_ref)
-    # print('    Vapor composition (PC-SAFT):', xv)
+        print('    Vapor composition (reference):', xv_ref)
+        print('    Vapor composition (PC-SAFT):', xv)
+        print('    Vapor composition relative deviation:', (xv-xv_ref)/xv_ref*100)
 
     # Binary mixture: methanol-cyclohexane
     #0 = methanol, 1 = cyclohexane
@@ -498,16 +500,18 @@ def test_flashTQ(print_result=False):
     ref = 101330 # source: Marinichev A.N.; Susarev M.P.: Investigation of Liquid-Vapor Equilibrium in the System Methanol-Cyclohexane at 35, 45 and 55°C and 760 mm Hg. J.Appl.Chem.USSR 38 (1965) 1582-1584
     t = 327.48
     xv_ref = np.asarray([0.59400,0.40600])
-    calc = flashTQ(t, 0, pyargs)
+    calc, xl, xv = flashTQ(t, 0, pyargs)
     assert abs((calc-ref)/ref*100) < 10
+    assert np.all(abs((xv-xv_ref)/xv_ref*100) < 10)
     if print_result:
         print('\n##########  Test with methanol-cyclohexane mixture  ##########')
         print('----- Bubble point pressure at 327.48 K -----')
         print('    Reference:', ref, 'Pa')
         print('    PC-SAFT:', calc, 'Pa')
         print('    Relative deviation:', (calc-ref)/ref*100, '%')
-    # print('    Vapor composition (reference):', xv_ref)
-    # print('    Vapor composition (PC-SAFT):', xv)
+        print('    Vapor composition (reference):', xv_ref)
+        print('    Vapor composition (PC-SAFT):', xv)
+        print('    Vapor composition relative deviation:', (xv-xv_ref)/xv_ref*100)
 
     # Binary mixture: water-acetic acid
     #0 = water, 1 = acetic acid
@@ -525,8 +529,9 @@ def test_flashTQ(print_result=False):
     pyargs = {'x':xl, 'm':m, 's':s, 'e':e, 'e_assoc':eAB, 'vol_a':volAB, 'k_ij':k_ij}
     ref = 273722. # source: Othmer, D. F.; Silvis, S. J.; Spiel, A. Ind. Eng. Chem., 1952, 44, 1864-72 Composition of vapors from boiling binary solutions pressure equilibrium still for studying water - acetic acid system
     xv_ref = np.asarray([0.9923666645, 0.0076333355])
-    calc = flashTQ(t, 0, pyargs)
+    calc, xl, xv = flashTQ(t, 0, pyargs)
     assert abs((calc-ref)/ref*100) < 10
+    assert np.all(abs((xv-xv_ref)/xv_ref*100) < 15)
     if print_result:
         print('\n##########  Test with water-acetic acid mixture  ##########')
         print('----- Bubble point pressure at %s K -----' % t)
@@ -534,8 +539,9 @@ def test_flashTQ(print_result=False):
         print('    Reference pressure:', ref, 'Pa')
         print('    PC-SAFT pressure:', calc, 'Pa')
         print('    Relative deviation:', (calc-ref)/ref*100, '%')
-    # print('    Vapor composition (reference):', xv_ref)
-    # print('    Vapor composition (PC-SAFT):', xv)
+        print('    Vapor composition (reference):', xv_ref)
+        print('    Vapor composition (PC-SAFT):', xv)
+        print('    Vapor composition relative deviation:', (xv-xv_ref)/xv_ref*100)
 
     xl = np.asarray([0.2691800943, 0.7308199057])
     t = 372.774
@@ -543,15 +549,18 @@ def test_flashTQ(print_result=False):
     pyargs = {'x':xl, 'm':m, 's':s, 'e':e, 'e_assoc':eAB, 'vol_a':volAB, 'k_ij':k_ij}
     ref = 74463. # source: Freeman, J. R.; Wilson, G. M. AIChE Symp. Ser., 1985, 81, 14-25 High temperature vapor-liquid equilibrium measurements on acetic acid/water mixtures
     xv_ref = np.asarray([0.3878269411, 0.6121730589])
-    calc = flashTQ(t, 0, pyargs)
+    calc, xl, xv = flashTQ(t, 0, pyargs)
+    assert abs((calc-ref)/ref*100) < 10
+    assert np.all(abs((xv-xv_ref)/xv_ref*100) < 15)
     if print_result:
         print('----- Bubble point pressure at %s K -----' % t)
         print('    Liquid composition:', xl)
         print('    Reference pressure:', ref, 'Pa')
         print('    PC-SAFT pressure:', calc, 'Pa')
         print('    Relative deviation:', (calc-ref)/ref*100, '%')
-    # print('    Vapor composition (reference):', xv_ref)
-    # print('    Vapor composition (PC-SAFT):', xv)
+        print('    Vapor composition (reference):', xv_ref)
+        print('    Vapor composition (PC-SAFT):', xv)
+        print('    Vapor composition relative deviation:', (xv-xv_ref)/xv_ref*100)
 
     # NaCl in water
     # 0 = Na+, 1 = Cl-, 2 = H2O
@@ -576,7 +585,7 @@ def test_flashTQ(print_result=False):
     pyargs = {'x':x, 'm':m, 's':s, 'e':e, 'e_assoc':eAB, 'vol_a':volAB, 'k_ij':k_ij, 'z':z, 'dielc':dielc}
 
     xv_guess = np.asarray([0., 0., 1.])
-    calc = flashTQ(t, 0, pyargs, ref)
+    calc, xl, xv = flashTQ(t, 0, pyargs, ref)
     assert abs((calc-ref)/ref*100) < 10
     if print_result:
         print('\n##########  Test with aqueous NaCl  ##########')
@@ -604,16 +613,18 @@ def test_flashPQ(print_result=False):
     p = 101330
     ref = 327.48 # source: Marinichev A.N.; Susarev M.P.: Investigation of Liquid-Vapor Equilibrium in the System Methanol-Cyclohexane at 35, 45 and 55°C and 760 mm Hg. J.Appl.Chem.USSR 38 (1965) 1582-1584
     xv_ref = np.asarray([0.59400,0.40600])
-    calc = flashPQ(p, 0, pyargs)
+    calc, xl, xv = flashPQ(p, 0, pyargs)
     assert abs((calc-ref)/ref*100) < 1
+    assert np.all(abs((xv-xv_ref)/xv_ref*100) < 10)
     if print_result:
         print('\n##########  Test with methanol-cyclohexane mixture  ##########')
         print('----- Bubble point temperature at 101330 Pa -----')
         print('    Reference:', ref, 'K')
         print('    PC-SAFT:', calc, 'K')
         print('    Relative deviation:', (calc-ref)/ref*100, '%')
-    # print('    Vapor composition (reference):', xv_ref)
-    # print('    Vapor composition (PC-SAFT):', xv)
+        print('    Vapor composition (reference):', xv_ref)
+        print('    Vapor composition (PC-SAFT):', xv)
+        print('    Vapor composition relative deviation:', (xv-xv_ref)/xv_ref*100)
 
     # NaCl in water
     # 0 = Na+, 1 = Cl-, 2 = H2O
@@ -638,7 +649,7 @@ def test_flashPQ(print_result=False):
     pyargs = {'x':x, 'm':m, 's':s, 'e':e, 'e_assoc':eAB, 'vol_a':volAB, 'k_ij':k_ij, 'z':z, 'dielc':dielc}
 
     xv_guess = np.asarray([0., 0., 1.])
-    calc = flashPQ(p, 0, pyargs, ref)
+    calc, xl, xv = flashPQ(p, 0, pyargs, ref)
     assert abs((calc-ref)/ref*100) < 1
     if print_result:
         print('\n##########  Test with aqueous NaCl  ##########')
