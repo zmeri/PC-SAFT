@@ -18,7 +18,7 @@ To speed up the original Python code the core functions have been rewritten in C
 python setup.py build_ext --inplace
 ```
 
-More about this process can be found from the [Cython documentation](http://docs.cython.org/en/latest/src/quickstart/build.html).
+Make sure that the Eigen header files are somewhere on your path. More about the Cython build process can be found from the [Cython documentation](http://docs.cython.org/en/latest/src/quickstart/build.html).
 
 The original Python-only code has been removed from the repository. If you still want to use the original Python-only functions, go back to an [earlier version](https://github.com/zmeri/PC-SAFT/tree/b43bf568c4dc1907316422d5c3f7b809e9725848) of the repository. Note that the Python-only code is no longer maintained, so it may not be as reliable as the Cython code.
 
