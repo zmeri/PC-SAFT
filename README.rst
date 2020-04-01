@@ -17,7 +17,10 @@ To make it easier to use this code, it has been added as a package to PyPi (pcsa
 Compiling with Cython
 ---------------------
 
-To speed up the original Python code the core functions have been rewritten in C++. These are then connected with the remaining Python code using Cython. This gave a significant improvement in speed. The Cython code needs to be compiled before use. To do so install Cython. Then run the following command from the directory containing the PC-SAFT code::
+To speed up the original Python code the core functions have been rewritten in C++. These are then connected with the remaining Python code using Cython. This gave a significant improvement in speed. The Cython code needs to be compiled before use. To do so install Cython. Then run the following command from the directory containing the PC-SAFT code
+
+::
+  
   python setup.py build_ext --inplace
 
 Make sure that the Eigen header files are somewhere on your path. More about the Cython build process can be found from the `Cython documentation`_.
