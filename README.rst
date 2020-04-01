@@ -20,7 +20,7 @@ Compiling with Cython
 To speed up the original Python code the core functions have been rewritten in C++. These are then connected with the remaining Python code using Cython. This gave a significant improvement in speed. The Cython code needs to be compiled before use. To do so install Cython. Then run the following command from the directory containing the PC-SAFT code
 
 ::
-  
+
   python setup.py build_ext --inplace
 
 Make sure that the Eigen header files are somewhere on your path. More about the Cython build process can be found from the `Cython documentation`_.
@@ -30,19 +30,19 @@ The original Python-only code has been removed from the repository. If you still
 Author
 ------
 
-* **Zach Baird** - zmeri_
+- **Zach Baird** - zmeri_
 
 License
 -------
 
-This project is licensed under the GNU General Public License v3.0 License - see the [LICENSE](LICENSE) file for details
+This project is licensed under the GNU General Public License v3.0 License
 
 Acknowledgments
 ---------------
 
 When developing these functions the code from two other groups was used as references:
-* Code from Joachim Gross (https://www.th.bci.tu-dortmund.de/cms/de/Forschung/PC-SAFT/Download/index.html)
-* The MATLAB/Octave program written by Angel Martin and others (http://hpp.uva.es/open-source-software-eos/)
+- Code from Joachim Gross (https://www.th.bci.tu-dortmund.de/cms/de/Forschung/PC-SAFT/Download/index.html)
+- The MATLAB/Octave program written by Angel Martin and others (http://hpp.uva.es/open-source-software-eos/)
 
 .. _Cython: http://cython.org/
 .. _Eigen: https://github.com/eigenteam/eigen-git-mirror
