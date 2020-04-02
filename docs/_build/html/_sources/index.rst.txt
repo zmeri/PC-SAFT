@@ -1,7 +1,12 @@
 Documentation for pcsaft
 ========================
 
+.. include:: README.rst
+
 .. automodule:: pcsaft
+
+Functions
+---------
 
 .. autosummary::
    :toctree: functions
@@ -22,6 +27,8 @@ Documentation for pcsaft
    pcsaft_dadt
    aly_lee
    dielc_water
+
+.. include:: references.rst
 
 Indices and tables
 ==================

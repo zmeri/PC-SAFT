@@ -31,34 +31,111 @@
 
           <div class="body" role="main">
             
-  <div class="section" id="module-pcsaft">
-<span id="documentation-for-pcsaft"></span><h1>Documentation for pcsaft<a class="headerlink" href="#module-pcsaft" title="Permalink to this headline">¶</a></h1>
-<p>PC-SAFT with electrolyte term</p>
-<p>These functions implement the PC-SAFT equation of state. In addition to the
-hard chain and dispersion terms, these functions also include dipole,
-association and ion terms for use with these types of compounds.</p>
-<p>&#64;author: Zach Baird</p>
-<div class="section" id="functions">
-<h2>Functions<a class="headerlink" href="#functions" title="Permalink to this headline">¶</a></h2>
+  <div class="section" id="documentation-for-pcsaft">
+<h1>Documentation for pcsaft<a class="headerlink" href="#documentation-for-pcsaft" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="pc-saft">
+<h2>PC-SAFT<a class="headerlink" href="#pc-saft" title="Permalink to this headline">¶</a></h2>
+<p>This package implement the PC-SAFT equation of state. In addition to the hard chain and dispersion terms, these functions also include dipole, association and ion terms for use with these types of compounds. When the ion term is included it is also called electrolyte PC-SAFT (ePC-SAFT).</p>
+<div class="section" id="documentation">
+<h3>Documentation<a class="headerlink" href="#documentation" title="Permalink to this headline">¶</a></h3>
+<p>Documentation for the package is available on <a class="reference external" href="https://pcsaft.readthedocs.io/en/latest/">Read the Docs</a>.</p>
+</div>
+<div class="section" id="dependencies">
+<h3>Dependencies<a class="headerlink" href="#dependencies" title="Permalink to this headline">¶</a></h3>
+<p>The Numpy and Scipy packages are required. The core functions have been written in C++ to improve calculation speed, so <a class="reference external" href="http://cython.org/">Cython</a> is needed, along with the <a class="reference external" href="https://github.com/eigenteam/eigen-git-mirror">Eigen</a> package for linear algebra. For unit testing pytest is used.</p>
+</div>
+<div class="section" id="python-package">
+<h3>Python package<a class="headerlink" href="#python-package" title="Permalink to this headline">¶</a></h3>
+<p>To make it easier to use this code, it has been added as a package to PyPi (<a class="reference external" href="https://pypi.org/project/pcsaft/">pcsaft</a>), which means it can be installed using pip. This allows you to use the code without needing to compile the Cython code yourself. Binaries for Linux and Windows have been added, but MacOS is currently not supported.</p>
+</div>
+<div class="section" id="compiling-with-cython">
+<h3>Compiling with Cython<a class="headerlink" href="#compiling-with-cython" title="Permalink to this headline">¶</a></h3>
+<p>To speed up the original Python code the core functions have been rewritten in C++. These are then connected with the remaining Python code using Cython. This gave a significant improvement in speed. The Cython code needs to be compiled before use. To do so install Cython. Then run the following command from the directory containing the PC-SAFT code</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">python</span> <span class="n">setup</span><span class="o">.</span><span class="n">py</span> <span class="n">build_ext</span> <span class="o">--</span><span class="n">inplace</span>
+</pre></div>
+</div>
+<p>Make sure that the Eigen header files are somewhere on your path. More about the Cython build process can be found from the <a class="reference external" href="http://docs.cython.org/en/latest/src/quickstart/build.html">Cython documentation</a>.</p>
+<p>The original Python-only code has been removed from the repository. If you still want to use the original Python-only functions, go back to an <a class="reference external" href="https://github.com/zmeri/PC-SAFT/tree/b43bf568c4dc1907316422d5c3f7b809e9725848">earlier version</a> of the repository. Note that the Python-only code is no longer maintained, so it may not be as reliable as the Cython code.</p>
+</div>
+<div class="section" id="author">
+<h3>Author<a class="headerlink" href="#author" title="Permalink to this headline">¶</a></h3>
 <ul class="simple">
-<li><p>flashTQ : calculate the equilibrium pressure when there are two phases</p></li>
-<li><p>flashPQ : calculate the equilibrium temperature when there are two phases</p></li>
-<li><p>pcsaft_Hvap : calculate the enthalpy of vaporization</p></li>
-<li><p>pcsaft_osmoticC : calculate the osmotic coefficient for the mixture</p></li>
-<li><p>pcsaft_cp : calculate the heat capacity</p></li>
-<li><p>pcsaft_den : calculate the molar density</p></li>
-<li><p>pcsaft_p : calculate the pressure</p></li>
-<li><p>pcsaft_hres : calculate the residual enthalpy</p></li>
-<li><p>pcsaft_sres : calculate the residual entropy</p></li>
-<li><p>pcsaft_gres : calculate the residual Gibbs free energy</p></li>
-<li><p>pcsaft_fugcoef : calculate the fugacity coefficients</p></li>
-<li><p>pcsaft_Z : calculate the compressibility factor</p></li>
-<li><p>pcsaft_ares : calculate the residual Helmholtz energy</p></li>
-<li><p>pcsaft_dadt : calculate the temperature derivative of the residual Helmholtz energy</p></li>
-<li><p>aly_lee : returns the ideal gas heat capacity</p></li>
-<li><p>dielc_water : returns the dielectric constant of water</p></li>
+<li><p><strong>Zach Baird</strong> - <a class="reference external" href="https://github.com/zmeri">zmeri</a></p></li>
 </ul>
-<p class="rubric">References</p>
+</div>
+<div class="section" id="license">
+<h3>License<a class="headerlink" href="#license" title="Permalink to this headline">¶</a></h3>
+<p>This project is licensed under the GNU General Public License v3.0</p>
+</div>
+<div class="section" id="acknowledgments">
+<h3>Acknowledgments<a class="headerlink" href="#acknowledgments" title="Permalink to this headline">¶</a></h3>
+<p>When developing these functions the code from two other groups was used as references</p>
+<ul class="simple">
+<li><p>Code from Joachim Gross (<a class="reference external" href="https://www.th.bci.tu-dortmund.de/cms/de/Forschung/PC-SAFT/Download/index.html">https://www.th.bci.tu-dortmund.de/cms/de/Forschung/PC-SAFT/Download/index.html</a>)</p></li>
+<li><p>The MATLAB/Octave program written by Angel Martin and others (<a class="reference external" href="http://hpp.uva.es/open-source-software-eos/">http://hpp.uva.es/open-source-software-eos/</a>)</p></li>
+</ul>
+<span class="target" id="module-pcsaft"></span></div>
+<div class="section" id="functions">
+<h3>Functions<a class="headerlink" href="#functions" title="Permalink to this headline">¶</a></h3>
+<table class="longtable docutils align-default">
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 90%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="functions/pcsaft.flashTQ.html#pcsaft.flashTQ" title="pcsaft.flashTQ"><code class="xref py py-obj docutils literal notranslate"><span class="pre">flashTQ</span></code></a></p></td>
+<td><p>Calculate the pressure of the system where vapor and liquid phases are in equilibrium.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="functions/pcsaft.flashPQ.html#pcsaft.flashPQ" title="pcsaft.flashPQ"><code class="xref py py-obj docutils literal notranslate"><span class="pre">flashPQ</span></code></a></p></td>
+<td><p>Calculate the temperature of the system where vapor and liquid phases are in equilibrium.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="functions/pcsaft.pcsaft_Hvap.html#pcsaft.pcsaft_Hvap" title="pcsaft.pcsaft_Hvap"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pcsaft_Hvap</span></code></a></p></td>
+<td><p>Calculate the enthalpy of vaporization.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="functions/pcsaft.pcsaft_osmoticC.html#pcsaft.pcsaft_osmoticC" title="pcsaft.pcsaft_osmoticC"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pcsaft_osmoticC</span></code></a></p></td>
+<td><p>Calculate the osmotic coefficient.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="functions/pcsaft.pcsaft_cp.html#pcsaft.pcsaft_cp" title="pcsaft.pcsaft_cp"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pcsaft_cp</span></code></a></p></td>
+<td><p>Calculate the specific molar isobaric heat capacity.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="functions/pcsaft.pcsaft_den.html#pcsaft.pcsaft_den" title="pcsaft.pcsaft_den"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pcsaft_den</span></code></a></p></td>
+<td><p>Calculate the molar density.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="functions/pcsaft.pcsaft_p.html#pcsaft.pcsaft_p" title="pcsaft.pcsaft_p"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pcsaft_p</span></code></a></p></td>
+<td><p>Calculate pressure.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="functions/pcsaft.pcsaft_hres.html#pcsaft.pcsaft_hres" title="pcsaft.pcsaft_hres"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pcsaft_hres</span></code></a></p></td>
+<td><p>Calculate the residual enthalpy for one phase of the system.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="functions/pcsaft.pcsaft_sres.html#pcsaft.pcsaft_sres" title="pcsaft.pcsaft_sres"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pcsaft_sres</span></code></a></p></td>
+<td><p>Calculate the residual entropy (constant volume) for one phase of the system.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="functions/pcsaft.pcsaft_gres.html#pcsaft.pcsaft_gres" title="pcsaft.pcsaft_gres"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pcsaft_gres</span></code></a></p></td>
+<td><p>Calculate the residual Gibbs energy for one phase of the system.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="functions/pcsaft.pcsaft_fugcoef.html#pcsaft.pcsaft_fugcoef" title="pcsaft.pcsaft_fugcoef"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pcsaft_fugcoef</span></code></a></p></td>
+<td><p>Calculate the fugacity coefficients for one phase of the system.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="functions/pcsaft.pcsaft_Z.html#pcsaft.pcsaft_Z" title="pcsaft.pcsaft_Z"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pcsaft_Z</span></code></a></p></td>
+<td><p>Calculate the compressibility factor.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="functions/pcsaft.pcsaft_ares.html#pcsaft.pcsaft_ares" title="pcsaft.pcsaft_ares"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pcsaft_ares</span></code></a></p></td>
+<td><p>Calculate the residual Helmholtz energy.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="functions/pcsaft.pcsaft_dadt.html#pcsaft.pcsaft_dadt" title="pcsaft.pcsaft_dadt"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pcsaft_dadt</span></code></a></p></td>
+<td><p>Calculate the temperature derivative of the residual Helmholtz energy.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="functions/pcsaft.aly_lee.html#pcsaft.aly_lee" title="pcsaft.aly_lee"><code class="xref py py-obj docutils literal notranslate"><span class="pre">aly_lee</span></code></a></p></td>
+<td><p>Calculate the ideal gas isobaric heat capacity using the Aly-Lee equation.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="functions/pcsaft.dielc_water.html#pcsaft.dielc_water" title="pcsaft.dielc_water"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dielc_water</span></code></a></p></td>
+<td><p>Return the dielectric constant of water at the given temperature.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="references">
+<h3>References<a class="headerlink" href="#references" title="Permalink to this headline">¶</a></h3>
 <ul class="simple">
 <li><ol class="upperalpha simple" start="10">
 <li><p>Gross and G. Sadowski, “Perturbed-Chain SAFT:  An Equation of State Based on a Perturbation Theory for Chain Molecules,” Ind. Eng. Chem. Res., vol. 40, no. 4, pp. 1244–1260, Feb. 2001.</p></li>
@@ -128,62 +205,7 @@ association and ion terms for use with these types of compounds.</p>
 </li>
 </ul>
 </div>
-<table class="longtable docutils align-default">
-<colgroup>
-<col style="width: 10%" />
-<col style="width: 90%" />
-</colgroup>
-<tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="functions/pcsaft.flashTQ.html#pcsaft.flashTQ" title="pcsaft.flashTQ"><code class="xref py py-obj docutils literal notranslate"><span class="pre">flashTQ</span></code></a></p></td>
-<td><p>Calculate the pressure of the system where vapor and liquid phases are in equilibrium.</p></td>
-</tr>
-<tr class="row-even"><td><p><a class="reference internal" href="functions/pcsaft.flashPQ.html#pcsaft.flashPQ" title="pcsaft.flashPQ"><code class="xref py py-obj docutils literal notranslate"><span class="pre">flashPQ</span></code></a></p></td>
-<td><p>Calculate the temperature of the system where vapor and liquid phases are in equilibrium.</p></td>
-</tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="functions/pcsaft.pcsaft_Hvap.html#pcsaft.pcsaft_Hvap" title="pcsaft.pcsaft_Hvap"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pcsaft_Hvap</span></code></a></p></td>
-<td><p>Calculate the enthalpy of vaporization.</p></td>
-</tr>
-<tr class="row-even"><td><p><a class="reference internal" href="functions/pcsaft.pcsaft_osmoticC.html#pcsaft.pcsaft_osmoticC" title="pcsaft.pcsaft_osmoticC"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pcsaft_osmoticC</span></code></a></p></td>
-<td><p>Calculate the osmotic coefficient.</p></td>
-</tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="functions/pcsaft.pcsaft_cp.html#pcsaft.pcsaft_cp" title="pcsaft.pcsaft_cp"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pcsaft_cp</span></code></a></p></td>
-<td><p>Calculate the specific molar isobaric heat capacity.</p></td>
-</tr>
-<tr class="row-even"><td><p><a class="reference internal" href="functions/pcsaft.pcsaft_den.html#pcsaft.pcsaft_den" title="pcsaft.pcsaft_den"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pcsaft_den</span></code></a></p></td>
-<td><p>Calculate the molar density.</p></td>
-</tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="functions/pcsaft.pcsaft_p.html#pcsaft.pcsaft_p" title="pcsaft.pcsaft_p"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pcsaft_p</span></code></a></p></td>
-<td><p>Calculate pressure.</p></td>
-</tr>
-<tr class="row-even"><td><p><a class="reference internal" href="functions/pcsaft.pcsaft_hres.html#pcsaft.pcsaft_hres" title="pcsaft.pcsaft_hres"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pcsaft_hres</span></code></a></p></td>
-<td><p>Calculate the residual enthalpy for one phase of the system.</p></td>
-</tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="functions/pcsaft.pcsaft_sres.html#pcsaft.pcsaft_sres" title="pcsaft.pcsaft_sres"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pcsaft_sres</span></code></a></p></td>
-<td><p>Calculate the residual entropy (constant volume) for one phase of the system.</p></td>
-</tr>
-<tr class="row-even"><td><p><a class="reference internal" href="functions/pcsaft.pcsaft_gres.html#pcsaft.pcsaft_gres" title="pcsaft.pcsaft_gres"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pcsaft_gres</span></code></a></p></td>
-<td><p>Calculate the residual Gibbs energy for one phase of the system.</p></td>
-</tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="functions/pcsaft.pcsaft_fugcoef.html#pcsaft.pcsaft_fugcoef" title="pcsaft.pcsaft_fugcoef"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pcsaft_fugcoef</span></code></a></p></td>
-<td><p>Calculate the fugacity coefficients for one phase of the system.</p></td>
-</tr>
-<tr class="row-even"><td><p><a class="reference internal" href="functions/pcsaft.pcsaft_Z.html#pcsaft.pcsaft_Z" title="pcsaft.pcsaft_Z"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pcsaft_Z</span></code></a></p></td>
-<td><p>Calculate the compressibility factor.</p></td>
-</tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="functions/pcsaft.pcsaft_ares.html#pcsaft.pcsaft_ares" title="pcsaft.pcsaft_ares"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pcsaft_ares</span></code></a></p></td>
-<td><p>Calculate the residual Helmholtz energy.</p></td>
-</tr>
-<tr class="row-even"><td><p><a class="reference internal" href="functions/pcsaft.pcsaft_dadt.html#pcsaft.pcsaft_dadt" title="pcsaft.pcsaft_dadt"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pcsaft_dadt</span></code></a></p></td>
-<td><p>Calculate the temperature derivative of the residual Helmholtz energy.</p></td>
-</tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="functions/pcsaft.aly_lee.html#pcsaft.aly_lee" title="pcsaft.aly_lee"><code class="xref py py-obj docutils literal notranslate"><span class="pre">aly_lee</span></code></a></p></td>
-<td><p>Calculate the ideal gas isobaric heat capacity using the Aly-Lee equation.</p></td>
-</tr>
-<tr class="row-even"><td><p><a class="reference internal" href="functions/pcsaft.dielc_water.html#pcsaft.dielc_water" title="pcsaft.dielc_water"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dielc_water</span></code></a></p></td>
-<td><p>Return the dielectric constant of water at the given temperature.</p></td>
-</tr>
-</tbody>
-</table>
+</div>
 </div>
 <div class="section" id="indices-and-tables">
 <h1>Indices and tables<a class="headerlink" href="#indices-and-tables" title="Permalink to this headline">¶</a></h1>

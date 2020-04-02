@@ -13,7 +13,7 @@ ext_modules = [
         sources=["pcsaft.pyx"],
         language="c++")]
 
-with open("README.md", "r") as fh:
+with open("docs/README.rst", "r") as fh:
     long_description = fh.read()
 
 setup(name='pcsaft',
