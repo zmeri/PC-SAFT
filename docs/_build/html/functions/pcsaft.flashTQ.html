@@ -1,0 +1,182 @@
+
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta charset="utf-8" />
+    <title>pcsaft.flashTQ &#8212; pcsaft 1.0.1 documentation</title>
+    <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <script id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <script src="../_static/language_data.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="pcsaft.flashPQ" href="pcsaft.flashPQ.html" />
+    <link rel="prev" title="Documentation for pcsaft" href="../index.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="pcsaft-flashtq">
+<h1>pcsaft.flashTQ<a class="headerlink" href="#pcsaft-flashtq" title="Permalink to this headline">¶</a></h1>
+<dl class="function">
+<dt id="pcsaft.flashTQ">
+<code class="sig-prename descclassname">pcsaft.</code><code class="sig-name descname">flashTQ</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pcsaft.flashTQ" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate the pressure of the system where vapor and liquid phases are in equilibrium.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>t</strong> (<em>float</em>) – Temperature (K)</p></li>
+<li><p><strong>q</strong> (<em>float</em>) – Mole fraction of the fluid in the vapor phase</p></li>
+<li><p><strong>pyargs</strong> (<em>dict</em>) – <p>A dictionary containing PC-SAFT parameters that can be passed for
+use in PC-SAFT:</p>
+<dl class="simple">
+<dt>x<span class="classifier">ndarray, shape (n,)</span></dt><dd><p>Mole fractions of each component. It has a length of n, where n is
+the number of components in the system.</p>
+</dd>
+<dt>m<span class="classifier">ndarray, shape (n,)</span></dt><dd><p>Segment number for each component.</p>
+</dd>
+<dt>s<span class="classifier">ndarray, shape (n,)</span></dt><dd><p>Segment diameter for each component. For ions this is the diameter of
+the hydrated ion. Units of Angstrom.</p>
+</dd>
+<dt>e<span class="classifier">ndarray, shape (n,)</span></dt><dd><p>Dispersion energy of each component. For ions this is the dispersion
+energy of the hydrated ion. Units of K.</p>
+</dd>
+<dt>k_ij<span class="classifier">ndarray, shape (n,n)</span></dt><dd><p>Binary interaction parameters between components in the mixture.
+(dimensions: ncomp x ncomp)</p>
+</dd>
+<dt>e_assoc<span class="classifier">ndarray, shape (n,)</span></dt><dd><p>Association energy of the associating components. For non associating
+compounds this is set to 0. Units of K.</p>
+</dd>
+<dt>vol_a<span class="classifier">ndarray, shape (n,)</span></dt><dd><p>Effective association volume of the associating components. For non
+associating compounds this is set to 0.</p>
+</dd>
+<dt>dipm<span class="classifier">ndarray, shape (n,)</span></dt><dd><p>Dipole moment of the polar components. For components where the dipole
+term is not used this is set to 0. Units of Debye.</p>
+</dd>
+<dt>dip_num<span class="classifier">ndarray, shape (n,)</span></dt><dd><p>The effective number of dipole functional groups on each component
+molecule. Some implementations use this as an adjustable parameter
+that is fit to data.</p>
+</dd>
+<dt>z<span class="classifier">ndarray, shape (n,)</span></dt><dd><p>Charge number of the ions</p>
+</dd>
+<dt>dielc<span class="classifier">float</span></dt><dd><p>Dielectric constant of the medium to be used for electrolyte
+calculations.</p>
+</dd>
+</dl>
+</p></li>
+<li><p><strong>p_guess</strong> (<em>float</em>) – Initial guess for the pressure (Pa) (optional)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><strong>p</strong> (<em>float</em>) – Pressure (Pa)</p></li>
+<li><p><strong>xl</strong> (<em>ndarray, shape (n,)</em>) – Liquid mole fractions after flash</p></li>
+<li><p><strong>xv</strong> (<em>ndarray, shape (n,)</em>) – Vapor mole fractions after flash</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../index.html">pcsaft</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">pcsaft.flashTQ</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pcsaft.flashPQ.html">pcsaft.flashPQ</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pcsaft.pcsaft_Hvap.html">pcsaft.pcsaft_Hvap</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pcsaft.pcsaft_osmoticC.html">pcsaft.pcsaft_osmoticC</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pcsaft.pcsaft_cp.html">pcsaft.pcsaft_cp</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pcsaft.pcsaft_den.html">pcsaft.pcsaft_den</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pcsaft.pcsaft_p.html">pcsaft.pcsaft_p</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pcsaft.pcsaft_hres.html">pcsaft.pcsaft_hres</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pcsaft.pcsaft_sres.html">pcsaft.pcsaft_sres</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pcsaft.pcsaft_gres.html">pcsaft.pcsaft_gres</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pcsaft.pcsaft_fugcoef.html">pcsaft.pcsaft_fugcoef</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pcsaft.pcsaft_Z.html">pcsaft.pcsaft_Z</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pcsaft.pcsaft_ares.html">pcsaft.pcsaft_ares</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pcsaft.pcsaft_dadt.html">pcsaft.pcsaft_dadt</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pcsaft.aly_lee.html">pcsaft.aly_lee</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pcsaft.dielc_water.html">pcsaft.dielc_water</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="../index.html" title="previous chapter">Documentation for pcsaft</a></li>
+      <li>Next: <a href="pcsaft.flashPQ.html" title="next chapter">pcsaft.flashPQ</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2020, Zach Baird.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 2.4.4</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="../_sources/functions/pcsaft.flashTQ.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

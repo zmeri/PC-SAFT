@@ -25,53 +25,23 @@ Functions
 - pcsaft_Z : calculate the compressibility factor
 - pcsaft_ares : calculate the residual Helmholtz energy
 - pcsaft_dadt : calculate the temperature derivative of the residual Helmholtz energy
-- XA_find : used internally to solve for XA
-- dXA_find : used internally to solve for the derivative of XA wrt density
-- dXAdt_find : used internally to solve for the derivative of XA wrt temperature
 - aly_lee : returns the ideal gas heat capacity
 - dielc_water : returns the dielectric constant of water
-- np_to_vector : converts a numpy array to a C++ vector
-- create_struct : converts additional arguments to a C++ struct
 
 References
 ----------
-* J. Gross and G. Sadowski, “Perturbed-Chain SAFT:  An Equation of State
-Based on a Perturbation Theory for Chain Molecules,” Ind. Eng. Chem.
-Res., vol. 40, no. 4, pp. 1244–1260, Feb. 2001.
-* M. Kleiner and G. Sadowski, “Modeling of Polar Systems Using PCP-SAFT: 
-An Approach to Account for Induced-Association Interactions,” J. Phys.
-Chem. C, vol. 111, no. 43, pp. 15544–15553, Nov. 2007.
-* Gross Joachim and Vrabec Jadran, “An equation‐of‐state contribution
-for polar components: Dipolar molecules,” AIChE J., vol. 52, no. 3,
-pp. 1194–1204, Feb. 2006.
-* A. J. de Villiers, C. E. Schwarz, and A. J. Burger, “Improving
-vapour–liquid-equilibria predictions for mixtures with non-associating polar
-components using sPC-SAFT extended with two dipolar terms,” Fluid Phase
-Equilibria, vol. 305, no. 2, pp. 174–184, Jun. 2011.
-* S. H. Huang and M. Radosz, “Equation of state for small, large,
-polydisperse, and associating molecules,” Ind. Eng. Chem. Res., vol. 29,
-no. 11, pp. 2284–2294, Nov. 1990.
-* S. H. Huang and M. Radosz, “Equation of state for small, large,
-polydisperse, and associating molecules: extension to fluid mixtures,”
-Ind. Eng. Chem. Res., vol. 30, no. 8, pp. 1994–2005, Aug. 1991.
-* S. H. Huang and M. Radosz, “Equation of state for small, large,
-polydisperse, and associating molecules: extension to fluid mixtures.
-[Erratum to document cited in CA115(8):79950j],” Ind. Eng. Chem. Res.,
-vol. 32, no. 4, pp. 762–762, Apr. 1993.
-* J. Gross and G. Sadowski, “Application of the Perturbed-Chain SAFT
-Equation of State to Associating Systems,” Ind. Eng. Chem. Res., vol.
-41, no. 22, pp. 5510–5515, Oct. 2002.
-* L. F. Cameretti, G. Sadowski, and J. M. Mollerup, “Modeling of Aqueous
-Electrolyte Solutions with Perturbed-Chain Statistical Associated Fluid
-Theory,” Ind. Eng. Chem. Res., vol. 44, no. 9, pp. 3355–3362, Apr. 2005.
-* L. F. Cameretti, G. Sadowski, and J. M. Mollerup, “Modeling of Aqueous
-Electrolyte Solutions with Perturbed-Chain Statistical Association Fluid
-Theory,” Ind. Eng. Chem. Res., vol. 44, no. 23, pp. 8944–8944, Nov. 2005.
-* C. Held, L. F. Cameretti, and G. Sadowski, “Modeling aqueous
-electrolyte solutions: Part 1. Fully dissociated electrolytes,” Fluid
-Phase Equilibria, vol. 270, no. 1, pp. 87–96, Aug. 2008.
-* C. Held, T. Reschke, S. Mohammad, A. Luza, and G. Sadowski, “ePC-SAFT
-revised,” Chem. Eng. Res. Des., vol. 92, no. 12, pp. 2884–2897, Dec. 2014.
+- J. Gross and G. Sadowski, “Perturbed-Chain SAFT:  An Equation of State Based on a Perturbation Theory for Chain Molecules,” Ind. Eng. Chem. Res., vol. 40, no. 4, pp. 1244–1260, Feb. 2001.
+- M. Kleiner and G. Sadowski, “Modeling of Polar Systems Using PCP-SAFT: An Approach to Account for Induced-Association Interactions,” J. Phys. Chem. C, vol. 111, no. 43, pp. 15544–15553, Nov. 2007.
+- J. Gross Joachim and J. Vrabec, “An equation‐of‐state contribution for polar components: Dipolar molecules,” AIChE J., vol. 52, no. 3, pp. 1194–1204, Feb. 2006.
+- A. J. de Villiers, C. E. Schwarz, and A. J. Burger, “Improving vapour–liquid-equilibria predictions for mixtures with non-associating polar components using sPC-SAFT extended with two dipolar terms,” Fluid Phase Equilibria, vol. 305, no. 2, pp. 174–184, Jun. 2011.
+- S. H. Huang and M. Radosz, “Equation of state for small, large, polydisperse, and associating molecules,” Ind. Eng. Chem. Res., vol. 29, no. 11, pp. 2284–2294, Nov. 1990.
+- S. H. Huang and M. Radosz, “Equation of state for small, large, polydisperse, and associating molecules: extension to fluid mixtures,” Ind. Eng. Chem. Res., vol. 30, no. 8, pp. 1994–2005, Aug. 1991.
+- S. H. Huang and M. Radosz, “Equation of state for small, large, polydisperse, and associating molecules: extension to fluid mixtures. [Erratum to document cited in CA115(8):79950j],” Ind. Eng. Chem. Res., vol. 32, no. 4, pp. 762–762, Apr. 1993.
+- J. Gross and G. Sadowski, “Application of the Perturbed-Chain SAFT Equation of State to Associating Systems,” Ind. Eng. Chem. Res., vol. 41, no. 22, pp. 5510–5515, Oct. 2002.
+- L. F. Cameretti, G. Sadowski, and J. M. Mollerup, “Modeling of Aqueous Electrolyte Solutions with Perturbed-Chain Statistical Associated Fluid Theory,” Ind. Eng. Chem. Res., vol. 44, no. 9, pp. 3355–3362, Apr. 2005.
+- L. F. Cameretti, G. Sadowski, and J. M. Mollerup, “Modeling of Aqueous Electrolyte Solutions with Perturbed-Chain Statistical Association Fluid Theory,” Ind. Eng. Chem. Res., vol. 44, no. 23, pp. 8944–8944, Nov. 2005.
+- C. Held, L. F. Cameretti, and G. Sadowski, “Modeling aqueous electrolyte solutions: Part 1. Fully dissociated electrolytes,” Fluid Phase Equilibria, vol. 270, no. 1, pp. 87–96, Aug. 2008.
+- C. Held, T. Reschke, S. Mohammad, A. Luza, and G. Sadowski, “ePC-SAFT revised,” Chem. Eng. Res. Des., vol. 92, no. 12, pp. 2884–2897, Dec. 2014.
 """
 
 import numpy as np
@@ -80,19 +50,16 @@ from copy import deepcopy
 cimport pcsaft
 
 class InputError(Exception):
-    """Exception raised for errors in the input.
-    """
+    # Exception raised for errors in the input.
     def __init__(self, message):
         self.message = message
 
 class SolutionError(Exception):
-    """Exception raised when a solver does not return a value.
-    """
+    # Exception raised when a solver does not return a value.
     def __init__(self, message):
         self.message = message
 
 def check_input(x, vars):
-    ''' Perform a few basic checks to make sure the input is reasonable. '''
     if abs(np.sum(x) - 1) > 1e-7:
         raise InputError('The mole fractions do not sum to 1. x = {}'.format(x))
     if 'temperature' in vars:
@@ -128,7 +95,7 @@ def pcsaft_p(t, rho, pyargs):
     t : float
         Temperature (K)
     rho : float
-        Molar density (mol m^{-3})
+        Molar density (mol m\ :sup:`-3`)
     pyargs : dict
         A dictionary containing PC-SAFT parameters that can be passed for
         use in PC-SAFT:
@@ -186,7 +153,7 @@ def pcsaft_fugcoef(t, rho, pyargs):
     t : float
         Temperature (K)
     rho : float
-        Molar density (mol m^{-3})
+        Molar density (mol m\ :sup:`-3`)
     pyargs : dict
         A dictionary containing PC-SAFT parameters that can be passed for
         use in PC-SAFT:
@@ -244,7 +211,7 @@ def pcsaft_Z(t, rho, pyargs):
     t : float
         Temperature (K)
     rho : float
-        Molar density (mol m^{-3})
+        Molar density (mol m\ :sup:`-3`)
     pyargs : dict
         A dictionary containing PC-SAFT parameters that can be passed for
         use in PC-SAFT:
@@ -533,7 +500,7 @@ def pcsaft_osmoticC(t, rho, pyargs):
     t : float
         Temperature (K)
     rho : float
-        Molar density (mol m^{-3})
+        Molar density (mol m\ :sup:`-3`)
     pyargs : dict
         A dictionary containing PC-SAFT parameters that can be passed for
         use in PC-SAFT:
@@ -611,7 +578,7 @@ def pcsaft_cp(t, rho, params, pyargs):
     t : float
         Temperature (K)
     rho : float
-        Molar density (mol m^{-3})
+        Molar density (mol m\ :sup:`-3`)
     params : ndarray, shape (5,)
         Constants for the Aly-Lee equation. Can be substituted with parameters for
         another equation if the ideal gas heat capacity is given using a different
@@ -656,7 +623,7 @@ def pcsaft_cp(t, rho, params, pyargs):
     Returns
     -------
     cp : float
-        Specific molar isobaric heat capacity (J mol^-1 K^-1)
+        Specific molar isobaric heat capacity (J mol\ :sup:`-1` K\ :sup:`-1`)
     """
     pyargs = ensure_numpy_input(pyargs)
     check_input(pyargs['x'], {'density':rho, 'temperature':t})
@@ -680,8 +647,7 @@ def pcsaft_cp(t, rho, params, pyargs):
 
 def pcsaft_den(t, p, pyargs, phase='liq'):
     """
-    Wrapper for C++ pcsaft_den_cpp function because a C++ struct is needed for
-    that function.
+    Calculate the molar density.
 
     Parameters
     ----------
@@ -732,7 +698,7 @@ def pcsaft_den(t, p, pyargs, phase='liq'):
     Returns
     -------
     rho : float
-        Molar density (mol m^{-3})
+        Molar density (mol m\ :sup:`-3`)
     """
     pyargs = ensure_numpy_input(pyargs)
     check_input(pyargs['x'], {'pressure':p, 'temperature':t})
@@ -754,7 +720,7 @@ def pcsaft_hres(t, rho, pyargs):
     t : float
         Temperature (K)
     rho : float
-        Molar density (mol m^{-3})
+        Molar density (mol m\ :sup:`-3`)
     pyargs : dict
         A dictionary containing PC-SAFT parameters that can be passed for
         use in PC-SAFT:
@@ -795,7 +761,7 @@ def pcsaft_hres(t, rho, pyargs):
     Returns
     -------
     hres : float
-        Residual enthalpy (J mol^{-1})
+        Residual enthalpy (J mol\ :sup:`-1`)
     """
     pyargs = ensure_numpy_input(pyargs)
     check_input(pyargs['x'], {'density':rho, 'temperature':t})
@@ -811,7 +777,7 @@ def pcsaft_sres(t, rho, pyargs):
     t : float
         Temperature (K)
     rho : float
-        Molar density (mol m^{-3})
+        Molar density (mol m\ :sup:`-3`)
     pyargs : dict
         A dictionary containing PC-SAFT parameters that can be passed for
         use in PC-SAFT:
@@ -852,7 +818,7 @@ def pcsaft_sres(t, rho, pyargs):
     Returns
     -------
     sres : float
-        Residual entropy (J mol^{-1} K^{-1})
+        Residual entropy (J mol\ :sup:`-1` K\ :sup:`-1`)
     """
     pyargs = ensure_numpy_input(pyargs)
     check_input(pyargs['x'], {'density':rho, 'temperature':t})
@@ -868,7 +834,7 @@ def pcsaft_gres(t, rho, pyargs):
     t : float
         Temperature (K)
     rho : float
-        Molar density (mol m^{-3})
+        Molar density (mol m\ :sup:`-3`)
     pyargs : dict
         A dictionary containing PC-SAFT parameters that can be passed for
         use in PC-SAFT:
@@ -909,7 +875,7 @@ def pcsaft_gres(t, rho, pyargs):
     Returns
     -------
     gres : float
-        Residual Gibbs energy (J mol^{-1})
+        Residual Gibbs energy (J mol\ :sup:`-1`)
     """
     pyargs = ensure_numpy_input(pyargs)
     check_input(pyargs['x'], {'density':rho, 'temperature':t})
@@ -919,14 +885,14 @@ def pcsaft_gres(t, rho, pyargs):
 
 def pcsaft_ares(t, rho, pyargs):
     """
-    Calculates the residual Helmholtz energy.
+    Calculate the residual Helmholtz energy.
 
     Parameters
     ----------
     t : float
         Temperature (K)
     rho : float
-        Molar density (mol m^{-3})
+        Molar density (mol m\ :sup:`-3`)
     pyargs : dict
         A dictionary containing PC-SAFT parameters that can be passed for
         use in PC-SAFT:
@@ -967,7 +933,7 @@ def pcsaft_ares(t, rho, pyargs):
     Returns
     -------
     ares : float
-        Residual Helmholtz energy (J mol^{-1})
+        Residual Helmholtz energy (J mol\ :sup:`-1`)
     """
     pyargs = ensure_numpy_input(pyargs)
     check_input(pyargs['x'], {'density':rho, 'temperature':t})
@@ -977,14 +943,14 @@ def pcsaft_ares(t, rho, pyargs):
 
 def pcsaft_dadt(t, rho, pyargs):
     """
-    Calculates the temperature derivative of the residual Helmholtz energy.
+    Calculate the temperature derivative of the residual Helmholtz energy.
 
     Parameters
     ----------
     t : float
         Temperature (K)
     rho : float
-        Molar density (mol m^{-3})
+        Molar density (mol m\ :sup:`-3`)
     pyargs : dict
         A dictionary containing PC-SAFT parameters that can be passed for
         use in PC-SAFT:
@@ -1025,7 +991,7 @@ def pcsaft_dadt(t, rho, pyargs):
     Returns
     -------
     dadt : float
-        Temperature derivative of the residual Helmholtz energy (J mol^{-1})
+        Temperature derivative of the residual Helmholtz energy (J mol\ :sup:`-1`)
     """
     pyargs = ensure_numpy_input(pyargs)
     check_input(pyargs['x'], {'density':rho, 'temperature':t})
@@ -1047,13 +1013,11 @@ def aly_lee(t, c):
     Returns
     -------
     cp_ideal : float
-        Ideal gas isobaric heat capacity (J mol^-1 K^-1)
+        Ideal gas isobaric heat capacity (J mol\ :sup:`-1` K\ :sup:`-1`)
 
-    Reference:
-    F. A. Aly and L. L. Lee, “Self-consistent equations for calculating the ideal
-    gas heat capacity, enthalpy, and entropy,” Fluid Phase Equilibria, vol. 6,
-    no. 3–4, pp. 169–179, 1981.
-
+    References
+    ----------
+    - F. A. Aly and L. L. Lee, “Self-consistent equations for calculating the ideal gas heat capacity, enthalpy, and entropy,” Fluid Phase Equilibria, vol. 6, no. 3–4, pp. 169–179, 1981.
     """
     cp_ideal = (c[0] + c[1]*(c[2]/t/np.sinh(c[2]/t))**2 + c[3]*(c[4]/t/np.cosh(c[4]/t))**2)/1000.
     return cp_ideal
@@ -1062,18 +1026,30 @@ def dielc_water(t):
     """
     Return the dielectric constant of water at the given temperature.
 
+    This equation was fit to values given in the reference. For temperatures from
+    263.15 to 368.15 K values at 1 bar were used. For temperatures from 368.15 to
+    443.15 K values at 10 bar were used. Below 263.15 K and above 443.15 K an
+    error is raised.
+
+    Parameters
+    ----------
     t : float
         Temperature (K)
 
-    This equation was fit to values given in the reference. For temperatures
-    from 263.15 to 368.15 K values at 1 bar were used. For temperatures from
-    368.15 to 443.15 K values at 10 bar were used.
+    Returns
+    -------
+    dielc : float
+        Dielectric constant of water
 
-    Reference:
-    D. G. Archer and P. Wang, “The Dielectric Constant of Water and Debye‐Hückel
-    Limiting Law Slopes,” J. Phys. Chem. Ref. Data, vol. 19, no. 2, pp. 371–411,
-    Mar. 1990.
+    References
+    ----------
+    - D. G. Archer and P. Wang, “The Dielectric Constant of Water and Debye‐Hückel Limiting Law Slopes,” J. Phys. Chem. Ref. Data, vol. 19, no. 2, pp. 371–411, Mar. 1990.
     """
+    if t < 263.15:
+        raise ValueError('For dielc_water t must be greater than 263.15 K.')
+    elif t > 443.15:
+        raise ValueError('For dielc_water t must be less than 443.15 K.')
+
     if t <= 368.15:
         dielc = 7.6555618295E-04*t**2 - 8.1783881423E-01*t + 2.5419616803E+02
     else:
