@@ -1,0 +1,154 @@
+
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta charset="utf-8" />
+    <title>PC-SAFT &#8212; pcsaft 1.0.1 documentation</title>
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script src="_static/language_data.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="pc-saft">
+<h1>PC-SAFT<a class="headerlink" href="#pc-saft" title="Permalink to this headline">¶</a></h1>
+<p>This package implement the PC-SAFT equation of state. In addition to the hard chain and dispersion terms, these functions also include dipole, association and ion terms for use with these types of compounds. When the ion term is included it is also called electrolyte PC-SAFT (ePC-SAFT).</p>
+<div class="section" id="dependencies">
+<h2>Dependencies<a class="headerlink" href="#dependencies" title="Permalink to this headline">¶</a></h2>
+<p>The Numpy and Scipy packages are required. The core functions have been written in C++ to improve calculation speed, so <a class="reference external" href="http://cython.org/">Cython</a> is needed, along with the <a class="reference external" href="https://github.com/eigenteam/eigen-git-mirror">Eigen</a> package for linear algebra. For unit testing pytest is used.</p>
+</div>
+<div class="section" id="python-package">
+<h2>Python package<a class="headerlink" href="#python-package" title="Permalink to this headline">¶</a></h2>
+<p>To make it easier to use this code, it has been added as a package to PyPi (<a class="reference external" href="https://pypi.org/project/pcsaft/">pcsaft</a>), which means it can be installed using pip. This allows you to use the code without needing to compile the Cython code yourself. Binaries for Linux and Windows have been added, but MacOS is currently not supported.</p>
+</div>
+<div class="section" id="compiling-with-cython">
+<h2>Compiling with Cython<a class="headerlink" href="#compiling-with-cython" title="Permalink to this headline">¶</a></h2>
+<p>To speed up the original Python code the core functions have been rewritten in C++. These are then connected with the remaining Python code using Cython. This gave a significant improvement in speed. The Cython code needs to be compiled before use. To do so install Cython. Then run the following command from the directory containing the PC-SAFT code</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">python</span> <span class="n">setup</span><span class="o">.</span><span class="n">py</span> <span class="n">build_ext</span> <span class="o">--</span><span class="n">inplace</span>
+</pre></div>
+</div>
+<p>Make sure that the Eigen header files are somewhere on your path. More about the Cython build process can be found from the <a class="reference external" href="http://docs.cython.org/en/latest/src/quickstart/build.html">Cython documentation</a>.</p>
+<p>The original Python-only code has been removed from the repository. If you still want to use the original Python-only functions, go back to an <a class="reference external" href="https://github.com/zmeri/PC-SAFT/tree/b43bf568c4dc1907316422d5c3f7b809e9725848">earlier version</a> of the repository. Note that the Python-only code is no longer maintained, so it may not be as reliable as the Cython code.</p>
+</div>
+<div class="section" id="author">
+<h2>Author<a class="headerlink" href="#author" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><p><strong>Zach Baird</strong> - <a class="reference external" href="https://github.com/zmeri">zmeri</a></p></li>
+</ul>
+</div>
+<div class="section" id="license">
+<h2>License<a class="headerlink" href="#license" title="Permalink to this headline">¶</a></h2>
+<p>This project is licensed under the GNU General Public License v3.0</p>
+</div>
+<div class="section" id="acknowledgments">
+<h2>Acknowledgments<a class="headerlink" href="#acknowledgments" title="Permalink to this headline">¶</a></h2>
+<p>When developing these functions the code from two other groups was used as references</p>
+<ul class="simple">
+<li><p>Code from Joachim Gross (<a class="reference external" href="https://www.th.bci.tu-dortmund.de/cms/de/Forschung/PC-SAFT/Download/index.html">https://www.th.bci.tu-dortmund.de/cms/de/Forschung/PC-SAFT/Download/index.html</a>)</p></li>
+<li><p>The MATLAB/Octave program written by Angel Martin and others (<a class="reference external" href="http://hpp.uva.es/open-source-software-eos/">http://hpp.uva.es/open-source-software-eos/</a>)</p></li>
+</ul>
+</div>
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="index.html">pcsaft</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="functions/pcsaft.flashTQ.html">pcsaft.flashTQ</a></li>
+<li class="toctree-l1"><a class="reference internal" href="functions/pcsaft.flashPQ.html">pcsaft.flashPQ</a></li>
+<li class="toctree-l1"><a class="reference internal" href="functions/pcsaft.pcsaft_Hvap.html">pcsaft.pcsaft_Hvap</a></li>
+<li class="toctree-l1"><a class="reference internal" href="functions/pcsaft.pcsaft_osmoticC.html">pcsaft.pcsaft_osmoticC</a></li>
+<li class="toctree-l1"><a class="reference internal" href="functions/pcsaft.pcsaft_cp.html">pcsaft.pcsaft_cp</a></li>
+<li class="toctree-l1"><a class="reference internal" href="functions/pcsaft.pcsaft_den.html">pcsaft.pcsaft_den</a></li>
+<li class="toctree-l1"><a class="reference internal" href="functions/pcsaft.pcsaft_p.html">pcsaft.pcsaft_p</a></li>
+<li class="toctree-l1"><a class="reference internal" href="functions/pcsaft.pcsaft_hres.html">pcsaft.pcsaft_hres</a></li>
+<li class="toctree-l1"><a class="reference internal" href="functions/pcsaft.pcsaft_sres.html">pcsaft.pcsaft_sres</a></li>
+<li class="toctree-l1"><a class="reference internal" href="functions/pcsaft.pcsaft_gres.html">pcsaft.pcsaft_gres</a></li>
+<li class="toctree-l1"><a class="reference internal" href="functions/pcsaft.pcsaft_fugcoef.html">pcsaft.pcsaft_fugcoef</a></li>
+<li class="toctree-l1"><a class="reference internal" href="functions/pcsaft.pcsaft_Z.html">pcsaft.pcsaft_Z</a></li>
+<li class="toctree-l1"><a class="reference internal" href="functions/pcsaft.pcsaft_ares.html">pcsaft.pcsaft_ares</a></li>
+<li class="toctree-l1"><a class="reference internal" href="functions/pcsaft.pcsaft_dadt.html">pcsaft.pcsaft_dadt</a></li>
+<li class="toctree-l1"><a class="reference internal" href="functions/pcsaft.aly_lee.html">pcsaft.aly_lee</a></li>
+<li class="toctree-l1"><a class="reference internal" href="functions/pcsaft.dielc_water.html">pcsaft.dielc_water</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2020, Zach Baird.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 2.4.4</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="_sources/README.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>
