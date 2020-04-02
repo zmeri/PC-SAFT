@@ -4,6 +4,10 @@ PC-SAFT
 
 This package implement the PC-SAFT equation of state. In addition to the hard chain and dispersion terms, these functions also include dipole, association and ion terms for use with these types of compounds. When the ion term is included it is also called electrolyte PC-SAFT (ePC-SAFT).
 
+Documentation
+-------------
+Documentation for the package is available on `Read the Docs`_.
+
 Dependencies
 ------------
 
@@ -45,6 +49,7 @@ When developing these functions the code from two other groups was used as refer
 - Code from Joachim Gross (https://www.th.bci.tu-dortmund.de/cms/de/Forschung/PC-SAFT/Download/index.html)
 - The MATLAB/Octave program written by Angel Martin and others (http://hpp.uva.es/open-source-software-eos/)
 
+.. _`Read the Docs`: https://pcsaft.readthedocs.io/en/latest/
 .. _Cython: http://cython.org/
 .. _Eigen: https://github.com/eigenteam/eigen-git-mirror
 .. _pcsaft: https://pypi.org/project/pcsaft/
