@@ -25,3 +25,4 @@ python:
       path: .
     - method: setuptools
       path: .
+  system_packages: true
