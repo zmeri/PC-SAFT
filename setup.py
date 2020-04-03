@@ -25,9 +25,9 @@ setup(name='pcsaft',
       url="https://github.com/zmeri/PC-SAFT",
       packages=find_packages(),
       install_requires=[
-        numpy,
-        scipy,
-        cython
+        'numpy',
+        'scipy',
+        'cython'
       ],
       classifiers=[
         "Programming Language :: Python :: 3",
