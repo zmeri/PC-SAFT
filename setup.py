@@ -28,7 +28,7 @@ setup(name='pcsaft',
         cython,
         numpy,
         scipy
-      ]
+      ],
       classifiers=[
         "Programming Language :: Python :: 3",
         "Programming Language :: C++",
