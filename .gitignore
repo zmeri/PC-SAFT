@@ -1,0 +1,4 @@
+docs/_build/
+build/
+*.pytest_cache
+*.so
