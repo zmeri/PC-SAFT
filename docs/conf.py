@@ -42,6 +42,9 @@ exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
 
 autosummary_generate = True
 
+submodules:
+  include: all
+
 
 # -- Options for HTML output -------------------------------------------------
 
