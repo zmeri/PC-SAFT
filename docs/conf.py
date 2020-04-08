@@ -44,6 +44,7 @@ autosummary_generate = True
 
 submodules:
   include: all
+  recursive: true
 
 
 # -- Options for HTML output -------------------------------------------------
