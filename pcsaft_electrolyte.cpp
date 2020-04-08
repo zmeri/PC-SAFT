@@ -2,7 +2,7 @@
 #include <string>
 #include <cmath>
 #include "math.h"
-#include "Eigen/Dense"
+#include "externals/eigen/Eigen/Dense"
 
 #include "pcsaft_electrolyte.h"
 
