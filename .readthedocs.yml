@@ -26,5 +26,6 @@ python:
 
 
 submodules:
-  include: all
+  include:
+    - Eigen
   recursive: true
