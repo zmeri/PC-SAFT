@@ -1,48 +1,5 @@
 # -*- coding: utf-8 -*-
 # setuptools: language=c++
-"""
-PC-SAFT with electrolyte term
-
-These functions implement the PC-SAFT equation of state. In addition to the
-hard chain and dispersion terms, these functions also include dipole,
-association and ion terms for use with these types of compounds.
-
-@author: Zach Baird
-
-Functions
----------
-- flashTQ : calculate the equilibrium pressure when there are two phases
-- flashPQ : calculate the equilibrium temperature when there are two phases
-- pcsaft_Hvap : calculate the enthalpy of vaporization
-- pcsaft_osmoticC : calculate the osmotic coefficient for the mixture
-- pcsaft_cp : calculate the heat capacity
-- pcsaft_den : calculate the molar density
-- pcsaft_p : calculate the pressure
-- pcsaft_hres : calculate the residual enthalpy
-- pcsaft_sres : calculate the residual entropy
-- pcsaft_gres : calculate the residual Gibbs free energy
-- pcsaft_fugcoef : calculate the fugacity coefficients
-- pcsaft_Z : calculate the compressibility factor
-- pcsaft_ares : calculate the residual Helmholtz energy
-- pcsaft_dadt : calculate the temperature derivative of the residual Helmholtz energy
-- aly_lee : returns the ideal gas heat capacity
-- dielc_water : returns the dielectric constant of water
-
-References
-----------
-- J. Gross and G. Sadowski, “Perturbed-Chain SAFT:  An Equation of State Based on a Perturbation Theory for Chain Molecules,” Ind. Eng. Chem. Res., vol. 40, no. 4, pp. 1244–1260, Feb. 2001.
-- M. Kleiner and G. Sadowski, “Modeling of Polar Systems Using PCP-SAFT: An Approach to Account for Induced-Association Interactions,” J. Phys. Chem. C, vol. 111, no. 43, pp. 15544–15553, Nov. 2007.
-- J. Gross Joachim and J. Vrabec, “An equation‐of‐state contribution for polar components: Dipolar molecules,” AIChE J., vol. 52, no. 3, pp. 1194–1204, Feb. 2006.
-- A. J. de Villiers, C. E. Schwarz, and A. J. Burger, “Improving vapour–liquid-equilibria predictions for mixtures with non-associating polar components using sPC-SAFT extended with two dipolar terms,” Fluid Phase Equilibria, vol. 305, no. 2, pp. 174–184, Jun. 2011.
-- S. H. Huang and M. Radosz, “Equation of state for small, large, polydisperse, and associating molecules,” Ind. Eng. Chem. Res., vol. 29, no. 11, pp. 2284–2294, Nov. 1990.
-- S. H. Huang and M. Radosz, “Equation of state for small, large, polydisperse, and associating molecules: extension to fluid mixtures,” Ind. Eng. Chem. Res., vol. 30, no. 8, pp. 1994–2005, Aug. 1991.
-- S. H. Huang and M. Radosz, “Equation of state for small, large, polydisperse, and associating molecules: extension to fluid mixtures. [Erratum to document cited in CA115(8):79950j],” Ind. Eng. Chem. Res., vol. 32, no. 4, pp. 762–762, Apr. 1993.
-- J. Gross and G. Sadowski, “Application of the Perturbed-Chain SAFT Equation of State to Associating Systems,” Ind. Eng. Chem. Res., vol. 41, no. 22, pp. 5510–5515, Oct. 2002.
-- L. F. Cameretti, G. Sadowski, and J. M. Mollerup, “Modeling of Aqueous Electrolyte Solutions with Perturbed-Chain Statistical Associated Fluid Theory,” Ind. Eng. Chem. Res., vol. 44, no. 9, pp. 3355–3362, Apr. 2005.
-- L. F. Cameretti, G. Sadowski, and J. M. Mollerup, “Modeling of Aqueous Electrolyte Solutions with Perturbed-Chain Statistical Association Fluid Theory,” Ind. Eng. Chem. Res., vol. 44, no. 23, pp. 8944–8944, Nov. 2005.
-- C. Held, L. F. Cameretti, and G. Sadowski, “Modeling aqueous electrolyte solutions: Part 1. Fully dissociated electrolytes,” Fluid Phase Equilibria, vol. 270, no. 1, pp. 87–96, Aug. 2008.
-- C. Held, T. Reschke, S. Mohammad, A. Luza, and G. Sadowski, “ePC-SAFT revised,” Chem. Eng. Res. Des., vol. 92, no. 12, pp. 2884–2897, Dec. 2014.
-"""
 
 import numpy as np
 from libcpp.vector cimport vector
@@ -655,9 +612,6 @@ def pcsaft_den(t, p, pyargs, phase='liq'):
         Temperature (K)
     p : float
         Pressure (Pa)
-    phase : string
-        The phase for which the calculation is performed. Options: "liq" (liquid),
-        "vap" (vapor).
     pyargs : dict
         A dictionary containing PC-SAFT parameters that can be passed for
         use in PC-SAFT:
@@ -694,6 +648,10 @@ def pcsaft_den(t, p, pyargs, phase='liq'):
         dielc : float
             Dielectric constant of the medium to be used for electrolyte
             calculations.
+
+    phase : string
+        The phase for which the calculation is performed. Options: "liq" (liquid),
+        "vap" (vapor).
 
     Returns
     -------
