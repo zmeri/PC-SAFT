@@ -82,8 +82,8 @@ def pcsaft_p(t, rho, pyargs):
             term is not used this is set to 0. Units of Debye.
         dip_num : ndarray, shape (n,)
             The effective number of dipole functional groups on each component
-            molecule. Some implementations use this as an adjustable parameter
-            that is fit to data.
+            molecule. Generally this is set to 1, but some implementations use this
+            as an adjustable parameter that is fit to data.
         z : ndarray, shape (n,)
             Charge number of the ions
         dielc : float
@@ -140,8 +140,8 @@ def pcsaft_fugcoef(t, rho, pyargs):
             term is not used this is set to 0. Units of Debye.
         dip_num : ndarray, shape (n,)
             The effective number of dipole functional groups on each component
-            molecule. Some implementations use this as an adjustable parameter
-            that is fit to data.
+            molecule. Generally this is set to 1, but some implementations use this
+            as an adjustable parameter that is fit to data.
         z : ndarray, shape (n,)
             Charge number of the ions
         dielc : float
@@ -198,8 +198,8 @@ def pcsaft_Z(t, rho, pyargs):
             term is not used this is set to 0. Units of Debye.
         dip_num : ndarray, shape (n,)
             The effective number of dipole functional groups on each component
-            molecule. Some implementations use this as an adjustable parameter
-            that is fit to data.
+            molecule. Generally this is set to 1, but some implementations use this
+            as an adjustable parameter that is fit to data.
         z : ndarray, shape (n,)
             Charge number of the ions
         dielc : float
@@ -256,8 +256,8 @@ def flashPQ(p, q, pyargs, t_guess=None):
             term is not used this is set to 0. Units of Debye.
         dip_num : ndarray, shape (n,)
             The effective number of dipole functional groups on each component
-            molecule. Some implementations use this as an adjustable parameter
-            that is fit to data.
+            molecule. Generally this is set to 1, but some implementations use this
+            as an adjustable parameter that is fit to data.
         z : ndarray, shape (n,)
             Charge number of the ions
         dielc : float
@@ -332,8 +332,8 @@ def flashTQ(t, q, pyargs, p_guess=None):
             term is not used this is set to 0. Units of Debye.
         dip_num : ndarray, shape (n,)
             The effective number of dipole functional groups on each component
-            molecule. Some implementations use this as an adjustable parameter
-            that is fit to data.
+            molecule. Generally this is set to 1, but some implementations use this
+            as an adjustable parameter that is fit to data.
         z : ndarray, shape (n,)
             Charge number of the ions
         dielc : float
@@ -405,8 +405,8 @@ def pcsaft_Hvap(t, pyargs, p_guess=None):
             term is not used this is set to 0. Units of Debye.
         dip_num : ndarray, shape (n,)
             The effective number of dipole functional groups on each component
-            molecule. Some implementations use this as an adjustable parameter
-            that is fit to data.
+            molecule. Generally this is set to 1, but some implementations use this
+            as an adjustable parameter that is fit to data.
         z : ndarray, shape (n,)
             Charge number of the ions
         dielc : float
@@ -487,8 +487,8 @@ def pcsaft_osmoticC(t, rho, pyargs):
             term is not used this is set to 0. Units of Debye.
         dip_num : ndarray, shape (n,)
             The effective number of dipole functional groups on each component
-            molecule. Some implementations use this as an adjustable parameter
-            that is fit to data.
+            molecule. Generally this is set to 1, but some implementations use this
+            as an adjustable parameter that is fit to data.
         z : ndarray, shape (n,)
             Charge number of the ions
         dielc : float
@@ -544,38 +544,38 @@ def pcsaft_cp(t, rho, params, pyargs):
         A dictionary containing PC-SAFT parameters that can be passed for
         use in PC-SAFT:
 
-            x : ndarray, shape (n,)
-                Mole fractions of each component. It has a length of n, where n is
-                the number of components in the system.
-            m : ndarray, shape (n,)
-                Segment number for each component.
-            s : ndarray, shape (n,)
-                Segment diameter for each compopynent. For ions this is the diameter of
-                the hydrated ion. Units of Angstrom.
-            e : ndarray, shape (n,)
-                Dispersion energy of each component. For ions this is the dispersion
-                energy of the hydrated ion. Units of K.
-            k_ij : ndarray, shape (n,n)
-                Binary interaction parameters between components in the mixture.
-                (dimensions: ncomp x ncomp)
-            e_assoc : ndarray, shape (n,)
-                Association energy of the associating components. For non associating
-                compounds this is set to 0. Units of K.
-            vol_a : ndarray, shape (n,)
-                Effective association volume of the associating components. For non
-                associating compounds this is set to 0.
-            dipm : ndarray, shape (n,)
-                Dipole moment of the polar components. For components where the dipole
-                term is not used this is set to 0. Units of Debye.
-            dip_num : ndarray, shape (n,)
-                The effective number of dipole functional groups on each component
-                molecule. Some implementations use this as an adjustable parameter
-                that is fit to data.
-            z : ndarray, shape (n,)
-                Charge number of the ions
-            dielc : float
-                Dielectric constant of the medium to be used for electrolyte
-                calculations.
+        x : ndarray, shape (n,)
+            Mole fractions of each component. It has a length of n, where n is
+            the number of components in the system.
+        m : ndarray, shape (n,)
+            Segment number for each component.
+        s : ndarray, shape (n,)
+            Segment diameter for each compopynent. For ions this is the diameter of
+            the hydrated ion. Units of Angstrom.
+        e : ndarray, shape (n,)
+            Dispersion energy of each component. For ions this is the dispersion
+            energy of the hydrated ion. Units of K.
+        k_ij : ndarray, shape (n,n)
+            Binary interaction parameters between components in the mixture.
+            (dimensions: ncomp x ncomp)
+        e_assoc : ndarray, shape (n,)
+            Association energy of the associating components. For non associating
+            compounds this is set to 0. Units of K.
+        vol_a : ndarray, shape (n,)
+            Effective association volume of the associating components. For non
+            associating compounds this is set to 0.
+        dipm : ndarray, shape (n,)
+            Dipole moment of the polar components. For components where the dipole
+            term is not used this is set to 0. Units of Debye.
+        dip_num : ndarray, shape (n,)
+            The effective number of dipole functional groups on each component
+            molecule. Generally this is set to 1, but some implementations use this
+            as an adjustable parameter that is fit to data.
+        z : ndarray, shape (n,)
+            Charge number of the ions
+        dielc : float
+            Dielectric constant of the medium to be used for electrolyte
+            calculations.
 
     Returns
     -------
@@ -641,8 +641,8 @@ def pcsaft_den(t, p, pyargs, phase='liq'):
             term is not used this is set to 0. Units of Debye.
         dip_num : ndarray, shape (n,)
             The effective number of dipole functional groups on each component
-            molecule. Some implementations use this as an adjustable parameter
-            that is fit to data.
+            molecule. Generally this is set to 1, but some implementations use this
+            as an adjustable parameter that is fit to data.
         z : ndarray, shape (n,)
             Charge number of the ions
         dielc : float
@@ -708,8 +708,8 @@ def pcsaft_hres(t, rho, pyargs):
             term is not used this is set to 0. Units of Debye.
         dip_num : ndarray, shape (n,)
             The effective number of dipole functional groups on each component
-            molecule. Some implementations use this as an adjustable parameter
-            that is fit to data.
+            molecule. Generally this is set to 1, but some implementations use this
+            as an adjustable parameter that is fit to data.
         z : ndarray, shape (n,)
             Charge number of the ions
         dielc : float
@@ -765,8 +765,8 @@ def pcsaft_sres(t, rho, pyargs):
             term is not used this is set to 0. Units of Debye.
         dip_num : ndarray, shape (n,)
             The effective number of dipole functional groups on each component
-            molecule. Some implementations use this as an adjustable parameter
-            that is fit to data.
+            molecule. Generally this is set to 1, but some implementations use this
+            as an adjustable parameter that is fit to data.
         z : ndarray, shape (n,)
             Charge number of the ions
         dielc : float
@@ -822,8 +822,8 @@ def pcsaft_gres(t, rho, pyargs):
             term is not used this is set to 0. Units of Debye.
         dip_num : ndarray, shape (n,)
             The effective number of dipole functional groups on each component
-            molecule. Some implementations use this as an adjustable parameter
-            that is fit to data.
+            molecule. Generally this is set to 1, but some implementations use this
+            as an adjustable parameter that is fit to data.
         z : ndarray, shape (n,)
             Charge number of the ions
         dielc : float
@@ -880,8 +880,8 @@ def pcsaft_ares(t, rho, pyargs):
             term is not used this is set to 0. Units of Debye.
         dip_num : ndarray, shape (n,)
             The effective number of dipole functional groups on each component
-            molecule. Some implementations use this as an adjustable parameter
-            that is fit to data.
+            molecule. Generally this is set to 1, but some implementations use this
+            as an adjustable parameter that is fit to data.
         z : ndarray, shape (n,)
             Charge number of the ions
         dielc : float
@@ -938,8 +938,8 @@ def pcsaft_dadt(t, rho, pyargs):
             term is not used this is set to 0. Units of Debye.
         dip_num : ndarray, shape (n,)
             The effective number of dipole functional groups on each component
-            molecule. Some implementations use this as an adjustable parameter
-            that is fit to data.
+            molecule. Generally this is set to 1, but some implementations use this
+            as an adjustable parameter that is fit to data.
         z : ndarray, shape (n,)
             Charge number of the ions
         dielc : float
