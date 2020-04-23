@@ -16,7 +16,7 @@ The Numpy and Scipy packages are required. The core functions have been written 
 Python package
 --------------
 
-To make it easier to use this code, it has been added as a package to PyPi (pcsaft_), which means it can be installed using pip. This allows you to use the code without needing to compile the Cython code yourself. Binaries for Linux and Windows have been added, but MacOS is currently not supported.
+To make it easier to use this code, it has been added as a package to PyPi (pcsaft_), which means it can be installed using pip. This allows you to use the code without needing to compile the Cython code yourself. Binaries might not be available for all platforms or Python versions.
 
 Compiling with Cython
 ---------------------
