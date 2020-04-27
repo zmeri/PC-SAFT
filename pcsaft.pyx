@@ -150,7 +150,7 @@ def pcsaft_fugcoef(t, rho, pyargs):
 
     Returns
     -------
-    fugcoef : ndarray, shape (n,)
+    fugcoef : list, shape (n,)
         Fugacity coefficients of each component.
     """
     pyargs = ensure_numpy_input(pyargs)
