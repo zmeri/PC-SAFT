@@ -1,7 +1,0 @@
-pcsaft.cpp
-setup.py
-pcsaft.egg-info/PKG-INFO
-pcsaft.egg-info/SOURCES.txt
-pcsaft.egg-info/dependency_links.txt
-pcsaft.egg-info/requires.txt
-pcsaft.egg-info/top_level.txt
