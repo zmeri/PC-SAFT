@@ -1,4 +1,6 @@
 docs/_build/
 build/
+dist/
+tests/__pycache__
 *.pytest_cache
 *.so
