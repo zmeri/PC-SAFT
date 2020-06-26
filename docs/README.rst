@@ -8,6 +8,11 @@ Documentation
 -------------
 Documentation for the package is available on `Read the Docs`_.
 
+Example
+-------
+.. literalinclude:: example.py
+  :language: Python
+
 Dependencies
 ------------
 
