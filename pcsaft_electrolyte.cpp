@@ -397,14 +397,16 @@ double pcsaft_Z_cpp(double t, double rho, vector<double> x, add_args &cppargs) {
         int ctr = 0;
         double dif = 1000.;
         vector<double> XA_old = XA;
-        while ((ctr < 500) && (dif > 1e-9)) {
+        while ((ctr < 100) && (dif > 1e-15)) {
             ctr += 1;
-            XA = XA_find(XA, delta_ij, den, x_assoc);
+            XA = XA_find(XA_old, delta_ij, den, x_assoc);
             dif = 0.;
             for (int i = 0; i < num_sites; i++) {
                 dif += abs(XA[i] - XA_old[i]);
             }
-            XA_old = XA;
+            for (int i = 0; i < num_sites; i++) {
+                XA_old[i] = (XA[i] + XA_old[i]) / 2.0;
+            }
         }
 
         vector<double> dXA_dx(num_sites*ncomp, 0);
@@ -866,14 +868,16 @@ vector<double> pcsaft_fugcoef_cpp(double t, double rho, vector<double> x, add_ar
         int ctr = 0;
         double dif = 1000.;
         vector<double> XA_old = XA;
-        while ((ctr < 500) && (dif > 1e-9)) {
+        while ((ctr < 100) && (dif > 1e-15)) {
             ctr += 1;
-            XA = XA_find(XA, delta_ij, den, x_assoc);
+            XA = XA_find(XA_old, delta_ij, den, x_assoc);
             dif = 0.;
             for (int i = 0; i < num_sites; i++) {
                 dif += abs(XA[i] - XA_old[i]);
             }
-            XA_old = XA;
+            for (int i = 0; i < num_sites; i++) {
+                XA_old[i] = (XA[i] + XA_old[i]) / 2.0;
+            }
         }
 
         vector<double> dXA_dx(num_sites*ncomp, 0);
@@ -1178,14 +1182,16 @@ double pcsaft_ares_cpp(double t, double rho, vector<double> x, add_args &cppargs
         int ctr = 0;
         double dif = 1000.;
         vector<double> XA_old = XA;
-        while ((ctr < 500) && (dif > 1e-9)) {
+        while ((ctr < 100) && (dif > 1e-15)) {
             ctr += 1;
-            XA = XA_find(XA, delta_ij, den, x_assoc);
+            XA = XA_find(XA_old, delta_ij, den, x_assoc);
             dif = 0.;
             for (int i = 0; i < num_sites; i++) {
                 dif += abs(XA[i] - XA_old[i]);
             }
-            XA_old = XA;
+            for (int i = 0; i < num_sites; i++) {
+                XA_old[i] = (XA[i] + XA_old[i]) / 2.0;
+            }
         }
 
         ares_assoc = 0.;
@@ -1507,14 +1513,16 @@ double pcsaft_dadt_cpp(double t, double rho, vector<double> x, add_args &cppargs
         int ctr = 0;
         double dif = 1000.;
         vector<double> XA_old = XA;
-        while ((ctr < 500) && (dif > 1e-9)) {
+        while ((ctr < 100) && (dif > 1e-15)) {
             ctr += 1;
-            XA = XA_find(XA, delta_ij, den, x_assoc);
+            XA = XA_find(XA_old, delta_ij, den, x_assoc);
             dif = 0.;
             for (int i = 0; i < num_sites; i++) {
                 dif += abs(XA[i] - XA_old[i]);
             }
-            XA_old = XA;
+            for (int i = 0; i < num_sites; i++) {
+                XA_old[i] = (XA[i] + XA_old[i]) / 2.0;
+            }
         }
 
         vector<double> dXA_dt(num_sites, 0);
