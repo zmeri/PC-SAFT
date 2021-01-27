@@ -1944,7 +1944,7 @@ vector<double> findx_bub_temp(double t, double p, double Q, vector<double> x, ad
 
         int itr = 0;
         double dif = 10000.;
-        while (((dif>1e-9) || !isfinite(dif)) && (itr<100)) {
+        while (((dif>1e-9) || !std::isfinite(dif)) && (itr<100)) {
             vector<double> xv_old = xv;
             vector<double> xl_old = xl;
             rhol = pcsaft_den_cpp(t, p, xl, 0, cppargs);
@@ -2272,11 +2272,11 @@ double BrentRho(double t, double p, vector<double> x, int phase, add_args &cppar
 
     // If one of the boundaries is to within tolerance, just stop
     if (std::abs(fb) < tol_abs) { return b;}
-    if (isnan(fb)){
+    if (std::isnan(fb)){
         throw ValueError("BrentRho's method f(b) is NAN for b");
     }
     if (std::abs(fa) < tol_abs) { return a;}
-    if (isnan(fa)){
+    if (std::isnan(fa)){
         throw ValueError("BrentRho's method f(a) is NAN for a");
     }
     if (fa*fb>0){
@@ -2349,7 +2349,7 @@ double BrentRho(double t, double p, vector<double> x, int phase, add_args &cppar
             b+=-tol;
         }
         fb=resid_rho(b, t, p, x, cppargs);
-        if (isnan(fb)){
+        if (std::isnan(fb)){
             throw ValueError("BrentRho's method f(t) is NAN for t");
         }
         if (std::abs(fb) < macheps){
@@ -2373,11 +2373,11 @@ double BrentRho(double t, double p, vector<double> x, int phase, add_args &cppar
         m=0.5*(c-b);
         tol=2*macheps*std::abs(b)+tol_abs;
         iter+=1;
-        if (isnan(a)){
+        if (std::isnan(a)){
             throw ValueError("BrentRho's method a is NAN");}
-        if (isnan(b)){
+        if (std::isnan(b)){
             throw ValueError("BrentRho's method b is NAN");}
-        if (isnan(c)){
+        if (std::isnan(c)){
             throw ValueError("BrentRho's method c is NAN");}
         if (iter>maxiter){
             throw SolutionError("BrentRho's method reached maximum number of steps");}
