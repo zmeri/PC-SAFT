@@ -402,7 +402,7 @@ double pcsaft_Z_cpp(double t, double rho, vector<double> x, add_args &cppargs) {
             XA = XA_find(XA_old, delta_ij, den, x_assoc);
             dif = 0.;
             for (int i = 0; i < num_sites; i++) {
-                dif += abs(XA[i] - XA_old[i]);
+                dif += std::abs(XA[i] - XA_old[i]);
             }
             for (int i = 0; i < num_sites; i++) {
                 XA_old[i] = (XA[i] + XA_old[i]) / 2.0;
@@ -873,7 +873,7 @@ vector<double> pcsaft_fugcoef_cpp(double t, double rho, vector<double> x, add_ar
             XA = XA_find(XA_old, delta_ij, den, x_assoc);
             dif = 0.;
             for (int i = 0; i < num_sites; i++) {
-                dif += abs(XA[i] - XA_old[i]);
+                dif += std::abs(XA[i] - XA_old[i]);
             }
             for (int i = 0; i < num_sites; i++) {
                 XA_old[i] = (XA[i] + XA_old[i]) / 2.0;
@@ -1187,7 +1187,7 @@ double pcsaft_ares_cpp(double t, double rho, vector<double> x, add_args &cppargs
             XA = XA_find(XA_old, delta_ij, den, x_assoc);
             dif = 0.;
             for (int i = 0; i < num_sites; i++) {
-                dif += abs(XA[i] - XA_old[i]);
+                dif += std::abs(XA[i] - XA_old[i]);
             }
             for (int i = 0; i < num_sites; i++) {
                 XA_old[i] = (XA[i] + XA_old[i]) / 2.0;
@@ -1518,7 +1518,7 @@ double pcsaft_dadt_cpp(double t, double rho, vector<double> x, add_args &cppargs
             XA = XA_find(XA_old, delta_ij, den, x_assoc);
             dif = 0.;
             for (int i = 0; i < num_sites; i++) {
-                dif += abs(XA[i] - XA_old[i]);
+                dif += std::abs(XA[i] - XA_old[i]);
             }
             for (int i = 0; i < num_sites; i++) {
                 XA_old[i] = (XA[i] + XA_old[i]) / 2.0;
@@ -1781,7 +1781,7 @@ vector<double> findx_bub_pressure(double p, double t, double Q, vector<double> x
 
             dif = 0;
             for (int i = 0; i < ncomp; i++) {
-                dif += abs(xv[i] - xv_old[i]) + abs(xl[i] - xl_old[i]);
+                dif += std::abs(xv[i] - xv_old[i]) + std::abs(xl[i] - xl_old[i]);
             }
 
             itr += 1;
@@ -1991,7 +1991,7 @@ vector<double> findx_bub_temp(double t, double p, double Q, vector<double> x, ad
 
             dif = 0;
             for (int i = 0; i < ncomp; i++) {
-                dif += abs(xv[i] - xv_old[i]) + abs(xl[i] - xl_old[i]);
+                dif += std::abs(xv[i] - xv_old[i]) + std::abs(xl[i] - xl_old[i]);
             }
 
             itr += 1;
@@ -2139,8 +2139,8 @@ double pcsaft_den_cpp(double t, double p, vector<double> x, int phase, add_args 
         for (int i = 0; i < num_pts; i++) {
             rho_guess = 0.7405 / (double)num_pts * i + 1e-8;
             err = resid_rho(reduced_to_molar(rho_guess, t, ncomp, x, cppargs), t, p, x, cppargs);
-            if (abs(err) < err_min) {
-                err_min = abs(err);
+            if (std::abs(err) < err_min) {
+                err_min = std::abs(err);
                 rho_min = reduced_to_molar(rho_guess, t, ncomp, x, cppargs);
             }
         }
