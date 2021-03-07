@@ -34,6 +34,6 @@ cdef extern from "pcsaft_electrolyte.cpp":
         vector[double] z
         double dielc
         vector[int] assoc_num
-        vector[int] assoc_scheme
+        vector[int] assoc_matrix
         vector[double] k_hb
         vector[double] l_ij

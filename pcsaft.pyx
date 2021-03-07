@@ -37,18 +37,67 @@ def check_association(pyargs):
         raise InputError('e_assoc was given, but not vol_a.')
     elif ('vol_a' in pyargs) and ('e_assoc' not in pyargs):
         raise InputError('vol_a was given, but not e_assoc.')
-    elif ('e_assoc' in pyargs) and ('assoc_num' in pyargs) and ('assoc_scheme' not in pyargs):
-        raise InputError('When assoc_num is given, assoc_scheme must also be specified.')
 
-    if ('vol_a' in pyargs) and ('assoc_num' not in pyargs):
-        pyargs['assoc_num'] = np.zeros_like(pyargs['vol_a'])
-        pyargs['assoc_num'][pyargs['vol_a'] != 0] = 2
+    if ('e_assoc' in pyargs) and ('assoc_scheme' not in pyargs):
+        pyargs['assoc_scheme'] = []
+        for a in pyargs['vol_a']:
+            if a != 0:
+                pyargs['assoc_scheme'].append('2b')
+            else:
+                pyargs['assoc_scheme'].append(None)
 
-        pyargs['assoc_scheme'] = np.ones((int(np.sum(pyargs['assoc_num'])),int(np.sum(pyargs['assoc_num']))))
-        for i in range(pyargs['assoc_scheme'].shape[0]):
-            for j in range(pyargs['assoc_scheme'].shape[1]):
-                if ((i + j) % 2 == 0):
-                    pyargs['assoc_scheme'][i,j] = 0
+    if ('e_assoc' in pyargs):
+        pyargs = create_assoc_matrix(pyargs)
+
+    return pyargs
+
+def create_assoc_matrix(pyargs):
+    charge = [] # whether the association site has a partial positive charge (i.e. hydrogen), negative charge, or elements of both (e.g. for acids modelled as type 1)
+
+    scheme_charges = {
+        '1': [0],
+        '2a': [0, 0],
+        '2b': [-1, 1],
+        '3a': [0, 0, 0],
+        '3b': [-1, -1, 1],
+        '4a': [0, 0, 0, 0],
+        '4b': [1, 1, 1, -1],
+        '4c': [-1, -1, 1, 1]
+    }
+
+    assoc_num = []
+    for comp in pyargs['assoc_scheme']:
+        if comp is None:
+            assoc_num.append(0)
+            pass
+        elif type(comp) is list:
+            num = 0
+            for site in comp:
+                if site.lower() not in scheme_charges:
+                    raise InputError('{} is not a valid association type.'.format(site))
+                charge.extend(scheme_charges[site.lower()])
+                num += len(scheme_charges[site.lower()])
+            assoc_num.append(num)
+        else:
+            if comp.lower() not in scheme_charges:
+                raise InputError('{} is not a valid association type.'.format(comp))
+            charge.extend(scheme_charges[comp.lower()])
+            assoc_num.append(len(scheme_charges[comp.lower()]))
+    pyargs['assoc_num'] = np.asarray(assoc_num)
+
+    pyargs['assoc_matrix'] = np.zeros((len(charge)*len(charge)))
+    ctr = 0
+    for c1 in charge:
+        for c2 in charge:
+            if (c1 == 0 or c2 == 0):
+                pyargs['assoc_matrix'][ctr] = 1;
+            elif (c1 == 1 and c2 == -1):
+                pyargs['assoc_matrix'][ctr] = 1;
+            elif (c1 == -1 and c2 == 1):
+                pyargs['assoc_matrix'][ctr] = 1;
+            else:
+                pyargs['assoc_matrix'][ctr] = 0;
+            ctr += 1
 
     return pyargs
 
@@ -109,20 +158,14 @@ def pcsaft_p(t, rho, x, pyargs):
         dielc : float
             Dielectric constant of the medium to be used for electrolyte
             calculations.
-        assoc_num : ndarray, shape (n,)
-            Number of association sites for each component. Note that each associating
-            functional group generally has multiple association sites (see Huang and
-            Radosz 1990). If `e_assoc` and `vol_a` are given but this is not, it is
-            assumed there are 2 association sites (which would, for example, correspond
-            to one hydroxyl functional group).
-        assoc_scheme : ndarray, shape (m,m)
-            Array showing whether or not association occurs between the various
-            association sites in the system. 0 indicates that association does not
-            occur and 1 (or any other nonzero number) indicates that association
-            does occur between those two sites. The order for the sites must be the same
-            as used for assoc_num. If this array and assoc_num are
-            omitted, then a 2B association scheme is assumed. If `assoc_num` is given
-            and `assoc_scheme` is not, then an error is thrown.
+        assoc_scheme : list, shape (n,)
+            The types of association sites for each component. Use `None` for molecules
+            without association sites. If a molecule has multiple association sites,
+            use a nested list for that component to specify the association scheme for
+            each site. The accepted association schemes are those given by Huang and
+            Radosz (1990): 1, 2A, 2B, 3A, 3B, 4A, 4B, 4C. If `e_assoc` and `vol_a` are
+            given but `assoc_scheme` is not, the 2B association scheme is assumed (which
+            would, for example, correspond to one hydroxyl functional group).
 
     Returns
     -------
@@ -182,20 +225,14 @@ def pcsaft_fugcoef(t, rho, x, pyargs):
         dielc : float
             Dielectric constant of the medium to be used for electrolyte
             calculations.
-        assoc_num : ndarray, shape (n,)
-            Number of association sites for each component. Note that each associating
-            functional group generally has multiple association sites (see Huang and
-            Radosz 1990). If `e_assoc` and `vol_a` are given but this is not, it is
-            assumed there are 2 association sites (which would, for example, correspond
-            to one hydroxyl functional group).
-        assoc_scheme : ndarray, shape (m,m)
-            Array showing whether or not association occurs between the various
-            association sites in the system. 0 indicates that association does not
-            occur and 1 (or any other nonzero number) indicates that association
-            does occur between those two sites. The order for the sites must be the same
-            as used for assoc_num. If this array and assoc_num are
-            omitted, then a 2B association scheme is assumed. If `assoc_num` is given
-            and `assoc_scheme` is not, then an error is thrown.
+        assoc_scheme : list, shape (n,)
+            The types of association sites for each component. Use `None` for molecules
+            without association sites. If a molecule has multiple association sites,
+            use a nested list for that component to specify the association scheme for
+            each site. The accepted association schemes are those given by Huang and
+            Radosz (1990): 1, 2A, 2B, 3A, 3B, 4A, 4B, 4C. If `e_assoc` and `vol_a` are
+            given but `assoc_scheme` is not, the 2B association scheme is assumed (which
+            would, for example, correspond to one hydroxyl functional group).
 
     Returns
     -------
@@ -255,20 +292,14 @@ def pcsaft_Z(t, rho, x, pyargs):
         dielc : float
             Dielectric constant of the medium to be used for electrolyte
             calculations.
-        assoc_num : ndarray, shape (n,)
-            Number of association sites for each component. Note that each associating
-            functional group generally has multiple association sites (see Huang and
-            Radosz 1990). If `e_assoc` and `vol_a` are given but this is not, it is
-            assumed there are 2 association sites (which would, for example, correspond
-            to one hydroxyl functional group).
-        assoc_scheme : ndarray, shape (m,m)
-            Array showing whether or not association occurs between the various
-            association sites in the system. 0 indicates that association does not
-            occur and 1 (or any other nonzero number) indicates that association
-            does occur between those two sites. The order for the sites must be the same
-            as used for assoc_num. If this array and assoc_num are
-            omitted, then a 2B association scheme is assumed. If `assoc_num` is given
-            and `assoc_scheme` is not, then an error is thrown.
+        assoc_scheme : list, shape (n,)
+            The types of association sites for each component. Use `None` for molecules
+            without association sites. If a molecule has multiple association sites,
+            use a nested list for that component to specify the association scheme for
+            each site. The accepted association schemes are those given by Huang and
+            Radosz (1990): 1, 2A, 2B, 3A, 3B, 4A, 4B, 4C. If `e_assoc` and `vol_a` are
+            given but `assoc_scheme` is not, the 2B association scheme is assumed (which
+            would, for example, correspond to one hydroxyl functional group).
 
     Returns
     -------
@@ -328,20 +359,14 @@ def flashPQ(p, q, x, pyargs, t_guess=None):
         dielc : float
             Dielectric constant of the medium to be used for electrolyte
             calculations.
-        assoc_num : ndarray, shape (n,)
-            Number of association sites for each component. Note that each associating
-            functional group generally has multiple association sites (see Huang and
-            Radosz 1990). If `e_assoc` and `vol_a` are given but this is not, it is
-            assumed there are 2 association sites (which would, for example, correspond
-            to one hydroxyl functional group).
-        assoc_scheme : ndarray, shape (m,m)
-            Array showing whether or not association occurs between the various
-            association sites in the system. 0 indicates that association does not
-            occur and 1 (or any other nonzero number) indicates that association
-            does occur between those two sites. The order for the sites must be the same
-            as used for assoc_num. If this array and assoc_num are
-            omitted, then a 2B association scheme is assumed. If `assoc_num` is given
-            and `assoc_scheme` is not, then an error is thrown.
+        assoc_scheme : list, shape (n,)
+            The types of association sites for each component. Use `None` for molecules
+            without association sites. If a molecule has multiple association sites,
+            use a nested list for that component to specify the association scheme for
+            each site. The accepted association schemes are those given by Huang and
+            Radosz (1990): 1, 2A, 2B, 3A, 3B, 4A, 4B, 4C. If `e_assoc` and `vol_a` are
+            given but `assoc_scheme` is not, the 2B association scheme is assumed (which
+            would, for example, correspond to one hydroxyl functional group).
 
     t_guess : float
         Initial guess for the temperature (K) (optional)
@@ -419,20 +444,14 @@ def flashTQ(t, q, x, pyargs, p_guess=None):
         dielc : float
             Dielectric constant of the medium to be used for electrolyte
             calculations.
-        assoc_num : ndarray, shape (n,)
-            Number of association sites for each component. Note that each associating
-            functional group generally has multiple association sites (see Huang and
-            Radosz 1990). If `e_assoc` and `vol_a` are given but this is not, it is
-            assumed there are 2 association sites (which would, for example, correspond
-            to one hydroxyl functional group).
-        assoc_scheme : ndarray, shape (m,m)
-            Array showing whether or not association occurs between the various
-            association sites in the system. 0 indicates that association does not
-            occur and 1 (or any other nonzero number) indicates that association
-            does occur between those two sites. The order for the sites must be the same
-            as used for assoc_num. If this array and assoc_num are
-            omitted, then a 2B association scheme is assumed. If `assoc_num` is given
-            and `assoc_scheme` is not, then an error is thrown.
+        assoc_scheme : list, shape (n,)
+            The types of association sites for each component. Use `None` for molecules
+            without association sites. If a molecule has multiple association sites,
+            use a nested list for that component to specify the association scheme for
+            each site. The accepted association schemes are those given by Huang and
+            Radosz (1990): 1, 2A, 2B, 3A, 3B, 4A, 4B, 4C. If `e_assoc` and `vol_a` are
+            given but `assoc_scheme` is not, the 2B association scheme is assumed (which
+            would, for example, correspond to one hydroxyl functional group).
 
     p_guess : float
         Initial guess for the pressure (Pa) (optional)
@@ -507,20 +526,14 @@ def pcsaft_Hvap(t, x, pyargs, p_guess=None):
         dielc : float
             Dielectric constant of the medium to be used for electrolyte
             calculations.
-        assoc_num : ndarray, shape (n,)
-            Number of association sites for each component. Note that each associating
-            functional group generally has multiple association sites (see Huang and
-            Radosz 1990). If `e_assoc` and `vol_a` are given but this is not, it is
-            assumed there are 2 association sites (which would, for example, correspond
-            to one hydroxyl functional group).
-        assoc_scheme : ndarray, shape (m,m)
-            Array showing whether or not association occurs between the various
-            association sites in the system. 0 indicates that association does not
-            occur and 1 (or any other nonzero number) indicates that association
-            does occur between those two sites. The order for the sites must be the same
-            as used for assoc_num. If this array and assoc_num are
-            omitted, then a 2B association scheme is assumed. If `assoc_num` is given
-            and `assoc_scheme` is not, then an error is thrown.
+        assoc_scheme : list, shape (n,)
+            The types of association sites for each component. Use `None` for molecules
+            without association sites. If a molecule has multiple association sites,
+            use a nested list for that component to specify the association scheme for
+            each site. The accepted association schemes are those given by Huang and
+            Radosz (1990): 1, 2A, 2B, 3A, 3B, 4A, 4B, 4C. If `e_assoc` and `vol_a` are
+            given but `assoc_scheme` is not, the 2B association scheme is assumed (which
+            would, for example, correspond to one hydroxyl functional group).
 
     p_guess : float
         Guess for the vapor pressure (Pa) (optional)
@@ -604,20 +617,14 @@ def pcsaft_osmoticC(t, rho, x, pyargs):
         dielc : float
             Dielectric constant of the medium to be used for electrolyte
             calculations.
-        assoc_num : ndarray, shape (n,)
-            Number of association sites for each component. Note that each associating
-            functional group generally has multiple association sites (see Huang and
-            Radosz 1990). If `e_assoc` and `vol_a` are given but this is not, it is
-            assumed there are 2 association sites (which would, for example, correspond
-            to one hydroxyl functional group).
-        assoc_scheme : ndarray, shape (m,m)
-            Array showing whether or not association occurs between the various
-            association sites in the system. 0 indicates that association does not
-            occur and 1 (or any other nonzero number) indicates that association
-            does occur between those two sites. The order for the sites must be the same
-            as used for assoc_num. If this array and assoc_num are
-            omitted, then a 2B association scheme is assumed. If `assoc_num` is given
-            and `assoc_scheme` is not, then an error is thrown.
+        assoc_scheme : list, shape (n,)
+            The types of association sites for each component. Use `None` for molecules
+            without association sites. If a molecule has multiple association sites,
+            use a nested list for that component to specify the association scheme for
+            each site. The accepted association schemes are those given by Huang and
+            Radosz (1990): 1, 2A, 2B, 3A, 3B, 4A, 4B, 4C. If `e_assoc` and `vol_a` are
+            given but `assoc_scheme` is not, the 2B association scheme is assumed (which
+            would, for example, correspond to one hydroxyl functional group).
 
     Returns
     -------
@@ -698,20 +705,14 @@ def pcsaft_cp(t, rho, params, x, pyargs):
         dielc : float
             Dielectric constant of the medium to be used for electrolyte
             calculations.
-        assoc_num : ndarray, shape (n,)
-            Number of association sites for each component. Note that each associating
-            functional group generally has multiple association sites (see Huang and
-            Radosz 1990). If `e_assoc` and `vol_a` are given but this is not, it is
-            assumed there are 2 association sites (which would, for example, correspond
-            to one hydroxyl functional group).
-        assoc_scheme : ndarray, shape (m,m)
-            Array showing whether or not association occurs between the various
-            association sites in the system. 0 indicates that association does not
-            occur and 1 (or any other nonzero number) indicates that association
-            does occur between those two sites. The order for the sites must be the same
-            as used for assoc_num. If this array and assoc_num are
-            omitted, then a 2B association scheme is assumed. If `assoc_num` is given
-            and `assoc_scheme` is not, then an error is thrown.
+        assoc_scheme : list, shape (n,)
+            The types of association sites for each component. Use `None` for molecules
+            without association sites. If a molecule has multiple association sites,
+            use a nested list for that component to specify the association scheme for
+            each site. The accepted association schemes are those given by Huang and
+            Radosz (1990): 1, 2A, 2B, 3A, 3B, 4A, 4B, 4C. If `e_assoc` and `vol_a` are
+            given but `assoc_scheme` is not, the 2B association scheme is assumed (which
+            would, for example, correspond to one hydroxyl functional group).
 
     Returns
     -------
@@ -785,20 +786,14 @@ def pcsaft_den(t, p, x, pyargs, phase='liq'):
         dielc : float
             Dielectric constant of the medium to be used for electrolyte
             calculations.
-        assoc_num : ndarray, shape (n,)
-            Number of association sites for each component. Note that each associating
-            functional group generally has multiple association sites (see Huang and
-            Radosz 1990). If `e_assoc` and `vol_a` are given but this is not, it is
-            assumed there are 2 association sites (which would, for example, correspond
-            to one hydroxyl functional group).
-        assoc_scheme : ndarray, shape (m,m)
-            Array showing whether or not association occurs between the various
-            association sites in the system. 0 indicates that association does not
-            occur and 1 (or any other nonzero number) indicates that association
-            does occur between those two sites. The order for the sites must be the same
-            as used for assoc_num. If this array and assoc_num are
-            omitted, then a 2B association scheme is assumed. If `assoc_num` is given
-            and `assoc_scheme` is not, then an error is thrown.
+        assoc_scheme : list, shape (n,)
+            The types of association sites for each component. Use `None` for molecules
+            without association sites. If a molecule has multiple association sites,
+            use a nested list for that component to specify the association scheme for
+            each site. The accepted association schemes are those given by Huang and
+            Radosz (1990): 1, 2A, 2B, 3A, 3B, 4A, 4B, 4C. If `e_assoc` and `vol_a` are
+            given but `assoc_scheme` is not, the 2B association scheme is assumed (which
+            would, for example, correspond to one hydroxyl functional group).
 
     phase : string
         The phase for which the calculation is performed. Options: "liq" (liquid),
@@ -867,20 +862,14 @@ def pcsaft_hres(t, rho, x, pyargs):
         dielc : float
             Dielectric constant of the medium to be used for electrolyte
             calculations.
-        assoc_num : ndarray, shape (n,)
-            Number of association sites for each component. Note that each associating
-            functional group generally has multiple association sites (see Huang and
-            Radosz 1990). If `e_assoc` and `vol_a` are given but this is not, it is
-            assumed there are 2 association sites (which would, for example, correspond
-            to one hydroxyl functional group).
-        assoc_scheme : ndarray, shape (m,m)
-            Array showing whether or not association occurs between the various
-            association sites in the system. 0 indicates that association does not
-            occur and 1 (or any other nonzero number) indicates that association
-            does occur between those two sites. The order for the sites must be the same
-            as used for assoc_num. If this array and assoc_num are
-            omitted, then a 2B association scheme is assumed. If `assoc_num` is given
-            and `assoc_scheme` is not, then an error is thrown.
+        assoc_scheme : list, shape (n,)
+            The types of association sites for each component. Use `None` for molecules
+            without association sites. If a molecule has multiple association sites,
+            use a nested list for that component to specify the association scheme for
+            each site. The accepted association schemes are those given by Huang and
+            Radosz (1990): 1, 2A, 2B, 3A, 3B, 4A, 4B, 4C. If `e_assoc` and `vol_a` are
+            given but `assoc_scheme` is not, the 2B association scheme is assumed (which
+            would, for example, correspond to one hydroxyl functional group).
 
     Returns
     -------
@@ -939,20 +928,14 @@ def pcsaft_sres(t, rho, x, pyargs):
         dielc : float
             Dielectric constant of the medium to be used for electrolyte
             calculations.
-        assoc_num : ndarray, shape (n,)
-            Number of association sites for each component. Note that each associating
-            functional group generally has multiple association sites (see Huang and
-            Radosz 1990). If `e_assoc` and `vol_a` are given but this is not, it is
-            assumed there are 2 association sites (which would, for example, correspond
-            to one hydroxyl functional group).
-        assoc_scheme : ndarray, shape (m,m)
-            Array showing whether or not association occurs between the various
-            association sites in the system. 0 indicates that association does not
-            occur and 1 (or any other nonzero number) indicates that association
-            does occur between those two sites. The order for the sites must be the same
-            as used for assoc_num. If this array and assoc_num are
-            omitted, then a 2B association scheme is assumed. If `assoc_num` is given
-            and `assoc_scheme` is not, then an error is thrown.
+        assoc_scheme : list, shape (n,)
+            The types of association sites for each component. Use `None` for molecules
+            without association sites. If a molecule has multiple association sites,
+            use a nested list for that component to specify the association scheme for
+            each site. The accepted association schemes are those given by Huang and
+            Radosz (1990): 1, 2A, 2B, 3A, 3B, 4A, 4B, 4C. If `e_assoc` and `vol_a` are
+            given but `assoc_scheme` is not, the 2B association scheme is assumed (which
+            would, for example, correspond to one hydroxyl functional group).
 
     Returns
     -------
@@ -1011,20 +994,14 @@ def pcsaft_gres(t, rho, x, pyargs):
         dielc : float
             Dielectric constant of the medium to be used for electrolyte
             calculations.
-        assoc_num : ndarray, shape (n,)
-            Number of association sites for each component. Note that each associating
-            functional group generally has multiple association sites (see Huang and
-            Radosz 1990). If `e_assoc` and `vol_a` are given but this is not, it is
-            assumed there are 2 association sites (which would, for example, correspond
-            to one hydroxyl functional group).
-        assoc_scheme : ndarray, shape (m,m)
-            Array showing whether or not association occurs between the various
-            association sites in the system. 0 indicates that association does not
-            occur and 1 (or any other nonzero number) indicates that association
-            does occur between those two sites. The order for the sites must be the same
-            as used for assoc_num. If this array and assoc_num are
-            omitted, then a 2B association scheme is assumed. If `assoc_num` is given
-            and `assoc_scheme` is not, then an error is thrown.
+        assoc_scheme : list, shape (n,)
+            The types of association sites for each component. Use `None` for molecules
+            without association sites. If a molecule has multiple association sites,
+            use a nested list for that component to specify the association scheme for
+            each site. The accepted association schemes are those given by Huang and
+            Radosz (1990): 1, 2A, 2B, 3A, 3B, 4A, 4B, 4C. If `e_assoc` and `vol_a` are
+            given but `assoc_scheme` is not, the 2B association scheme is assumed (which
+            would, for example, correspond to one hydroxyl functional group).
 
     Returns
     -------
@@ -1084,20 +1061,14 @@ def pcsaft_ares(t, rho, x, pyargs):
         dielc : float
             Dielectric constant of the medium to be used for electrolyte
             calculations.
-        assoc_num : ndarray, shape (n,)
-            Number of association sites for each component. Note that each associating
-            functional group generally has multiple association sites (see Huang and
-            Radosz 1990). If `e_assoc` and `vol_a` are given but this is not, it is
-            assumed there are 2 association sites (which would, for example, correspond
-            to one hydroxyl functional group).
-        assoc_scheme : ndarray, shape (m,m)
-            Array showing whether or not association occurs between the various
-            association sites in the system. 0 indicates that association does not
-            occur and 1 (or any other nonzero number) indicates that association
-            does occur between those two sites. The order for the sites must be the same
-            as used for assoc_num. If this array and assoc_num are
-            omitted, then a 2B association scheme is assumed. If `assoc_num` is given
-            and `assoc_scheme` is not, then an error is thrown.
+        assoc_scheme : list, shape (n,)
+            The types of association sites for each component. Use `None` for molecules
+            without association sites. If a molecule has multiple association sites,
+            use a nested list for that component to specify the association scheme for
+            each site. The accepted association schemes are those given by Huang and
+            Radosz (1990): 1, 2A, 2B, 3A, 3B, 4A, 4B, 4C. If `e_assoc` and `vol_a` are
+            given but `assoc_scheme` is not, the 2B association scheme is assumed (which
+            would, for example, correspond to one hydroxyl functional group).
 
     Returns
     -------
@@ -1157,20 +1128,14 @@ def pcsaft_dadt(t, rho, x, pyargs):
         dielc : float
             Dielectric constant of the medium to be used for electrolyte
             calculations.
-        assoc_num : ndarray, shape (n,)
-            Number of association sites for each component. Note that each associating
-            functional group generally has multiple association sites (see Huang and
-            Radosz 1990). If `e_assoc` and `vol_a` are given but this is not, it is
-            assumed there are 2 association sites (which would, for example, correspond
-            to one hydroxyl functional group).
-        assoc_scheme : ndarray, shape (m,m)
-            Array showing whether or not association occurs between the various
-            association sites in the system. 0 indicates that association does not
-            occur and 1 (or any other nonzero number) indicates that association
-            does occur between those two sites. The order for the sites must be the same
-            as used for assoc_num. If this array and assoc_num are
-            omitted, then a 2B association scheme is assumed. If `assoc_num` is given
-            and `assoc_scheme` is not, then an error is thrown.
+        assoc_scheme : list, shape (n,)
+            The types of association sites for each component. Use `None` for molecules
+            without association sites. If a molecule has multiple association sites,
+            use a nested list for that component to specify the association scheme for
+            each site. The accepted association schemes are those given by Huang and
+            Radosz (1990): 1, 2A, 2B, 3A, 3B, 4A, 4B, 4C. If `e_assoc` and `vol_a` are
+            given but `assoc_scheme` is not, the 2B association scheme is assumed (which
+            would, for example, correspond to one hydroxyl functional group).
 
     Returns
     -------
@@ -1293,8 +1258,8 @@ def create_struct(pyargs):
         cppargs.dielc = pyargs['dielc']
     if 'assoc_num' in pyargs:
         cppargs.assoc_num = np_to_vector_int(pyargs['assoc_num'])
-    if 'assoc_scheme' in pyargs:
-        cppargs.assoc_scheme = np_to_vector_int(pyargs['assoc_scheme'])
+    if 'assoc_matrix' in pyargs:
+        cppargs.assoc_matrix = np_to_vector_int(pyargs['assoc_matrix'])
     if 'k_hb' in pyargs:
         cppargs.k_hb = np_to_vector_double(pyargs['k_hb'])
     if 'l_ij' in pyargs:

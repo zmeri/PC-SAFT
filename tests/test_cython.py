@@ -1211,135 +1211,135 @@ def test_cp(print_result=False):
 
 def test_pressure(print_result=False):
     """Test the pressure function to see if it is working correctly."""
-# #     Toluene
-#     x = np.asarray([1.])
-#     m = np.asarray([2.8149])
-#     s = np.asarray([3.7169])
-#     e = np.asarray([285.69])
-#     pyargs = {'m':m, 's':s, 'e':e}
-#
-#     ref = 101325 # Pa
-#     t = 320 # K
-#     rho = 9033.11420899 # mol m^-3 From density calculation with working PC-SAFT density function
-#     calc = pcsaft_p(t, rho, x, pyargs)
-#     if print_result:
-#         print('\n##########  Test with toluene  ##########')
-#         print('----- Pressure at {} K -----'.format(t))
-#         print('    Reference:', ref, 'Pa')
-#         print('    PC-SAFT:', calc, 'Pa')
-#         print('    Relative deviation:', (calc-ref)/ref*100, '%')
-#     assert abs((calc-ref)/ref*100) < 1e-6
-#
-#     # Water
-#     m = np.asarray([1.2047])
-#     e = np.asarray([353.95])
-#     volAB = np.asarray([0.0451])
-#     eAB = np.asarray([2425.67])
-#
-#     ref = 101325 # Pa
-#     t = 274 # K
-#     s = np.asarray([2.7927 + 10.11*np.exp(-0.01775*t) - 1.417*np.exp(-0.01146*t)])
-#     pyargs = {'m':m, 's':s, 'e':e, 'e_assoc':eAB, 'vol_a':volAB}
-#     rho = 55476.44269210048 # mol m^-3 From density calculation with working PC-SAFT density function
-#     calc = pcsaft_p(t, rho, x, pyargs)
-#     if print_result:
-#         print('\n##########  Test with water  ##########')
-#         print('----- Pressure at {} K -----'.format(t))
-#         print('    Reference:', ref, 'Pa')
-#         print('    PC-SAFT:', calc, 'Pa')
-#         print('    Relative deviation:', (calc-ref)/ref*100, '%')
-#     assert abs((calc-ref)/ref*100) < 1e-6
-#
-#     # Acetic acid
-#     m = np.asarray([1.3403])
-#     s = np.asarray([3.8582])
-#     e = np.asarray([211.59])
-#     volAB = np.asarray([0.075550])
-#     eAB = np.asarray([3044.4])
-#     pyargs = {'m':m, 's':s, 'e':e, 'e_assoc':eAB, 'vol_a':volAB}
-#
-#     ref = 101325 # Pa
-#     t = 305 # K
-#     rho = 16965.66943969988 # mol m^-3 From density calculation with working PC-SAFT density function
-#     calc = pcsaft_p(t, rho, x, pyargs)
-#     if print_result:
-#         print('\n##########  Test with acetic acid  ##########')
-#         print('----- Pressure at {} K -----'.format(t))
-#         print('    Reference:', ref, 'Pa')
-#         print('    PC-SAFT:', calc, 'Pa')
-#         print('    Relative deviation:', (calc-ref)/ref*100, '%')
-#     assert abs((calc-ref)/ref*100) < 1e-6
-#
-#     # dimethyl ether
-#     m = np.asarray([2.2634])
-#     s = np.asarray([3.2723])
-#     e = np.asarray([210.29])
-#     dpm = np.asarray([1.3])
-#     dip_num = np.asarray([1.0])
-#     pyargs = {'m':m, 's':s, 'e':e, 'dipm':dpm, 'dip_num':dip_num}
-#
-#     ref = 101325 # Pa
-#     t = 240 # K
-#     rho = 15865.69021378 # mol m^-3 From density calculation with working PC-SAFT density function
-#     calc = pcsaft_p(t, rho, x, pyargs)
-#     if print_result:
-#         print('\n##########  Test with dimethyl ether  ##########')
-#         print('----- Pressure at {} K -----'.format(t))
-#         print('    Reference:', ref, 'Pa')
-#         print('    PC-SAFT:', calc, 'Pa')
-#         print('    Relative deviation:', (calc-ref)/ref*100, '%')
-#     assert abs((calc-ref)/ref*100) < 1e-6
-#
-#     # Binary mixture: methanol-cyclohexane
-#     #0 = methanol, 1 = cyclohexane
-#     x = np.asarray([0.0550, 0.945])
-#     m = np.asarray([1.5255, 2.5303])
-#     s = np.asarray([3.2300, 3.8499])
-#     e = np.asarray([188.90, 278.11])
-#     volAB = np.asarray([0.035176, 0.])
-#     eAB = np.asarray([2899.5, 0.])
-#     k_ij = np.asarray([[0, 0.051],
-#                        [0.051, 0]])
-#     pyargs = {'m':m, 's':s, 'e':e, 'e_assoc':eAB, 'vol_a':volAB, 'k_ij':k_ij}
-#
-#     ref = 101325 # Pa
-#     t = 298.15 # K
-#     rho = 9368.903682262355 # mol m^-3 From density calculation with working PC-SAFT density function
-#     calc = pcsaft_p(t, rho, x, pyargs)
-#     if print_result:
-#         print('\n##########  Test with methanol-cyclohexane mixture  ##########')
-#         print('----- Pressure at {} K -----'.format(t))
-#         print('    Reference:', ref, 'Pa')
-#         print('    PC-SAFT:', calc, 'Pa')
-#         print('    Relative deviation:', (calc-ref)/ref*100, '%')
-#     assert abs((calc-ref)/ref*100) < 1e-6
+#     Toluene
+    x = np.asarray([1.])
+    m = np.asarray([2.8149])
+    s = np.asarray([3.7169])
+    e = np.asarray([285.69])
+    pyargs = {'m':m, 's':s, 'e':e}
 
-    # # Binary mixture: water-acetic acid
-    # #0 = water, 1 = acetic acid
-    # x = np.asarray([0.9898662364, 0.0101337636])
-    # m = np.asarray([1.2047, 1.3403])
-    # s = np.asarray([0, 3.8582])
-    # e = np.asarray([353.95, 211.59])
-    # volAB = np.asarray([0.0451, 0.075550])
-    # eAB = np.asarray([2425.67, 3044.4])
-    # k_ij = np.asarray([[0, -0.127],
-    #                    [-0.127, 0]])
-    #
-    # t = 403.574
-    # s[0] = 3.8395 + 1.2828*np.exp(-0.0074944*t) - 1.3939*np.exp(-0.00056029*t)
-    # pyargs = {'x':x, 'm':m, 's':s, 'e':e, 'e_assoc':eAB, 'vol_a':volAB, 'k_ij':k_ij}
-    # ref = 275000. # experimental bubble point pressure is 273722 Pa. source: Othmer, D. F.; Silvis, S. J.; Spiel, A. Ind. Eng. Chem., 1952, 44, 1864-72 Composition of vapors from boiling binary solutions pressure equilibrium still for studying water - acetic acid system
-    # xv_ref = np.asarray([0.9923666645, 0.0076333355])
-    # rho = 50902.74840603031
-    # calc = pcsaft_p(t, rho, x, pyargs)
-    # if print_result:
-    #     print('\n##########  Test with water-acetic acid mixture  ##########')
-    #     print('----- Bubble point pressure at %s K -----' % t)
-    #     print('    Liquid composition:', x)
-    #     print('    Reference pressure:', ref, 'Pa')
-    #     print('    PC-SAFT pressure:', calc, 'Pa')
-    #     print('    Relative deviation:', (calc-ref)/ref*100, '%')
-    # assert abs((calc-ref)/ref*100) < 1e-6
+    ref = 101325 # Pa
+    t = 320 # K
+    rho = 9033.11420899 # mol m^-3 From density calculation with working PC-SAFT density function
+    calc = pcsaft_p(t, rho, x, pyargs)
+    if print_result:
+        print('\n##########  Test with toluene  ##########')
+        print('----- Pressure at {} K -----'.format(t))
+        print('    Reference:', ref, 'Pa')
+        print('    PC-SAFT:', calc, 'Pa')
+        print('    Relative deviation:', (calc-ref)/ref*100, '%')
+    assert abs((calc-ref)/ref*100) < 1e-6
+
+    # Water
+    m = np.asarray([1.2047])
+    e = np.asarray([353.95])
+    volAB = np.asarray([0.0451])
+    eAB = np.asarray([2425.67])
+
+    ref = 101325 # Pa
+    t = 274 # K
+    s = np.asarray([2.7927 + 10.11*np.exp(-0.01775*t) - 1.417*np.exp(-0.01146*t)])
+    pyargs = {'m':m, 's':s, 'e':e, 'e_assoc':eAB, 'vol_a':volAB}
+    rho = 55476.44269210048 # mol m^-3 From density calculation with working PC-SAFT density function
+    calc = pcsaft_p(t, rho, x, pyargs)
+    if print_result:
+        print('\n##########  Test with water  ##########')
+        print('----- Pressure at {} K -----'.format(t))
+        print('    Reference:', ref, 'Pa')
+        print('    PC-SAFT:', calc, 'Pa')
+        print('    Relative deviation:', (calc-ref)/ref*100, '%')
+    assert abs((calc-ref)/ref*100) < 1e-6
+
+    # Acetic acid
+    m = np.asarray([1.3403])
+    s = np.asarray([3.8582])
+    e = np.asarray([211.59])
+    volAB = np.asarray([0.075550])
+    eAB = np.asarray([3044.4])
+    pyargs = {'m':m, 's':s, 'e':e, 'e_assoc':eAB, 'vol_a':volAB}
+
+    ref = 101325 # Pa
+    t = 305 # K
+    rho = 16965.66943969988 # mol m^-3 From density calculation with working PC-SAFT density function
+    calc = pcsaft_p(t, rho, x, pyargs)
+    if print_result:
+        print('\n##########  Test with acetic acid  ##########')
+        print('----- Pressure at {} K -----'.format(t))
+        print('    Reference:', ref, 'Pa')
+        print('    PC-SAFT:', calc, 'Pa')
+        print('    Relative deviation:', (calc-ref)/ref*100, '%')
+    assert abs((calc-ref)/ref*100) < 1e-6
+
+    # dimethyl ether
+    m = np.asarray([2.2634])
+    s = np.asarray([3.2723])
+    e = np.asarray([210.29])
+    dpm = np.asarray([1.3])
+    dip_num = np.asarray([1.0])
+    pyargs = {'m':m, 's':s, 'e':e, 'dipm':dpm, 'dip_num':dip_num}
+
+    ref = 101325 # Pa
+    t = 240 # K
+    rho = 15865.69021378 # mol m^-3 From density calculation with working PC-SAFT density function
+    calc = pcsaft_p(t, rho, x, pyargs)
+    if print_result:
+        print('\n##########  Test with dimethyl ether  ##########')
+        print('----- Pressure at {} K -----'.format(t))
+        print('    Reference:', ref, 'Pa')
+        print('    PC-SAFT:', calc, 'Pa')
+        print('    Relative deviation:', (calc-ref)/ref*100, '%')
+    assert abs((calc-ref)/ref*100) < 1e-6
+
+    # Binary mixture: methanol-cyclohexane
+    #0 = methanol, 1 = cyclohexane
+    x = np.asarray([0.0550, 0.945])
+    m = np.asarray([1.5255, 2.5303])
+    s = np.asarray([3.2300, 3.8499])
+    e = np.asarray([188.90, 278.11])
+    volAB = np.asarray([0.035176, 0.])
+    eAB = np.asarray([2899.5, 0.])
+    k_ij = np.asarray([[0, 0.051],
+                       [0.051, 0]])
+    pyargs = {'m':m, 's':s, 'e':e, 'e_assoc':eAB, 'vol_a':volAB, 'k_ij':k_ij}
+
+    ref = 101325 # Pa
+    t = 298.15 # K
+    rho = 9368.903682262355 # mol m^-3 From density calculation with working PC-SAFT density function
+    calc = pcsaft_p(t, rho, x, pyargs)
+    if print_result:
+        print('\n##########  Test with methanol-cyclohexane mixture  ##########')
+        print('----- Pressure at {} K -----'.format(t))
+        print('    Reference:', ref, 'Pa')
+        print('    PC-SAFT:', calc, 'Pa')
+        print('    Relative deviation:', (calc-ref)/ref*100, '%')
+    assert abs((calc-ref)/ref*100) < 1e-6
+
+    # Binary mixture: water-acetic acid
+    #0 = water, 1 = acetic acid
+    x = np.asarray([0.9898662364, 0.0101337636])
+    m = np.asarray([1.2047, 1.3403])
+    s = np.asarray([0, 3.8582])
+    e = np.asarray([353.95, 211.59])
+    volAB = np.asarray([0.0451, 0.075550])
+    eAB = np.asarray([2425.67, 3044.4])
+    k_ij = np.asarray([[0, -0.127],
+                       [-0.127, 0]])
+
+    t = 403.574
+    s[0] = 3.8395 + 1.2828*np.exp(-0.0074944*t) - 1.3939*np.exp(-0.00056029*t)
+    pyargs = {'x':x, 'm':m, 's':s, 'e':e, 'e_assoc':eAB, 'vol_a':volAB, 'k_ij':k_ij}
+    ref = 275000. # experimental bubble point pressure is 273722 Pa. source: Othmer, D. F.; Silvis, S. J.; Spiel, A. Ind. Eng. Chem., 1952, 44, 1864-72 Composition of vapors from boiling binary solutions pressure equilibrium still for studying water - acetic acid system
+    xv_ref = np.asarray([0.9923666645, 0.0076333355])
+    rho = 50902.74840603031
+    calc = pcsaft_p(t, rho, x, pyargs)
+    if print_result:
+        print('\n##########  Test with water-acetic acid mixture  ##########')
+        print('----- Bubble point pressure at %s K -----' % t)
+        print('    Liquid composition:', x)
+        print('    Reference pressure:', ref, 'Pa')
+        print('    PC-SAFT pressure:', calc, 'Pa')
+        print('    Relative deviation:', (calc-ref)/ref*100, '%')
+    assert abs((calc-ref)/ref*100) < 1e-6
 
     # NaCl in water
     # 0 = Na+, 1 = Cl-, 2 = H2O
