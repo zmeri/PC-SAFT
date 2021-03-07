@@ -26,7 +26,7 @@ struct add_args {
     vector<double> z;
     double dielc;
     vector<int> assoc_num;
-    vector<int> assoc_scheme;
+    vector<int> assoc_matrix;
     vector<double> k_hb;
     vector<double> l_ij;
 };
@@ -59,7 +59,6 @@ bool IsNotZero (double x) {return x != 0.0;}
 double reduced_to_molar(double nu, double t, int ncomp, vector<double> x, add_args &cppargs);
 double dielc_water(double t);
 double calc_water_sigma(double t);
-add_args get_single_component(add_args cppargs, int i);
 
 class ValueError: public std::exception
 {

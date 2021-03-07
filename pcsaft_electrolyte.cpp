@@ -339,7 +339,7 @@ double pcsaft_Z_cpp(double t, double rho, vector<double> x, add_args &cppargs) {
             idxi = iA[i]*ncomp+iA[i];
             for (int j = 0; j < num_sites; j++) {
                 idxj = iA[j]*ncomp+iA[j];
-                if (cppargs.assoc_scheme[idxa] != 0) {
+                if (cppargs.assoc_matrix[idxa] != 0) {
                     double eABij = (cppargs.e_assoc[iA[i]]+cppargs.e_assoc[iA[j]])/2.;
                     double volABij = _HUGE;
                     if (cppargs.k_hb.empty()) {
@@ -370,7 +370,7 @@ double pcsaft_Z_cpp(double t, double rho, vector<double> x, add_args &cppargs) {
                 idxi = iA[i]*ncomp+iA[i];
                 for (int j = 0; j < num_sites; j++) {
                     idxj = iA[j]*ncomp+iA[j];
-                    if (cppargs.assoc_scheme[idxa] != 0) {
+                    if (cppargs.assoc_matrix[idxa] != 0) {
                         double eABij = (cppargs.e_assoc[iA[i]]+cppargs.e_assoc[iA[j]])/2.;
                         double volABij = _HUGE;
                         if (cppargs.k_hb.empty()) {
@@ -810,7 +810,7 @@ vector<double> pcsaft_fugcoef_cpp(double t, double rho, vector<double> x, add_ar
             idxi = iA[i]*ncomp+iA[i];
             for (int j = 0; j < num_sites; j++) {
                 idxj = iA[j]*ncomp+iA[j];
-                if (cppargs.assoc_scheme[idxa] != 0) {
+                if (cppargs.assoc_matrix[idxa] != 0) {
                     double eABij = (cppargs.e_assoc[iA[i]]+cppargs.e_assoc[iA[j]])/2.;
                     double volABij = _HUGE;
                     if (cppargs.k_hb.empty()) {
@@ -841,7 +841,7 @@ vector<double> pcsaft_fugcoef_cpp(double t, double rho, vector<double> x, add_ar
                 idxi = iA[i]*ncomp+iA[i];
                 for (int j = 0; j < num_sites; j++) {
                     idxj = iA[j]*ncomp+iA[j];
-                    if (cppargs.assoc_scheme[idxa] != 0) {
+                    if (cppargs.assoc_matrix[idxa] != 0) {
                         double eABij = (cppargs.e_assoc[iA[i]]+cppargs.e_assoc[iA[j]])/2.;
                         double volABij = _HUGE;
                         if (cppargs.k_hb.empty()) {
@@ -1158,7 +1158,7 @@ double pcsaft_ares_cpp(double t, double rho, vector<double> x, add_args &cppargs
             idxi = iA[i]*ncomp+iA[i];
             for (int j = 0; j < num_sites; j++) {
                 idxj = iA[j]*ncomp+iA[j];
-                if (cppargs.assoc_scheme[idxa] != 0) {
+                if (cppargs.assoc_matrix[idxa] != 0) {
                     double eABij = (cppargs.e_assoc[iA[i]]+cppargs.e_assoc[iA[j]])/2.;
                     double volABij = _HUGE;
                     if (cppargs.k_hb.empty()) {
@@ -1486,7 +1486,7 @@ double pcsaft_dadt_cpp(double t, double rho, vector<double> x, add_args &cppargs
             idxi = iA[i]*ncomp+iA[i];
             for (int j = 0; j < num_sites; j++) {
                 idxj = iA[j]*ncomp+iA[j];
-                if (cppargs.assoc_scheme[idxa] != 0) {
+                if (cppargs.assoc_matrix[idxa] != 0) {
                     double eABij = (cppargs.e_assoc[iA[i]]+cppargs.e_assoc[iA[j]])/2.;
                     double volABij = _HUGE;
                     if (cppargs.k_hb.empty()) {
@@ -2197,51 +2197,6 @@ double dielc_water(double t) {
 
 double calc_water_sigma(double t) {
     return 3.8395 + 1.2828 * exp(-0.0074944 * t) - 1.3939 * exp(-0.00056029 * t);
-}
-
-add_args get_single_component(add_args cppargs, int i) {
-    add_args cppargs1;
-    cppargs1.m.push_back(cppargs.m[i]);
-    cppargs1.s.push_back(cppargs.s[i]);
-    cppargs1.e.push_back(cppargs.e[i]);
-    if (!cppargs.e_assoc.empty()) {
-        cppargs1.e_assoc.push_back(cppargs.e_assoc[i]);
-    }
-    if (!cppargs.vol_a.empty()) {
-        cppargs1.vol_a.push_back(cppargs.vol_a[i]);
-    }
-    if (!cppargs.dipm.empty()) {
-        cppargs1.dipm.push_back(cppargs.dipm[i]);
-    }
-    if (!cppargs.dip_num.empty()) {
-        cppargs1.dip_num.push_back(cppargs.dip_num[i]);
-    }
-    if (!cppargs.z.empty()) {
-        cppargs1.z.push_back(cppargs.z[i]);
-    }
-    cppargs1.dielc = cppargs.dielc;
-    if (!cppargs.assoc_num.empty()) {
-        cppargs1.assoc_num.push_back(cppargs.assoc_num[i]);
-    }
-    if (!cppargs.assoc_scheme.empty()) {
-        int i_start = 0;
-        for (int j = 0; j < i; j++) {
-            i_start += cppargs.assoc_num[j];
-        }
-        int num_sites = 0;
-        for (unsigned j = 0; j < cppargs.m.size(); j++) {
-            num_sites += cppargs.assoc_num[j];
-        }
-
-        int num_a = cppargs1.assoc_num[0];
-        for (int j = 0; j < num_a; j++) {
-            for (int k = 0; k < num_a; k++) {
-                cppargs1.assoc_scheme.push_back(cppargs.assoc_scheme[(j+i_start)*num_sites + i_start + k]);
-            }
-        }
-    }
-
-    return cppargs1;
 }
 
 /*

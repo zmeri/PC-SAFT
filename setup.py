@@ -17,7 +17,7 @@ with open("docs/README.rst", "r") as fh:
     long_description = fh.read()
 
 setup(name='pcsaft',
-      version='1.1.1',
+      version='1.2.0',
       author="Zach Baird",
       description="The PC-SAFT equation of state, including dipole, association and ion terms.",
       long_description=long_description,
