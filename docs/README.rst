@@ -4,7 +4,8 @@ PC-SAFT
 
 .. image:: https://badge.fury.io/py/pcsaft.svg
     :target: https://badge.fury.io/py/pcsaft
-.. image:: https://img.shields.io/pypi/l/pcsaft   :alt: PyPI - License
+.. image:: https://img.shields.io/pypi/l/pcsaft
+    :alt: PyPI - License
 
 This package implements the PC-SAFT equation of state. In addition to the hard chain and dispersion terms, these functions also include dipole, association and ion terms for use with these types of compounds. When the ion term is included it is also called electrolyte PC-SAFT (ePC-SAFT).
 
