@@ -37,7 +37,7 @@ Example
   t = 320 # K
   p = 101325 # Pa
   den = pcsaft_den(t, p, x, pyargs, phase='liq')
-  print('Density of toluene at {} K:'.format(t), den, 'mol m^-3')
+  print('Density of toluene at {} K: {} mol m^-3'.format(t, den))
 
   # Water using default 2B association scheme
   x = np.asarray([1.])
@@ -51,7 +51,7 @@ Example
   s = np.asarray([2.7927 + 10.11*np.exp(-0.01775*t) - 1.417*np.exp(-0.01146*t)]) # temperature dependent sigma is used for better accuracy
   pyargs = {'m':m, 's':s, 'e':e, 'e_assoc':eAB, 'vol_a':volAB}
   den = pcsaft_den(t, p, x, pyargs, phase='liq')
-  print('Density of water at {} K:'.format(t), den, 'mol m^-3')
+  print('Density of water at {} K: {} mol m^-3'.format(t, den))
   
   # Water using 4C association scheme
   x = np.asarray([1.])
@@ -66,7 +66,7 @@ Example
   s = np.asarray([2.7927 + 10.11*np.exp(-0.01775*t) - 1.417*np.exp(-0.01146*t)]) # temperature dependent sigma is used for better accuracy
   pyargs = {'m':m, 's':s, 'e':e, 'e_assoc':eAB, 'vol_a':volAB, 'assoc_scheme':assoc_schemes}
   den = pcsaft_den(t, p, x, pyargs, phase='liq')
-  print('Density of water at {} K:'.format(t), den, 'mol m^-3')
+  print('Density of water at {} K: {} mol m^-3'.format(t, den))
 
 Dependencies
 ------------
