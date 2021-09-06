@@ -30,7 +30,7 @@ jobs:
         with:
           path: ./wheelhouse/*.whl
         env:
-          - CIBW_BEFORE_BUILD= "pip install numpy scipy cython"
+          CIBW_BEFORE_BUILD: pip install numpy scipy cython
 
   build_sdist:
     name: Build source distribution
