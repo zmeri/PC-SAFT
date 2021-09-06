@@ -11,6 +11,8 @@ jobs:
   build_wheels:
     name: Build wheels on ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
+    env:
+      CIBW_BEFORE_BUILD: pip install numpy scipy cython
     strategy:
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
@@ -20,8 +22,6 @@ jobs:
 
       - uses: actions/setup-python@v2
         name: Install Python
-        env:
-          CIBW_BEFORE_BUILD: pip install numpy scipy cython
         with:
           python-version: '3.8'
 
