@@ -20,6 +20,8 @@ jobs:
 
       - uses: actions/setup-python@v2
         name: Install Python
+        env:
+          CIBW_TEST_REQUIRES: numpy scipy cython
         with:
           python-version: '3.8'
 
@@ -29,8 +31,6 @@ jobs:
       - uses: actions/upload-artifact@v2
         with:
           path: ./wheelhouse/*.whl
-        env:
-          CIBW_BEFORE_BUILD: "pip install numpy scipy cython"
 
   build_sdist:
     name: Build source distribution
