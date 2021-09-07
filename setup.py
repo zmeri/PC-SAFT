@@ -7,6 +7,7 @@ Setup file for compiling to Cython module
 from setuptools import setup, Extension, find_packages
 from Cython.Build import cythonize
 import numpy as np
+import os
 
 ext_modules = [
     Extension("pcsaft",
@@ -16,6 +17,12 @@ ext_modules = [
 with open("docs/README.rst", "r") as fh:
     long_description = fh.read()
 
+requirements_path = './requirements.txt'
+install_requires = []
+if os.path.isfile(requirements_path):
+    with open(requirements_path) as f:
+        install_requires = f.read().splitlines()
+
 setup(name='pcsaft',
       version='1.2.0',
       author="Zach Baird",
@@ -24,11 +31,7 @@ setup(name='pcsaft',
       long_description_content_type="text/x-rst",
       url="https://github.com/zmeri/PC-SAFT",
       packages=find_packages(),
-      install_requires=[
-        'numpy',
-        'scipy',
-        'cython'
-      ],
+      install_requires=install_requires,
       classifiers=[
         "Programming Language :: Python :: 3",
         "Programming Language :: C++",
