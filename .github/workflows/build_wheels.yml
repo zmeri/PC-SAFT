@@ -14,6 +14,7 @@ jobs:
     env:
       CIBW_BEFORE_BUILD: pip install numpy scipy cython
       CIBW_SKIP: cp310-*
+      CIBW_SKIP: pp*
     strategy:
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
@@ -71,5 +72,5 @@ jobs:
       - uses: pypa/gh-action-pypi-publish@v1.4.2
         with:
           user: __token__
-          password: ${{ secrets.pypi_password }}
-          # To test: repository_url: https://test.pypi.org/legacy/
+          password: ${{ secrets.pypi_test }}
+          repository_url: https://test.pypi.org/legacy/
