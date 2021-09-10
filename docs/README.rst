@@ -2,6 +2,18 @@
 PC-SAFT
 =======
 
+.. image:: https://badge.fury.io/py/pcsaft.svg
+    :target: https://badge.fury.io/py/pcsaft
+.. image:: https://img.shields.io/badge/License-GPLv3-blue.svg
+    :target: /LICENSE
+.. image:: https://img.shields.io/pypi/dm/pcsaft
+    :alt: PyPI - Downloads
+    :target: https://pypistats.org/packages/pcsaft
+.. image:: https://readthedocs.org/projects/pcsaft/badge/?version=latest
+   :target: http://pcsaft.readthedocs.io/?badge=latest
+
+Introduction
+------------
 This package implements the PC-SAFT equation of state. In addition to the hard chain and dispersion terms, these functions also include dipole, association and ion terms for use with these types of compounds. When the ion term is included it is also called electrolyte PC-SAFT (ePC-SAFT).
 
 Documentation
@@ -25,7 +37,7 @@ Example
   t = 320 # K
   p = 101325 # Pa
   den = pcsaft_den(t, p, x, pyargs, phase='liq')
-  print('Density of toluene at {} K:'.format(t), den, 'mol m^-3')
+  print('Density of toluene at {} K: {} mol m^-3'.format(t, den))
 
   # Water using default 2B association scheme
   x = np.asarray([1.])
@@ -39,7 +51,7 @@ Example
   s = np.asarray([2.7927 + 10.11*np.exp(-0.01775*t) - 1.417*np.exp(-0.01146*t)]) # temperature dependent sigma is used for better accuracy
   pyargs = {'m':m, 's':s, 'e':e, 'e_assoc':eAB, 'vol_a':volAB}
   den = pcsaft_den(t, p, x, pyargs, phase='liq')
-  print('Density of water at {} K:'.format(t), den, 'mol m^-3')
+  print('Density of water at {} K: {} mol m^-3'.format(t, den))
   
   # Water using 4C association scheme
   x = np.asarray([1.])
@@ -54,7 +66,7 @@ Example
   s = np.asarray([2.7927 + 10.11*np.exp(-0.01775*t) - 1.417*np.exp(-0.01146*t)]) # temperature dependent sigma is used for better accuracy
   pyargs = {'m':m, 's':s, 'e':e, 'e_assoc':eAB, 'vol_a':volAB, 'assoc_scheme':assoc_schemes}
   den = pcsaft_den(t, p, x, pyargs, phase='liq')
-  print('Density of water at {} K:'.format(t), den, 'mol m^-3')
+  print('Density of water at {} K: {} mol m^-3'.format(t, den))
 
 Dependencies
 ------------
