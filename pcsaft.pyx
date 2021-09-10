@@ -379,6 +379,28 @@ def flashPQ(p, q, x, pyargs, t_guess=None):
         Liquid mole fractions after flash
     xv : ndarray, shape (n,)
         Vapor mole fractions after flash
+
+    Notes
+    -----
+    To solve the PQ flash the temperature must be varied. This adds additional complexity
+    for water and electrolyte mixtures. For water, a temperature dependent sigma is often
+    used. However, there does not appear to be a way to pass a Python function to the C++
+    code without requiring the user to compile it using Cython. To avoid this, the `flashPQ`
+    function uses the following relationship internally to calculate sigma for water as a
+    function of temperature: ::
+
+        3.8395 + 1.2828 * exp(-0.0074944 * t) - 1.3939 * exp(-0.00056029 * t);
+
+    For electrolyte solutions the dielectric constant is calculated using the `dielc_water`
+    function. This means that the sigma value for water and the dielectric constant given by
+    the user are not used by the `flashPQ` function.
+
+    The code identifies which component is water by the epsilon/k value. Therefore, when
+    using `flashPQ` with water `e` must be exactly 353.9449, if you want the temperature
+    dependence of sigma to be accounted for.
+
+    If you want to use different functions for temperature dependent parameters with `flashPQ`
+    then you will need to modify the source code and recompile it.
     """
     x, pyargs = ensure_numpy_input(x, pyargs)
     check_input(x, {'pressure':p, 'Q':q})

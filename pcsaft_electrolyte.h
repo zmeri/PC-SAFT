@@ -59,6 +59,7 @@ bool IsNotZero (double x) {return x != 0.0;}
 double reduced_to_molar(double nu, double t, int ncomp, vector<double> x, add_args &cppargs);
 double dielc_water(double t);
 double calc_water_sigma(double t);
+double calc_sigma(double t, double (*function)(double)){return function(t);} // this can allow us to accept a custom function for a temperature dependent sigma
 
 class ValueError: public std::exception
 {
@@ -86,13 +87,10 @@ double BrentRho(double t, double p, vector<double> x, int phase, add_args &cppar
     double macheps, double tol_abs, int maxiter);
 
 // functions used for flash calculations
-vector<double> scan_pressure(double t, double Q, vector<double> x, add_args &cppargs, int npts);
-vector<double> scan_temp(double p, double Q, vector<double> x, add_args &cppargs, int npts);
-vector<double> findx_bub_pressure(double p, double t, double Q, vector<double> x, add_args &cppargs);
-vector<double> findx_bub_temp(double t, double p, double Q, vector<double> x, add_args &cppargs);
-double resid_bub_pressure(double p, double t, double Q, vector<double> x, add_args &cppargs);
-double resid_bub_temp(double t, double p, double Q, vector<double> x, add_args &cppargs);
-double BoundedSecantBubPressure(double t, double Q, vector<double> x, add_args &cppargs, double x0, double xmin,
-    double xmax, double dx, double tol, int maxiter);
-double BoundedSecantBubTemp(double p, double Q, vector<double> x, add_args &cppargs, double x0, double xmin,
+vector<double> outerPQ(double t_guess, double p, double Q, vector<double> x, add_args &cppargs);
+vector<double> outerTQ(double p_guess, double t, double Q, vector<double> x, add_args &cppargs);
+double estimate_flash_t(double p, double Q, vector<double> x, add_args &cppargs);
+double estimate_flash_p(double t, double Q, vector<double> x, add_args &cppargs);
+double resid_inner(double R, double kb0, double Q, vector<double> u, vector<double> x, add_args &cppargs);
+double BoundedSecantInner(double kb0, double Q, vector<double> u, vector<double> x, add_args &cppargs, double x0, double xmin,
     double xmax, double dx, double tol, int maxiter);

@@ -12,3 +12,4 @@ References
 - L. F. Cameretti, G. Sadowski, and J. M. Mollerup, “Modeling of Aqueous Electrolyte Solutions with Perturbed-Chain Statistical Association Fluid Theory,” Ind. Eng. Chem. Res., vol. 44, no. 23, pp. 8944–8944, Nov. 2005.
 - C. Held, L. F. Cameretti, and G. Sadowski, “Modeling aqueous electrolyte solutions: Part 1. Fully dissociated electrolytes,” Fluid Phase Equilibria, vol. 270, no. 1, pp. 87–96, Aug. 2008.
 - C. Held, T. Reschke, S. Mohammad, A. Luza, and G. Sadowski, “ePC-SAFT revised,” Chem. Eng. Res. Des., vol. 92, no. 12, pp. 2884–2897, Dec. 2014.
+- H. A. J. Watson, M. Vikse, T. Gundersen, and P. I. Barton, “Reliable Flash Calculations: Part 1. Nonsmooth Inside-Out Algorithms,” Ind. Eng. Chem. Res., vol. 56, no. 4, pp. 960–973, Feb. 2017.
