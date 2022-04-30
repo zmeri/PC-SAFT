@@ -60,6 +60,7 @@ double reduced_to_molar(double nu, double t, int ncomp, vector<double> x, add_ar
 double dielc_water(double t);
 double calc_water_sigma(double t);
 double calc_sigma(double t, double (*function)(double)){return function(t);} // this can allow us to accept a custom function for a temperature dependent sigma
+add_args get_single_component(int i, add_args &cppargs);
 
 class ValueError: public std::exception
 {

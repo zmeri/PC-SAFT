@@ -1725,7 +1725,7 @@ vector<double> outerPQ(double t_guess, double p, double Q, vector<double> x, add
     }
 
     // initialize variables
-    vector<double> fugcoef_l(ncomp), fugcoef_v(ncomp), k(ncomp), u(ncomp), kprime(ncomp), uprime(ncomp);
+    vector<double> fugcoef_l(ncomp), fugcoef_v(ncomp), k(ncomp), u(ncomp), kprime(ncomp);
     double rhol, rhov;
     double Tref = t_guess - 1;
     double Tprime = t_guess + 1;
@@ -1743,22 +1743,61 @@ vector<double> outerPQ(double t_guess, double p, double Q, vector<double> x, add
     // calculate initial guess for compositions based on fugacity coefficients and Raoult's Law.
     rhol = pcsaft_den_cpp(t, p, x, 0, cppargs);
     rhov = pcsaft_den_cpp(t, p, x, 1, cppargs);
-    if ((rhol - rhov) < 1e-4) {
-        throw SolutionError("liquid and vapor densities are the same.");
+    if ((rhol - rhov) > 1e-4) { // first, simply try calculating with the overall system composition, if the two density roots are found
+        fugcoef_l = pcsaft_fugcoef_cpp(t, rhol, x, cppargs);
+        fugcoef_v = pcsaft_fugcoef_cpp(t, rhov, x, cppargs);
+
+        for (int i = 0; i < ncomp; i++) {
+            if (cppargs.z.empty() || cppargs.z[i] == 0) {
+                k[i] = fugcoef_l[i] / fugcoef_v[i];
+            } else {
+                k[i] = 0; // set k to 0 for ionic components
+            }
+        }
+    } else {
+        for (int i = 0; i < ncomp; i++) {
+            if (cppargs.z.empty() || cppargs.z[i] == 0) {
+                try { // if using overall system composition doesn't work, try calculating using the vapor pressure
+                    if (ncomp == 1) {
+                        throw SolutionError("one component does not have a phase split at these conditions.");
+                    }
+                    vector<double> x_single(1, 1);
+                    add_args args_single = get_single_component(i, cppargs);
+                    double Psat = flashTQ_cpp(t, Q, x_single, args_single)[0];
+                    k[i] = Psat / p;
+                }
+                catch (const SolutionError& ex) { // if vapor pressure cannot be calculated for a component, then the component might be supercritical at these conditions. Instead, try calculating an initial guess at a very dilute concentration.
+                    double DILUTE_MOLE_FRAC = 1e-4;
+                    vector<double> x_dilute(ncomp, 0); // to make the calculation simpler, we only include the current component and the major component in the system when estimating an initial k value
+                    int idx_largest = 0; // index of the major component in the system
+                    for (int j = 0; j < ncomp; j++) {
+                        if (x[j] > x[idx_largest]) {
+                            idx_largest = j;
+                        }
+                    }
+
+                    x_dilute[i] = DILUTE_MOLE_FRAC;
+                    x_dilute[idx_largest] = 1 - DILUTE_MOLE_FRAC;
+
+                    rhol = pcsaft_den_cpp(t, p, x_dilute, 0, cppargs);
+                    if (rhol < 200) { // the density is probably not for the liquid phase
+                        throw SolutionError("initial k could not be estimated in outerTQ for one or more components.");
+                    }
+
+                    fugcoef_l[i] = pcsaft_fugcoef_cpp(t, rhol, x_dilute, cppargs)[i];
+                    k[i] = fugcoef_l[i] / 1; // here we assume that the vapor phase behaves like an ideal gas (fugacity coefficient close to 1)
+                }
+            } else {
+                k[i] = 0; // set k to 0 for ionic components
+            }
+        }
     }
-    fugcoef_l = pcsaft_fugcoef_cpp(t, rhol, x, cppargs);
-    fugcoef_v = pcsaft_fugcoef_cpp(t, rhov, x, cppargs);
 
     vector<double> xl(ncomp);
     vector<double> xv(ncomp);
     double xv_sum = 0;
     double xl_sum = 0;
     for (int i = 0; i < ncomp; i++) {
-        if (cppargs.z.empty() || cppargs.z[i] == 0) { // this if statement sets k to 0 for ionic components
-            k[i] = fugcoef_l[i] / fugcoef_v[i];
-        } else {
-            k[i] = 0;
-        }
         xl[i] = x[i] / (1 + Q * (k[i] - 1));
         xl_sum += xl[i];
         xv[i] = k[i] * x[i] / (1 + Q * (k[i] - 1));
@@ -1796,7 +1835,6 @@ vector<double> outerPQ(double t_guess, double p, double Q, vector<double> x, add
     fugcoef_v = pcsaft_fugcoef_cpp(Tprime, rhov, xv, cppargs);
     for (int i = 0; i < ncomp; i++) {
         kprime[i] = fugcoef_l[i] / fugcoef_v[i];
-        uprime[i] = std::log(k[i] / kb);
     }
 
     vector<double> t_weight(ncomp);
@@ -1839,6 +1877,9 @@ vector<double> outerPQ(double t_guess, double p, double Q, vector<double> x, add
 
     double B = std::log(kbprime / kb) / (1/Tprime - 1/t);
     double A = std::log(kb) - B * (1/t - 1/Tref);
+    if (B > 0) {
+        throw SolutionError("B > 0 in outerPQ");
+    }
 
     // solve
     vector<double> pp(ncomp);
@@ -1925,7 +1966,6 @@ vector<double> outerPQ(double t_guess, double p, double Q, vector<double> x, add
     return result;
 }
 
-
 vector<double> outerTQ(double p_guess, double t, double Q, vector<double> x, add_args &cppargs) {
     // Based on the algorithm proposed in H. A. J. Watson, M. Vikse, T. Gundersen, and P. I. Barton, “Reliable Flash Calculations: Part 1. Nonsmooth Inside-Out Algorithms,” Ind. Eng. Chem. Res., vol. 56, no. 4, pp. 960–973, Feb. 2017, doi: 10.1021/acs.iecr.6b03956.
     int ncomp = x.size();
@@ -1940,7 +1980,7 @@ vector<double> outerTQ(double p_guess, double t, double Q, vector<double> x, add
     }
 
     // initialize variables
-    vector<double> fugcoef_l(ncomp), fugcoef_v(ncomp), k(ncomp), u(ncomp), kprime(ncomp), uprime(ncomp);
+    vector<double> fugcoef_l(ncomp), fugcoef_v(ncomp), k(ncomp), u(ncomp), kprime(ncomp);
     double rhol, rhov;
     double Pref = p_guess - 0.01 * p_guess;
     double Pprime = p_guess + 0.01 * p_guess;
@@ -1952,22 +1992,61 @@ vector<double> outerTQ(double p_guess, double t, double Q, vector<double> x, add
     // calculate initial guess for compositions based on fugacity coefficients and Raoult's Law.
     rhol = pcsaft_den_cpp(t, p, x, 0, cppargs);
     rhov = pcsaft_den_cpp(t, p, x, 1, cppargs);
-    if ((rhol - rhov) < 1e-4) {
-        throw SolutionError("liquid and vapor densities are the same.");
+    if ((rhol - rhov) > 1e-4) { // first, simply try calculating with the overall system composition, if the two density roots are found
+        fugcoef_l = pcsaft_fugcoef_cpp(t, rhol, x, cppargs);
+        fugcoef_v = pcsaft_fugcoef_cpp(t, rhov, x, cppargs);
+
+        for (int i = 0; i < ncomp; i++) {
+            if (cppargs.z.empty() || cppargs.z[i] == 0) {
+                k[i] = fugcoef_l[i] / fugcoef_v[i];
+            } else {
+                k[i] = 0; // set k to 0 for ionic components
+            }
+        }
+    } else {
+        for (int i = 0; i < ncomp; i++) {
+            if (cppargs.z.empty() || cppargs.z[i] == 0) {
+                try { // if using overall system composition doesn't work, try calculating using the vapor pressure
+                    if (ncomp == 1) {
+                        throw SolutionError("one component does not have a phase split at these conditions.");
+                    }
+                    vector<double> x_single(1, 1);
+                    add_args args_single = get_single_component(i, cppargs);
+                    double Psat = flashTQ_cpp(t, Q, x_single, args_single)[0];
+                    k[i] = Psat / p;
+                }
+                catch (const SolutionError& ex) { // if vapor pressure cannot be calculated for a component, then the component might be supercritical at these conditions. Instead, try calculating an initial guess at a very dilute concentration.
+                    double DILUTE_MOLE_FRAC = 1e-4;
+                    vector<double> x_dilute(ncomp, 0); // to make the calculation simpler, we only include the current component and the major component in the system when estimating an initial k value
+                    int idx_largest = 0; // index of the major component in the system
+                    for (int j = 0; j < ncomp; j++) {
+                        if (x[j] > x[idx_largest]) {
+                            idx_largest = j;
+                        }
+                    }
+
+                    x_dilute[i] = DILUTE_MOLE_FRAC;
+                    x_dilute[idx_largest] = 1 - DILUTE_MOLE_FRAC;
+
+                    rhol = pcsaft_den_cpp(t, p, x_dilute, 0, cppargs);
+                    if (rhol < 200) { // the density is probably not for the liquid phase
+                        throw SolutionError("initial k could not be estimated in outerTQ for one or more components.");
+                    }
+
+                    fugcoef_l[i] = pcsaft_fugcoef_cpp(t, rhol, x_dilute, cppargs)[i];
+                    k[i] = fugcoef_l[i] / 1; // here we assume that the vapor phase behaves like an ideal gas (fugacity coefficient close to 1)
+                }
+            } else {
+                k[i] = 0; // set k to 0 for ionic components
+            }
+        }
     }
-    fugcoef_l = pcsaft_fugcoef_cpp(t, rhol, x, cppargs);
-    fugcoef_v = pcsaft_fugcoef_cpp(t, rhov, x, cppargs);
 
     vector<double> xl(ncomp);
     vector<double> xv(ncomp);
     double xv_sum = 0;
     double xl_sum = 0;
     for (int i = 0; i < ncomp; i++) {
-        if (cppargs.z.empty() || cppargs.z[i] == 0) {
-            k[i] = fugcoef_l[i] / fugcoef_v[i];
-        } else {
-            k[i] = 0; // set k to 0 for ionic components
-        }
         xl[i] = x[i] / (1 + Q * (k[i] - 1));
         xl_sum += xl[i];
         xv[i] = k[i] * x[i] / (1 + Q * (k[i] - 1));
@@ -2001,7 +2080,6 @@ vector<double> outerTQ(double p_guess, double t, double Q, vector<double> x, add
     fugcoef_v = pcsaft_fugcoef_cpp(t, rhov, xv, cppargs);
     for (int i = 0; i < ncomp; i++) {
         kprime[i] = fugcoef_l[i] / fugcoef_v[i];
-        uprime[i] = std::log(k[i] / kb);
     }
 
     vector<double> t_weight(ncomp);
@@ -2099,6 +2177,9 @@ vector<double> outerTQ(double p_guess, double t, double Q, vector<double> x, add
 
         if (itr == 0) {
             B = std::log(kbprime / kb) / (1/Pprime - 1/p);
+            if (B < 0) {
+                throw SolutionError("B < 0 in outerTQ");
+            }
         }
         A = std::log(kb) - B * (1/p - 1/Pref);
 
@@ -2126,7 +2207,6 @@ vector<double> outerTQ(double p_guess, double t, double Q, vector<double> x, add
     result.insert(result.end(), xv.begin(), xv.end());
     return result;
 }
-
 
 double resid_inner(double R, double kb0, double Q, vector<double> u, vector<double> x, add_args &cppargs) {
     int ncomp = x.size();
@@ -2281,7 +2361,6 @@ double pcsaft_den_cpp(double t, double p, vector<double> x, int phase, add_args 
     return rho;
 }
 
-
 double estimate_flash_t(double p, double Q, vector<double> x, add_args &cppargs) {
     /**
     Get a quick estimate of the temperature at which VLE occurs
@@ -2298,7 +2377,7 @@ double estimate_flash_t(double p, double Q, vector<double> x, add_args &cppargs)
 
     bool guess_found = false;
     double t_step = 30;
-    double t_start = 500;
+    double t_start = 400;
     double t_lbound = 1;
     if (!cppargs.z.empty()) {
         t_step = 15;
@@ -2307,9 +2386,7 @@ double estimate_flash_t(double p, double Q, vector<double> x, add_args &cppargs)
     }
     while (!guess_found && t_start > t_lbound) {
         // initialize variables
-        vector<double> fugcoef_l(ncomp), fugcoef_v(ncomp), k(ncomp), u(ncomp), kprime(ncomp), uprime(ncomp);
-        double rhol, rhov;
-        double Tprime = t_start + 1;
+        double Tprime = t_start - 50;
         double t = t_start;
 
         // calculate sigma for water, if it is present
@@ -2318,92 +2395,20 @@ double estimate_flash_t(double p, double Q, vector<double> x, add_args &cppargs)
         if (water_iter != cppargs.e.end()) {
             water_idx = std::distance(cppargs.e.begin(), water_iter);
             cppargs.s[water_idx] = calc_sigma(t, &calc_water_sigma);
-            cppargs.dielc = dielc_water(t); // Right now only aqueous mixtures are supported. Other solvents could be modeled by replacing the dielc_water function.
+            cppargs.dielc = dielc_water(t); // Right now only aqueous mixtures are supported for electrolyte PC-SAFT. Other solvents could be modeled by replacing the dielc_water function.
         }
 
-        // calculate initial guess for compositions based on fugacity coefficients and Raoult's Law.
-        rhol = pcsaft_den_cpp(t, p, x, 0, cppargs);
-        rhov = pcsaft_den_cpp(t, p, x, 1, cppargs);
-        if ((rhol - rhov) < 1e-4) {
+        try {
+            double p1 = estimate_flash_p(t, Q, x, cppargs);
+            double p2 = estimate_flash_p(Tprime, Q, x, cppargs);
+
+            double slope = (std::log10(p1) - std::log10(p2)) / (1/t - 1/Tprime);
+            double intercept = std::log10(p1) - slope * (1/t);
+            t_guess = slope / (std::log10(p) - intercept) ;
+            guess_found = true;
+        } catch (const SolutionError& ex) {
             t_start -= t_step;
-            continue;
         }
-        fugcoef_l = pcsaft_fugcoef_cpp(t, rhol, x, cppargs);
-        fugcoef_v = pcsaft_fugcoef_cpp(t, rhov, x, cppargs);
-
-        vector<double> xl(ncomp);
-        vector<double> xv(ncomp);
-        double xv_sum = 0;
-        double xl_sum = 0;
-        for (int i = 0; i < ncomp; i++) {
-            if (cppargs.z.empty() || cppargs.z[i] == 0) { // this if statement sets k to 0 for ionic components
-                k[i] = fugcoef_l[i] / fugcoef_v[i];
-            } else {
-                k[i] = 0;
-            }
-            xl[i] = x[i] / (1 + Q * (k[i] - 1));
-            xl_sum += xl[i];
-            xv[i] = k[i] * x[i] / (1 + Q * (k[i] - 1));
-            xv_sum += xv[i];
-        }
-
-        if (xv_sum != 1) {
-            for (int i = 0; i < ncomp; i++) {
-                xv[i] = xv[i] / xv_sum;
-            }
-        }
-
-        if (xl_sum != 1) {
-            for (int i = 0; i < ncomp; i++) {
-                xl[i] = xl[i] / xl_sum;
-            }
-        }
-
-        rhol = pcsaft_den_cpp(t, p, xl, 0, cppargs);
-        rhov = pcsaft_den_cpp(t, p, xv, 1, cppargs);
-        if ((rhol - rhov) < 1e-4) {
-            t_start -= t_step;
-            continue;
-        }
-        fugcoef_l = pcsaft_fugcoef_cpp(t, rhol, xl, cppargs);
-        fugcoef_v = pcsaft_fugcoef_cpp(t, rhov, xv, cppargs);
-        double numer = 0;
-        double denom = 0;
-        for (int i = 0; i < ncomp; i++) {
-            if (cppargs.z.empty() || cppargs.z[i] == 0) {
-                numer += xl[i] * fugcoef_l[i];
-                denom += xv[i] * fugcoef_v[i];
-            }
-        }
-        double ratio = numer / denom;
-
-        if (water_idx >= 0) {
-            cppargs.s[water_idx] = calc_sigma(Tprime, &calc_water_sigma);
-            cppargs.dielc = dielc_water(Tprime); // Right now only aqueous mixtures are supported. Other solvents could be modeled by replacing the dielc_water function.
-        }
-        rhol = pcsaft_den_cpp(Tprime, p, xl, 0, cppargs);
-        rhov = pcsaft_den_cpp(Tprime, p, xv, 1, cppargs);
-        if ((rhol - rhov) < 1e-4) {
-            t_start -= t_step;
-            continue;
-        }
-        fugcoef_l = pcsaft_fugcoef_cpp(Tprime, rhol, xl, cppargs);
-        fugcoef_v = pcsaft_fugcoef_cpp(Tprime, rhov, xv, cppargs);
-        numer = 0;
-        denom = 0;
-        for (int i = 0; i < ncomp; i++) {
-            if (cppargs.z.empty() || cppargs.z[i] == 0) {
-                numer += xl[i] * fugcoef_l[i];
-                denom += xv[i] * fugcoef_v[i];
-            }
-        }
-        double ratio_prime = numer / denom;
-
-        double slope = (std::log10(ratio) - std::log10(ratio_prime)) / (1/t - 1/Tprime);
-        double intercept = std::log10(ratio) - slope * 1/t;
-        t_guess = -slope / intercept;
-
-        guess_found = true;
     }
 
     if (!guess_found) {
@@ -2412,7 +2417,6 @@ double estimate_flash_t(double p, double Q, vector<double> x, add_args &cppargs)
 
     return t_guess;
 }
-
 
 double estimate_flash_p(double t, double Q, vector<double> x, add_args &cppargs) {
     /**
@@ -2432,7 +2436,7 @@ double estimate_flash_p(double t, double Q, vector<double> x, add_args &cppargs)
     double p_start = 10000;
     while (!guess_found && p_start < 1e7) {
         // initialize variables
-        vector<double> fugcoef_l(ncomp), fugcoef_v(ncomp), k(ncomp), u(ncomp), kprime(ncomp), uprime(ncomp);
+        vector<double> fugcoef_l(ncomp), fugcoef_v(ncomp), k(ncomp), u(ncomp), kprime(ncomp);
         double rhol, rhov;
         double Pprime = 0.99 * p_start;
         double p = p_start;
@@ -2527,7 +2531,6 @@ double estimate_flash_p(double t, double Q, vector<double> x, add_args &cppargs)
 
 
 double reduced_to_molar(double nu, double t, int ncomp, vector<double> x, add_args &cppargs) {
-
     vector<double> d(ncomp);
     double summ = 0.;
     for (int i = 0; i < ncomp; i++) {
@@ -2572,6 +2575,45 @@ double dielc_water(double t) {
 
 double calc_water_sigma(double t) {
     return 3.8395 + 1.2828 * std::exp(-0.0074944 * t) - 1.3939 * std::exp(-0.00056029 * t);
+}
+
+add_args get_single_component(int i, add_args &cppargs) {
+    add_args args_single;
+    args_single.m.push_back(cppargs.m[i]);
+    args_single.s.push_back(cppargs.s[i]);
+    args_single.e.push_back(cppargs.e[i]);
+    if (!cppargs.e_assoc.empty()) {
+        args_single.e_assoc.push_back(cppargs.e_assoc[i]);
+        args_single.vol_a.push_back(cppargs.vol_a[i]);
+    }
+    if (!cppargs.dipm.empty()) {
+        args_single.dipm.push_back(cppargs.dipm[i]);
+        args_single.dip_num.push_back(cppargs.dip_num[i]);
+    }
+    if (!cppargs.z.empty()) {
+        args_single.z.push_back(cppargs.z[i]);
+        args_single.dielc = cppargs.dielc;
+    }
+    if (!cppargs.assoc_num.empty()) {
+        args_single.assoc_num.push_back(cppargs.assoc_num[i]);
+
+        if (args_single.assoc_num[0] > 0) {
+            int nassoc = cppargs.assoc_num.size();
+            int start = 0;
+            for (int l = 0; l < (int)cppargs.assoc_num.size(); l++) {
+                if (l < i) {
+                    start += 1;
+                }
+            }
+            for (int j = 0; j < nassoc; j++) {
+                for (int k = 0; k < args_single.assoc_num[0]; k++) {
+                    args_single.assoc_matrix.push_back(cppargs.assoc_matrix[j*nassoc + start + k]);
+                }
+            }
+        }
+    }
+
+    return args_single;
 }
 
 /*
