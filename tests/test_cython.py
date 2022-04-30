@@ -615,7 +615,6 @@ def test_flashTQ(print_result=False):
 
     # Binary mixture: methane-benzene
     #0 = methane, 1 = benzene
-    x = np.asarray([0.0252,0.9748])
     m = np.asarray([1.0000, 2.4653])
     s = np.asarray([3.7039, 3.6478])
     e = np.asarray([150.03, 287.35])
@@ -623,9 +622,27 @@ def test_flashTQ(print_result=False):
                        [0.037, 0]])
     pyargs = {'m':m, 's':s, 'e':e, 'k_ij':k_ij}
 
+    x = np.asarray([0.0252,0.9748])
     t = 421.05
     ref = 1986983.25 # source: H.-M. Lin, H. M. Sebastian, J. J. Simnick, and K.-C. Chao, “Gas-liquid equilibrium in binary mixtures of methane with N-decane, benzene, and toluene,” J. Chem. Eng. Data, vol. 24, no. 2, pp. 146–149, Apr. 1979.
     xv_ref = np.asarray([0.6516,0.3484])
+    calc, xl, xv = flashTQ(t, 0, x, pyargs)
+    if print_result:
+        print('\n##########  Test with methane-benzene mixture  ##########')
+        print('----- Bubble point pressure at %s K -----' % t)
+        print('    Reference:', ref, 'Pa')
+        print('    PC-SAFT:', calc, 'Pa')
+        print('    Relative deviation:', (calc-ref)/ref*100, '%')
+        print('    Vapor composition (reference):', xv_ref)
+        print('    Vapor composition (PC-SAFT):', xv)
+        print('    Vapor composition relative deviation:', (xv-xv_ref)/xv_ref*100)
+    assert abs((calc-ref)/ref*100) < 10
+    assert np.all(abs((xv-xv_ref)/xv_ref*100) < 10)
+
+    x = np.asarray([0.119,0.881])
+    t = 348.15
+    ref = 6691000 # source: Hughes TJ, Kandil ME, Graham BF, Marsh KN, Huang SH, May EF. Phase equilibrium measurements of (methane+ benzene) and (methane+ methylbenzene) at temperatures from (188 to 348) K and pressures to 13 MPa. The Journal of Chemical Thermodynamics. 2015 Jun 1;85:141-7.
+    xv_ref = np.asarray([0.9675,0.0325])
     calc, xl, xv = flashTQ(t, 0, x, pyargs)
     if print_result:
         print('\n##########  Test with methane-benzene mixture  ##########')
@@ -857,6 +874,24 @@ def test_flashTQ(print_result=False):
 
 def test_flashPQ(print_result=False):
     """Test the flashPQ function to see if it is working correctly."""
+    # Toluene
+    x = np.asarray([1.])
+    m = np.asarray([2.8149])
+    s = np.asarray([3.7169])
+    e = np.asarray([285.69])
+    pyargs = {'m':m, 's':s, 'e':e}
+
+    p = 3255792.76201971 # source: reference EOS in CoolProp
+    ref = 572.6667
+    calc, xl, xv = flashPQ(p, 0, x, pyargs)
+    if print_result:
+        print('##########  Test with toluene  ##########')
+        print('----- Vapor pressure at {} Pa -----'.format(p))
+        print('    Reference:', ref, 'K')
+        print('    PC-SAFT:', calc, 'K')
+        print('    Relative deviation:', (calc-ref)/ref*100, '%')
+    assert abs((calc-ref)/ref*100) < 3
+
     # Binary mixture: methanol-cyclohexane
     #0 = methanol, 1 = cyclohexane
     x = np.asarray([0.3,0.7])

@@ -24,7 +24,7 @@ if os.path.isfile(requirements_path):
         install_requires = f.read().splitlines()
 
 setup(name='pcsaft',
-      version='1.3.0',
+      version='1.4.0',
       author="Zach Baird",
       description="The PC-SAFT equation of state, including dipole, association and ion terms.",
       long_description=long_description,
@@ -38,5 +38,6 @@ setup(name='pcsaft',
         "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
         "Operating System :: Microsoft :: Windows :: Windows 10",
         "Operating System :: POSIX :: Linux",
+        "Operating System :: MacOS"
       ],
       ext_modules=cythonize(ext_modules, language_level="3"))
