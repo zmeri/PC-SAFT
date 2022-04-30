@@ -38,5 +38,6 @@ setup(name='pcsaft',
         "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
         "Operating System :: Microsoft :: Windows :: Windows 10",
         "Operating System :: POSIX :: Linux",
+        "Operating System :: MacOS"
       ],
       ext_modules=cythonize(ext_modules, language_level="3"))
