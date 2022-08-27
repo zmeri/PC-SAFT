@@ -191,12 +191,12 @@ double pcsaft_Z_cpp(double t, double rho, vector<double> x, add_args &cppargs) {
     double Zhs = zeta[3]/(1-zeta[3]) + 3.*zeta[1]*zeta[2]/zeta[0]/(1.-zeta[3])/(1.-zeta[3]) +
         (3.*pow(zeta[2], 3.) - zeta[3]*pow(zeta[2], 3.))/zeta[0]/pow(1.-zeta[3], 3.);
 
-    static double a0[7] = { 0.910563145, 0.636128145, 2.686134789, -26.54736249, 97.75920878, -159.5915409, 91.29777408 };
-    static double a1[7] = { -0.308401692, 0.186053116, -2.503004726, 21.41979363, -65.25588533, 83.31868048, -33.74692293 };
-    static double a2[7] = { -0.090614835, 0.452784281, 0.596270073, -1.724182913, -4.130211253, 13.77663187, -8.672847037 };
-    static double b0[7] = { 0.724094694, 2.238279186, -4.002584949, -21.00357682, 26.85564136, 206.5513384, -355.6023561 };
-    static double b1[7] = { -0.575549808, 0.699509552, 3.892567339, -17.21547165, 192.6722645, -161.8264617, -165.2076935 };
-    static double b2[7] = { 0.097688312, -0.255757498, -9.155856153, 20.64207597, -38.80443005, 93.62677408, -29.66690559 };
+    static double a0[7] = { 0.9105631445, 0.6361281449, 2.6861347891, -26.547362491, 97.759208784, -159.59154087, 91.297774084 };
+    static double a1[7] = { -0.3084016918, 0.1860531159, -2.5030047259, 21.419793629, -65.255885330, 83.318680481, -33.746922930 };
+    static double a2[7] = { -0.0906148351, 0.4527842806, 0.5962700728, -1.7241829131, -4.1302112531, 13.776631870, -8.6728470368 };
+    static double b0[7] = { 0.7240946941, 2.2382791861, -4.0025849485, -21.003576815, 26.855641363, 206.55133841, -355.60235612 };
+    static double b1[7] = { -0.5755498075, 0.6995095521, 3.8925673390, -17.215471648, 192.67226447, -161.82646165, -165.20769346 };
+    static double b2[7] = { 0.0976883116, -0.2557574982, -9.1558561530, 20.642075974, -38.804430052, 93.626774077, -29.666905585 };
 
     vector<double> a (7, 0);
     vector<double> b (7, 0);
@@ -236,7 +236,7 @@ double pcsaft_Z_cpp(double t, double rho, vector<double> x, add_args &cppargs) {
         vector<double> bdip (5, 0);
         vector<double> cdip (5, 0);
         vector<double> dipmSQ (ncomp, 0);
-        double J2, dJ2_det, J3, dJ3_det;
+        double J2, detJ2_det, J3, detJ3_det;
 
         static double a0dip[5] = { 0.3043504, -0.1358588, 1.4493329, 0.3556977, -2.0653308 };
         static double a1dip[5] = { 0.9534641, -1.8396383, 2.0131180, -7.3724958, 8.2374135 };
@@ -262,17 +262,17 @@ double pcsaft_Z_cpp(double t, double rho, vector<double> x, add_args &cppargs) {
                     m_ij = 2;
                 }
                 J2 = 0.;
-                dJ2_det = 0.;
+                detJ2_det = 0.;
                 for (int l = 0; l < 5; l++) {
                     adip[l] = a0dip[l] + (m_ij-1)/m_ij*a1dip[l] + (m_ij-1)/m_ij*(m_ij-2)/m_ij*a2dip[l];
                     bdip[l] = b0dip[l] + (m_ij-1)/m_ij*b1dip[l] + (m_ij-1)/m_ij*(m_ij-2)/m_ij*b2dip[l];
-                    J2 += (adip[l] + bdip[l]*e_ij[j*ncomp+j]/t)*pow(eta, l); // j*ncomp+j needs to be used for e_ij because it is formatted as a 1D vector
-                    dJ2_det += (adip[l] + bdip[l]*e_ij[j*ncomp+j]/t)*l*pow(eta, l-1);
+                    J2 += (adip[l] + bdip[l]*e_ij[i*ncomp+j]/t)*pow(eta, l); // i*ncomp+j needs to be used for e_ij because it is formatted as a 1D vector
+                    detJ2_det += (adip[l] + bdip[l]*e_ij[i*ncomp+j]/t)*(l+1)*pow(eta, l);
                 }
                 A2 += x[i]*x[j]*e_ij[i*ncomp+i]/t*e_ij[j*ncomp+j]/t*pow(s_ij[i*ncomp+i],3)*pow(s_ij[j*ncomp+j],3)/
                     pow(s_ij[i*ncomp+j],3)*cppargs.dip_num[i]*cppargs.dip_num[j]*dipmSQ[i]*dipmSQ[j]*J2;
                 dA2_det += x[i]*x[j]*e_ij[i*ncomp+i]/t*e_ij[j*ncomp+j]/t*pow(s_ij[i*ncomp+i],3)*
-                    pow(s_ij[j*ncomp+j],3)/pow(s_ij[i*ncomp+j],3)*cppargs.dip_num[i]*cppargs.dip_num[j]*dipmSQ[i]*dipmSQ[j]*dJ2_det;
+                    pow(s_ij[j*ncomp+j],3)/pow(s_ij[i*ncomp+j],3)*cppargs.dip_num[i]*cppargs.dip_num[j]*dipmSQ[i]*dipmSQ[j]*detJ2_det;
             }
         }
 
@@ -285,11 +285,11 @@ double pcsaft_Z_cpp(double t, double rho, vector<double> x, add_args &cppargs) {
                         m_ijk = 2;
                     }
                     J3 = 0.;
-                    dJ3_det = 0.;
+                    detJ3_det = 0.;
                     for (int l = 0; l < 5; l++) {
                         cdip[l] = c0dip[l] + (m_ijk-1)/m_ijk*c1dip[l] + (m_ijk-1)/m_ijk*(m_ijk-2)/m_ijk*c2dip[l];
                         J3 += cdip[l]*pow(eta, l);
-                        dJ3_det += cdip[l]*l*pow(eta, (l-1));
+                        detJ3_det += cdip[l]*(l+2)*pow(eta, (l+1));
                     }
                     A3 += x[i]*x[j]*x[k]*e_ij[i*ncomp+i]/t*e_ij[j*ncomp+j]/t*e_ij[k*ncomp+k]/t*
                         pow(s_ij[i*ncomp+i],3)*pow(s_ij[j*ncomp+j],3)*pow(s_ij[k*ncomp+k],3)/s_ij[i*ncomp+j]/s_ij[i*ncomp+k]/
@@ -298,15 +298,15 @@ double pcsaft_Z_cpp(double t, double rho, vector<double> x, add_args &cppargs) {
                     dA3_det += x[i]*x[j]*x[k]*e_ij[i*ncomp+i]/t*e_ij[j*ncomp+j]/t*e_ij[k*ncomp+k]/t*
                         pow(s_ij[i*ncomp+i],3)*pow(s_ij[j*ncomp+j],3)*pow(s_ij[k*ncomp+k],3)/s_ij[i*ncomp+j]/s_ij[i*ncomp+k]/
                         s_ij[j*ncomp+k]*cppargs.dip_num[i]*cppargs.dip_num[j]*cppargs.dip_num[k]*dipmSQ[i]*
-                        dipmSQ[j]*dipmSQ[k]*dJ3_det;
+                        dipmSQ[j]*dipmSQ[k]*detJ3_det;
                 }
             }
         }
 
         A2 = -PI*den*A2;
         A3 = -4/3.*PI*PI*den*den*A3;
-        dA2_det = -PI*den*dA2_det;
-        dA3_det = -4/3.*PI*PI*den*den*dA3_det;
+        dA2_det = -PI*den/eta*dA2_det;
+        dA3_det = -4/3.*PI*PI*den/eta*den/eta*dA3_det;
 
         if (A2 != 0) { // when the mole fraction of the polar compounds is 0 then A2 = 0 and division by 0 occurs
             Zpolar = eta*((dA2_det*(1-A3/A2)+(dA3_det*A2-A3*dA2_det)/A2)/(1-A3/A2)/(1-A3/A2));
@@ -457,9 +457,9 @@ double pcsaft_Z_cpp(double t, double rho, vector<double> x, add_args &cppargs) {
 }
 
 
-vector<double> pcsaft_fugcoef_cpp(double t, double rho, vector<double> x, add_args &cppargs) {
+vector<double> pcsaft_lnfug_cpp(double t, double rho, vector<double> x, add_args &cppargs) {
     /**
-    Calculate the fugacity coefficients for one phase of the system.
+    Calculate the natural logarithm of the fugacity coefficients for one phase of the system.
     */
     int ncomp = x.size(); // number of components
     vector<double> d (ncomp);
@@ -542,12 +542,12 @@ vector<double> pcsaft_fugcoef_cpp(double t, double rho, vector<double> x, add_ar
     double Zhs = zeta[3]/(1-zeta[3]) + 3.*zeta[1]*zeta[2]/zeta[0]/(1.-zeta[3])/(1.-zeta[3]) +
         (3.*pow(zeta[2], 3.) - zeta[3]*pow(zeta[2], 3.))/zeta[0]/pow(1.-zeta[3], 3.);
 
-    static double a0[7] = { 0.910563145, 0.636128145, 2.686134789, -26.54736249, 97.75920878, -159.5915409, 91.29777408 };
-    static double a1[7] = { -0.308401692, 0.186053116, -2.503004726, 21.41979363, -65.25588533, 83.31868048, -33.74692293 };
-    static double a2[7] = { -0.090614835, 0.452784281, 0.596270073, -1.724182913, -4.130211253, 13.77663187, -8.672847037 };
-    static double b0[7] = { 0.724094694, 2.238279186, -4.002584949, -21.00357682, 26.85564136, 206.5513384, -355.6023561 };
-    static double b1[7] = { -0.575549808, 0.699509552, 3.892567339, -17.21547165, 192.6722645, -161.8264617, -165.2076935 };
-    static double b2[7] = { 0.097688312, -0.255757498, -9.155856153, 20.64207597, -38.80443005, 93.62677408, -29.66690559 };
+    static double a0[7] = { 0.9105631445, 0.6361281449, 2.6861347891, -26.547362491, 97.759208784, -159.59154087, 91.297774084 };
+    static double a1[7] = { -0.3084016918, 0.1860531159, -2.5030047259, 21.419793629, -65.255885330, 83.318680481, -33.746922930 };
+    static double a2[7] = { -0.0906148351, 0.4527842806, 0.5962700728, -1.7241829131, -4.1302112531, 13.776631870, -8.6728470368 };
+    static double b0[7] = { 0.7240946941, 2.2382791861, -4.0025849485, -21.003576815, 26.855641363, 206.55133841, -355.60235612 };
+    static double b1[7] = { -0.5755498075, 0.6995095521, 3.8925673390, -17.215471648, 192.67226447, -161.82646165, -165.20769346 };
+    static double b2[7] = { 0.0976883116, -0.2557574982, -9.1558561530, 20.642075974, -38.804430052, 93.626774077, -29.666905585 };
 
     vector<double> a (7, 0);
     vector<double> b (7, 0);
@@ -681,7 +681,7 @@ vector<double> pcsaft_fugcoef_cpp(double t, double rho, vector<double> x, add_ar
         vector<double> adip (5, 0);
         vector<double> bdip (5, 0);
         vector<double> cdip (5, 0);
-        double J2, dJ2_det, J3, dJ3_det;
+        double J2, dJ2_det, detJ2_det, J3, dJ3_det, detJ3_det;
         double m_ij;
         double m_ijk;
         for (int i = 0; i < ncomp; i++) {
@@ -692,16 +692,18 @@ vector<double> pcsaft_fugcoef_cpp(double t, double rho, vector<double> x, add_ar
                 }
                 J2 = 0.;
                 dJ2_det = 0.;
+                detJ2_det = 0;
                 for (int l = 0; l < 5; l++) {
                     adip[l] = a0dip[l] + (m_ij-1)/m_ij*a1dip[l] + (m_ij-1)/m_ij*(m_ij-2)/m_ij*a2dip[l];
                     bdip[l] = b0dip[l] + (m_ij-1)/m_ij*b1dip[l] + (m_ij-1)/m_ij*(m_ij-2)/m_ij*b2dip[l];
-                    J2 += (adip[l] + bdip[l]*e_ij[j*ncomp+j]/t)*pow(eta, l); // j*ncomp+j needs to be used for e_ij because it is formatted as a 1D vector
-                    dJ2_det += (adip[l] + bdip[l]*e_ij[j*ncomp+j]/t)*l*pow(eta, l-1);
+                    J2 += (adip[l] + bdip[l]*e_ij[i*ncomp+j]/t)*pow(eta, l); // i*ncomp+j needs to be used for e_ij because it is formatted as a 1D vector
+                    dJ2_det += (adip[l] + bdip[l]*e_ij[i*ncomp+j]/t)*l*pow(eta, l-1);
+                    detJ2_det += (adip[l] + bdip[l]*e_ij[i*ncomp+j]/t)*(l+1)*pow(eta, l);
                 }
                 A2 += x[i]*x[j]*e_ij[i*ncomp+i]/t*e_ij[j*ncomp+j]/t*pow(s_ij[i*ncomp+i],3)*pow(s_ij[j*ncomp+j],3)/
                     pow(s_ij[i*ncomp+j],3)*cppargs.dip_num[i]*cppargs.dip_num[j]*dipmSQ[i]*dipmSQ[j]*J2;
                 dA2_det += x[i]*x[j]*e_ij[i*ncomp+i]/t*e_ij[j*ncomp+j]/t*pow(s_ij[i*ncomp+i],3)*
-                    pow(s_ij[j*ncomp+j],3)/pow(s_ij[i*ncomp+j],3)*cppargs.dip_num[i]*cppargs.dip_num[j]*dipmSQ[i]*dipmSQ[j]*dJ2_det;
+                    pow(s_ij[j*ncomp+j],3)/pow(s_ij[i*ncomp+j],3)*cppargs.dip_num[i]*cppargs.dip_num[j]*dipmSQ[i]*dipmSQ[j]*detJ2_det;
                 if (i == j) {
                     dA2_dx[i] += e_ij[i*ncomp+i]/t*e_ij[j*ncomp+j]/t*pow(s_ij[i*ncomp+i],3)*pow(s_ij[j*ncomp+j],3)
                         /pow(s_ij[i*ncomp+j],3)*cppargs.dip_num[i]*cppargs.dip_num[j]*dipmSQ[i]*dipmSQ[j]*
@@ -720,10 +722,12 @@ vector<double> pcsaft_fugcoef_cpp(double t, double rho, vector<double> x, add_ar
                     }
                     J3 = 0.;
                     dJ3_det = 0.;
+                    detJ3_det = 0.;
                     for (int l = 0; l < 5; l++) {
                         cdip[l] = c0dip[l] + (m_ijk-1)/m_ijk*c1dip[l] + (m_ijk-1)/m_ijk*(m_ijk-2)/m_ijk*c2dip[l];
                         J3 += cdip[l]*pow(eta, l);
                         dJ3_det += cdip[l]*l*pow(eta, (l-1));
+                        detJ3_det += cdip[l]*(l+2)*pow(eta, (l+1));
                     }
                     A3 += x[i]*x[j]*x[k]*e_ij[i*ncomp+i]/t*e_ij[j*ncomp+j]/t*e_ij[k*ncomp+k]/t*
                         pow(s_ij[i*ncomp+i],3)*pow(s_ij[j*ncomp+j],3)*pow(s_ij[k*ncomp+k],3)/s_ij[i*ncomp+j]/s_ij[i*ncomp+k]/
@@ -732,7 +736,7 @@ vector<double> pcsaft_fugcoef_cpp(double t, double rho, vector<double> x, add_ar
                     dA3_det += x[i]*x[j]*x[k]*e_ij[i*ncomp+i]/t*e_ij[j*ncomp+j]/t*e_ij[k*ncomp+k]/t*
                         pow(s_ij[i*ncomp+i],3)*pow(s_ij[j*ncomp+j],3)*pow(s_ij[k*ncomp+k],3)/s_ij[i*ncomp+j]/s_ij[i*ncomp+k]/
                         s_ij[j*ncomp+k]*cppargs.dip_num[i]*cppargs.dip_num[j]*cppargs.dip_num[k]*dipmSQ[i]*
-                        dipmSQ[j]*dipmSQ[k]*dJ3_det;
+                        dipmSQ[j]*dipmSQ[k]*detJ3_det;
                     if ((i == j) && (i == k)) {
                         dA3_dx[i] += e_ij[i*ncomp+i]/t*e_ij[j*ncomp+j]/t*e_ij[k*ncomp+k]/t*pow(s_ij[i*ncomp+i],3)
                             *pow(s_ij[j*ncomp+j],3)*pow(s_ij[k*ncomp+k],3)/s_ij[i*ncomp+j]/s_ij[i*ncomp+k]/s_ij[j*ncomp+k]
@@ -760,8 +764,8 @@ vector<double> pcsaft_fugcoef_cpp(double t, double rho, vector<double> x, add_ar
 
         A2 = -PI*den*A2;
         A3 = -4/3.*PI*PI*den*den*A3;
-        dA2_det = -PI*den*dA2_det;
-        dA3_det = -4/3.*PI*PI*den*den*dA3_det;
+        dA2_det = -PI*den/eta*dA2_det;
+        dA3_det = -4/3.*PI*PI*den/eta*den/eta*dA3_det;
         for (int i = 0; i < ncomp; i++) {
             dA2_dx[i] = -PI*den*dA2_dx[i];
             dA3_dx[i] = -4/3.*PI*PI*den*den*dA3_dx[i];
@@ -933,10 +937,25 @@ vector<double> pcsaft_fugcoef_cpp(double t, double rho, vector<double> x, add_ar
     double Z = pcsaft_Z_cpp(t, rho, x, cppargs);
 
     vector<double> mu(ncomp, 0);
-    vector<double> fugcoef(ncomp, 0);
+    vector<double> lnfugcoef(ncomp, 0);
     for (int i = 0; i < ncomp; i++) {
         mu[i] = mu_hc[i] + mu_disp[i] + mu_polar[i] + mu_assoc[i] + mu_ion[i];
-        fugcoef[i] = exp(mu[i] - log(Z)); // the fugacity coefficients
+        lnfugcoef[i] = mu[i] - log(Z); // the natural logarithm of the fugacity coefficient
+    }
+
+    return lnfugcoef;
+}
+
+
+vector<double> pcsaft_fugcoef_cpp(double t, double rho, vector<double> x, add_args &cppargs) {
+    /**
+    Calculate the fugacity coefficients for one phase of the system.
+    */
+    int ncomp = x.size(); // number of components
+    vector<double> lnfug = pcsaft_lnfug_cpp(t, rho, x, cppargs);
+    vector<double> fugcoef(ncomp, 0);
+    for (int i = 0; i < ncomp; i++) {
+        fugcoef[i] = exp(lnfug[i]); // the fugacity coefficients
     }
 
     return fugcoef;
@@ -1032,12 +1051,12 @@ double pcsaft_ares_cpp(double t, double rho, vector<double> x, add_args &cppargs
     double ares_hs = 1/zeta[0]*(3*zeta[1]*zeta[2]/(1-zeta[3]) + pow(zeta[2], 3.)/(zeta[3]*pow(1-zeta[3],2))
             + (pow(zeta[2], 3.)/pow(zeta[3], 2.) - zeta[0])*log(1-zeta[3]));
 
-    static double a0[7] = { 0.910563145, 0.636128145, 2.686134789, -26.54736249, 97.75920878, -159.5915409, 91.29777408 };
-    static double a1[7] = { -0.308401692, 0.186053116, -2.503004726, 21.41979363, -65.25588533, 83.31868048, -33.74692293 };
-    static double a2[7] = { -0.090614835, 0.452784281, 0.596270073, -1.724182913, -4.130211253, 13.77663187, -8.672847037 };
-    static double b0[7] = { 0.724094694, 2.238279186, -4.002584949, -21.00357682, 26.85564136, 206.5513384, -355.6023561 };
-    static double b1[7] = { -0.575549808, 0.699509552, 3.892567339, -17.21547165, 192.6722645, -161.8264617, -165.2076935 };
-    static double b2[7] = { 0.097688312, -0.255757498, -9.155856153, 20.64207597, -38.80443005, 93.62677408, -29.66690559 };
+    static double a0[7] = { 0.9105631445, 0.6361281449, 2.6861347891, -26.547362491, 97.759208784, -159.59154087, 91.297774084 };
+    static double a1[7] = { -0.3084016918, 0.1860531159, -2.5030047259, 21.419793629, -65.255885330, 83.318680481, -33.746922930 };
+    static double a2[7] = { -0.0906148351, 0.4527842806, 0.5962700728, -1.7241829131, -4.1302112531, 13.776631870, -8.6728470368 };
+    static double b0[7] = { 0.7240946941, 2.2382791861, -4.0025849485, -21.003576815, 26.855641363, 206.55133841, -355.60235612 };
+    static double b1[7] = { -0.5755498075, 0.6995095521, 3.8925673390, -17.215471648, 192.67226447, -161.82646165, -165.20769346 };
+    static double b2[7] = { 0.0976883116, -0.2557574982, -9.1558561530, 20.642075974, -38.804430052, 93.626774077, -29.666905585 };
 
     vector<double> a (7, 0);
     vector<double> b (7, 0);
@@ -1335,12 +1354,12 @@ double pcsaft_dadt_cpp(double t, double rho, vector<double> x, add_args &cppargs
         * log(1-zeta[3])
         + (zeta[0]-pow(zeta[2],3)/pow(zeta[3],2.))*dzeta_dt[3]/(1-zeta[3]));
 
-    static double a0[7] = { 0.910563145, 0.636128145, 2.686134789, -26.54736249, 97.75920878, -159.5915409, 91.29777408 };
-    static double a1[7] = { -0.308401692, 0.186053116, -2.503004726, 21.41979363, -65.25588533, 83.31868048, -33.74692293 };
-    static double a2[7] = { -0.090614835, 0.452784281, 0.596270073, -1.724182913, -4.130211253, 13.77663187, -8.672847037 };
-    static double b0[7] = { 0.724094694, 2.238279186, -4.002584949, -21.00357682, 26.85564136, 206.5513384, -355.6023561 };
-    static double b1[7] = { -0.575549808, 0.699509552, 3.892567339, -17.21547165, 192.6722645, -161.8264617, -165.2076935 };
-    static double b2[7] = { 0.097688312, -0.255757498, -9.155856153, 20.64207597, -38.80443005, 93.62677408, -29.66690559 };
+    static double a0[7] = { 0.9105631445, 0.6361281449, 2.6861347891, -26.547362491, 97.759208784, -159.59154087, 91.297774084 };
+    static double a1[7] = { -0.3084016918, 0.1860531159, -2.5030047259, 21.419793629, -65.255885330, 83.318680481, -33.746922930 };
+    static double a2[7] = { -0.0906148351, 0.4527842806, 0.5962700728, -1.7241829131, -4.1302112531, 13.776631870, -8.6728470368 };
+    static double b0[7] = { 0.7240946941, 2.2382791861, -4.0025849485, -21.003576815, 26.855641363, 206.55133841, -355.60235612 };
+    static double b1[7] = { -0.5755498075, 0.6995095521, 3.8925673390, -17.215471648, 192.67226447, -161.82646165, -165.20769346 };
+    static double b2[7] = { 0.0976883116, -0.2557574982, -9.1558561530, 20.642075974, -38.804430052, 93.626774077, -29.666905585 };
 
     vector<double> a (7, 0);
     vector<double> b (7, 0);
@@ -1743,53 +1762,17 @@ vector<double> outerPQ(double t_guess, double p, double Q, vector<double> x, add
     // calculate initial guess for compositions based on fugacity coefficients and Raoult's Law.
     rhol = pcsaft_den_cpp(t, p, x, 0, cppargs);
     rhov = pcsaft_den_cpp(t, p, x, 1, cppargs);
-    if ((rhol - rhov) > 1e-4) { // first, simply try calculating with the overall system composition, if the two density roots are found
-        fugcoef_l = pcsaft_fugcoef_cpp(t, rhol, x, cppargs);
-        fugcoef_v = pcsaft_fugcoef_cpp(t, rhov, x, cppargs);
+    if ((rhol - rhov) < 1e-4) {
+        throw SolutionError("liquid and vapor densities are the same.");
+    }
+    fugcoef_l = pcsaft_fugcoef_cpp(t, rhol, x, cppargs);
+    fugcoef_v = pcsaft_fugcoef_cpp(t, rhov, x, cppargs);
 
-        for (int i = 0; i < ncomp; i++) {
-            if (cppargs.z.empty() || cppargs.z[i] == 0) {
-                k[i] = fugcoef_l[i] / fugcoef_v[i];
-            } else {
-                k[i] = 0; // set k to 0 for ionic components
-            }
-        }
-    } else {
-        for (int i = 0; i < ncomp; i++) {
-            if (cppargs.z.empty() || cppargs.z[i] == 0) {
-                try { // if using overall system composition doesn't work, try calculating using the vapor pressure
-                    if (ncomp == 1) {
-                        throw SolutionError("one component does not have a phase split at these conditions.");
-                    }
-                    vector<double> x_single(1, 1);
-                    add_args args_single = get_single_component(i, cppargs);
-                    double Psat = flashTQ_cpp(t, Q, x_single, args_single)[0];
-                    k[i] = Psat / p;
-                }
-                catch (const SolutionError& ex) { // if vapor pressure cannot be calculated for a component, then the component might be supercritical at these conditions. Instead, try calculating an initial guess at a very dilute concentration.
-                    double DILUTE_MOLE_FRAC = 1e-4;
-                    vector<double> x_dilute(ncomp, 0); // to make the calculation simpler, we only include the current component and the major component in the system when estimating an initial k value
-                    int idx_largest = 0; // index of the major component in the system
-                    for (int j = 0; j < ncomp; j++) {
-                        if (x[j] > x[idx_largest]) {
-                            idx_largest = j;
-                        }
-                    }
-
-                    x_dilute[i] = DILUTE_MOLE_FRAC;
-                    x_dilute[idx_largest] = 1 - DILUTE_MOLE_FRAC;
-
-                    rhol = pcsaft_den_cpp(t, p, x_dilute, 0, cppargs);
-                    if (rhol < 200) { // the density is probably not for the liquid phase
-                        throw SolutionError("initial k could not be estimated in outerTQ for one or more components.");
-                    }
-
-                    fugcoef_l[i] = pcsaft_fugcoef_cpp(t, rhol, x_dilute, cppargs)[i];
-                    k[i] = fugcoef_l[i] / 1; // here we assume that the vapor phase behaves like an ideal gas (fugacity coefficient close to 1)
-                }
-            } else {
-                k[i] = 0; // set k to 0 for ionic components
-            }
+    for (int i = 0; i < ncomp; i++) {
+        if (cppargs.z.empty() || cppargs.z[i] == 0) {
+            k[i] = fugcoef_l[i] / fugcoef_v[i];
+        } else {
+            k[i] = 0; // set k to 0 for ionic components
         }
     }
 
@@ -1992,53 +1975,17 @@ vector<double> outerTQ(double p_guess, double t, double Q, vector<double> x, add
     // calculate initial guess for compositions based on fugacity coefficients and Raoult's Law.
     rhol = pcsaft_den_cpp(t, p, x, 0, cppargs);
     rhov = pcsaft_den_cpp(t, p, x, 1, cppargs);
-    if ((rhol - rhov) > 1e-4) { // first, simply try calculating with the overall system composition, if the two density roots are found
-        fugcoef_l = pcsaft_fugcoef_cpp(t, rhol, x, cppargs);
-        fugcoef_v = pcsaft_fugcoef_cpp(t, rhov, x, cppargs);
+    if ((rhol - rhov) < 1e-4) {
+        throw SolutionError("liquid and vapor densities are the same.");
+    }
+    fugcoef_l = pcsaft_fugcoef_cpp(t, rhol, x, cppargs);
+    fugcoef_v = pcsaft_fugcoef_cpp(t, rhov, x, cppargs);
 
-        for (int i = 0; i < ncomp; i++) {
-            if (cppargs.z.empty() || cppargs.z[i] == 0) {
-                k[i] = fugcoef_l[i] / fugcoef_v[i];
-            } else {
-                k[i] = 0; // set k to 0 for ionic components
-            }
-        }
-    } else {
-        for (int i = 0; i < ncomp; i++) {
-            if (cppargs.z.empty() || cppargs.z[i] == 0) {
-                try { // if using overall system composition doesn't work, try calculating using the vapor pressure
-                    if (ncomp == 1) {
-                        throw SolutionError("one component does not have a phase split at these conditions.");
-                    }
-                    vector<double> x_single(1, 1);
-                    add_args args_single = get_single_component(i, cppargs);
-                    double Psat = flashTQ_cpp(t, Q, x_single, args_single)[0];
-                    k[i] = Psat / p;
-                }
-                catch (const SolutionError& ex) { // if vapor pressure cannot be calculated for a component, then the component might be supercritical at these conditions. Instead, try calculating an initial guess at a very dilute concentration.
-                    double DILUTE_MOLE_FRAC = 1e-4;
-                    vector<double> x_dilute(ncomp, 0); // to make the calculation simpler, we only include the current component and the major component in the system when estimating an initial k value
-                    int idx_largest = 0; // index of the major component in the system
-                    for (int j = 0; j < ncomp; j++) {
-                        if (x[j] > x[idx_largest]) {
-                            idx_largest = j;
-                        }
-                    }
-
-                    x_dilute[i] = DILUTE_MOLE_FRAC;
-                    x_dilute[idx_largest] = 1 - DILUTE_MOLE_FRAC;
-
-                    rhol = pcsaft_den_cpp(t, p, x_dilute, 0, cppargs);
-                    if (rhol < 200) { // the density is probably not for the liquid phase
-                        throw SolutionError("initial k could not be estimated in outerTQ for one or more components.");
-                    }
-
-                    fugcoef_l[i] = pcsaft_fugcoef_cpp(t, rhol, x_dilute, cppargs)[i];
-                    k[i] = fugcoef_l[i] / 1; // here we assume that the vapor phase behaves like an ideal gas (fugacity coefficient close to 1)
-                }
-            } else {
-                k[i] = 0; // set k to 0 for ionic components
-            }
+    for (int i = 0; i < ncomp; i++) {
+        if (cppargs.z.empty() || cppargs.z[i] == 0) {
+            k[i] = fugcoef_l[i] / fugcoef_v[i];
+        } else {
+            k[i] = 0; // set k to 0 for ionic components
         }
     }
 
@@ -2194,6 +2141,7 @@ vector<double> outerTQ(double p_guess, double t, double Q, vector<double> x, add
                 }
             }
         }
+
         itr += 1;
     }
 
@@ -2365,7 +2313,7 @@ double estimate_flash_t(double p, double Q, vector<double> x, add_args &cppargs)
     /**
     Get a quick estimate of the temperature at which VLE occurs
     */
-    double t_guess;
+    double t_guess = _HUGE;
     int ncomp = x.size();
 
     double x_ions = 0.; // overall mole fraction of ions in the system
@@ -2404,7 +2352,7 @@ double estimate_flash_t(double p, double Q, vector<double> x, add_args &cppargs)
 
             double slope = (std::log10(p1) - std::log10(p2)) / (1/t - 1/Tprime);
             double intercept = std::log10(p1) - slope * (1/t);
-            t_guess = slope / (std::log10(p) - intercept) ;
+            t_guess = slope / (std::log10(p) - intercept);
             guess_found = true;
         } catch (const SolutionError& ex) {
             t_start -= t_step;
@@ -2422,7 +2370,7 @@ double estimate_flash_p(double t, double Q, vector<double> x, add_args &cppargs)
     /**
     Get a quick estimate of the pressure at which VLE occurs
     */
-    double p_guess;
+    double p_guess = _HUGE;
     int ncomp = x.size();
 
     double x_ions = 0.; // overall mole fraction of ions in the system
@@ -2451,16 +2399,19 @@ double estimate_flash_p(double t, double Q, vector<double> x, add_args &cppargs)
         fugcoef_l = pcsaft_fugcoef_cpp(t, rhol, x, cppargs);
         fugcoef_v = pcsaft_fugcoef_cpp(t, rhov, x, cppargs);
 
-        vector<double> xl(ncomp);
-        vector<double> xv(ncomp);
-        double xv_sum = 0;
-        double xl_sum = 0;
         for (int i = 0; i < ncomp; i++) {
             if (cppargs.z.empty() || cppargs.z[i] == 0) {
                 k[i] = fugcoef_l[i] / fugcoef_v[i];
             } else {
                 k[i] = 0; // set k to 0 for ionic components
             }
+        }
+
+        vector<double> xl(ncomp);
+        vector<double> xv(ncomp);
+        double xv_sum = 0;
+        double xl_sum = 0;
+        for (int i = 0; i < ncomp; i++) {
             xl[i] = x[i] / (1 + Q * (k[i] - 1));
             xl_sum += xl[i];
             xv[i] = k[i] * x[i] / (1 + Q * (k[i] - 1));

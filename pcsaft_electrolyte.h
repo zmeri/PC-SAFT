@@ -32,6 +32,7 @@ struct add_args {
 };
 
 double pcsaft_Z_cpp(double t, double rho, vector<double> x, add_args &cppargs);
+vector<double> pcsaft_lnfug_cpp(double t, double rho, vector<double> x, add_args &cppargs);
 vector<double> pcsaft_fugcoef_cpp(double t, double rho, vector<double> x, add_args &cppargs);
 double pcsaft_p_cpp(double t, double rho, vector<double> x, add_args &cppargs);
 double pcsaft_den_cpp(double t, double p, vector<double> x, int phase, add_args &cppargs);
