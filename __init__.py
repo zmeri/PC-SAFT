@@ -7,6 +7,7 @@ from .pcsaft import pcsaft_p
 from .pcsaft import pcsaft_hres
 from .pcsaft import pcsaft_sres
 from .pcsaft import pcsaft_gres
+from .pcsaft import pcsaft_lnfugcoef
 from .pcsaft import pcsaft_fugcoef
 from .pcsaft import pcsaft_Z
 from .pcsaft import pcsaft_ares

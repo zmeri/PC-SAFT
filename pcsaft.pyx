@@ -32,26 +32,26 @@ def check_input(x, vars):
         if (vars['Q'] < 0) or (vars['Q'] > 1):
             raise InputError('{} must be <= 1 and >= 0. {} = {}'.format('Q', 'Q', vars['Q']))
 
-def check_association(pyargs):
-    if ('e_assoc' in pyargs) and ('vol_a' not in pyargs):
+def check_association(params):
+    if ('e_assoc' in params) and ('vol_a' not in params):
         raise InputError('e_assoc was given, but not vol_a.')
-    elif ('vol_a' in pyargs) and ('e_assoc' not in pyargs):
+    elif ('vol_a' in params) and ('e_assoc' not in params):
         raise InputError('vol_a was given, but not e_assoc.')
 
-    if ('e_assoc' in pyargs) and ('assoc_scheme' not in pyargs):
-        pyargs['assoc_scheme'] = []
-        for a in pyargs['vol_a']:
+    if ('e_assoc' in params) and ('assoc_scheme' not in params):
+        params['assoc_scheme'] = []
+        for a in params['vol_a']:
             if a != 0:
-                pyargs['assoc_scheme'].append('2b')
+                params['assoc_scheme'].append('2b')
             else:
-                pyargs['assoc_scheme'].append(None)
+                params['assoc_scheme'].append(None)
 
-    if ('e_assoc' in pyargs):
-        pyargs = create_assoc_matrix(pyargs)
+    if ('e_assoc' in params):
+        params = create_assoc_matrix(params)
 
-    return pyargs
+    return params
 
-def create_assoc_matrix(pyargs):
+def create_assoc_matrix(params):
     charge = [] # whether the association site has a partial positive charge (i.e. hydrogen), negative charge, or elements of both (e.g. for acids modelled as type 1)
 
     scheme_charges = {
@@ -66,7 +66,7 @@ def create_assoc_matrix(pyargs):
     }
 
     assoc_num = []
-    for comp in pyargs['assoc_scheme']:
+    for comp in params['assoc_scheme']:
         if comp is None:
             assoc_num.append(0)
             pass
@@ -83,36 +83,36 @@ def create_assoc_matrix(pyargs):
                 raise InputError('{} is not a valid association type.'.format(comp))
             charge.extend(scheme_charges[comp.lower()])
             assoc_num.append(len(scheme_charges[comp.lower()]))
-    pyargs['assoc_num'] = np.asarray(assoc_num)
+    params['assoc_num'] = np.asarray(assoc_num)
 
-    pyargs['assoc_matrix'] = np.zeros((len(charge)*len(charge)))
+    params['assoc_matrix'] = np.zeros((len(charge)*len(charge)))
     ctr = 0
     for c1 in charge:
         for c2 in charge:
             if (c1 == 0 or c2 == 0):
-                pyargs['assoc_matrix'][ctr] = 1;
+                params['assoc_matrix'][ctr] = 1;
             elif (c1 == 1 and c2 == -1):
-                pyargs['assoc_matrix'][ctr] = 1;
+                params['assoc_matrix'][ctr] = 1;
             elif (c1 == -1 and c2 == 1):
-                pyargs['assoc_matrix'][ctr] = 1;
+                params['assoc_matrix'][ctr] = 1;
             else:
-                pyargs['assoc_matrix'][ctr] = 0;
+                params['assoc_matrix'][ctr] = 0;
             ctr += 1
 
-    return pyargs
+    return params
 
-def ensure_numpy_input(x, pyargs):
+def ensure_numpy_input(x, params):
     if type(x) == np.float_:
         x = np.asarray([x])
-    if type(pyargs['m']) == np.float_:
-        pyargs['m'] = np.asarray([pyargs['m']])
-    if type(pyargs['s']) == np.float_:
-        pyargs['s'] = np.asarray([pyargs['s']])
-    if type(pyargs['e']) == np.float_:
-        pyargs['e'] = np.asarray([pyargs['e']])
-    return x, pyargs
+    if type(params['m']) == np.float_:
+        params['m'] = np.asarray([params['m']])
+    if type(params['s']) == np.float_:
+        params['s'] = np.asarray([params['s']])
+    if type(params['e']) == np.float_:
+        params['e'] = np.asarray([params['e']])
+    return x, params
 
-def pcsaft_p(t, rho, x, pyargs):
+def pcsaft_p(t, rho, x, params):
     """
     Calculate pressure.
 
@@ -125,7 +125,7 @@ def pcsaft_p(t, rho, x, pyargs):
     x : ndarray, shape (n,)
         Mole fractions of each component. It has a length of n, where n is
         the number of components in the system.
-    pyargs : dict
+    params : dict
         A dictionary containing PC-SAFT parameters that can be passed for
         use in PC-SAFT:
 
@@ -172,14 +172,81 @@ def pcsaft_p(t, rho, x, pyargs):
     P : float
         Pressure (Pa)
     """
-    x, pyargs = ensure_numpy_input(x, pyargs)
+    x, params = ensure_numpy_input(x, params)
     check_input(x, {'density':rho, 'temperature':t})
-    pyargs = check_association(pyargs)
-    cppargs = create_struct(pyargs)
+    params = check_association(params)
+    cppargs = create_struct(params)
     return pcsaft_p_cpp(t, rho, x, cppargs)
 
 
-def pcsaft_fugcoef(t, rho, x, pyargs):
+def pcsaft_lnfugcoef(t, rho, x, params):
+    """
+    Calculate the natural logarithm of the fugacity coefficients for one phase of the system.
+
+    Parameters
+    ----------
+    t : float
+        Temperature (K)
+    rho : float
+        Molar density (mol m\ :sup:`-3`)
+    x : ndarray, shape (n,)
+        Mole fractions of each component. It has a length of n, where n is
+        the number of components in the system.
+    params : dict
+        A dictionary containing PC-SAFT parameters that can be passed for
+        use in PC-SAFT:
+
+        m : ndarray, shape (n,)
+            Segment number for each component.
+        s : ndarray, shape (n,)
+            Segment diameter for each component. For ions this is the diameter of
+            the hydrated ion. Units of Angstrom.
+        e : ndarray, shape (n,)
+            Dispersion energy of each component. For ions this is the dispersion
+            energy of the hydrated ion. Units of K.
+        k_ij : ndarray, shape (n,n)
+            Binary interaction parameters between components in the mixture.
+            (dimensions: ncomp x ncomp)
+        e_assoc : ndarray, shape (n,)
+            Association energy of the associating components. For non associating
+            compounds this is set to 0. Units of K.
+        vol_a : ndarray, shape (n,)
+            Effective association volume of the associating components. For non
+            associating compounds this is set to 0.
+        dipm : ndarray, shape (n,)
+            Dipole moment of the polar components. For components where the dipole
+            term is not used this is set to 0. Units of Debye.
+        dip_num : ndarray, shape (n,)
+            The effective number of dipole functional groups on each component
+            molecule. Generally this is set to 1, but some implementations use this
+            as an adjustable parameter that is fit to data.
+        z : ndarray, shape (n,)
+            Charge number of the ions
+        dielc : float
+            Dielectric constant of the medium to be used for electrolyte
+            calculations.
+        assoc_scheme : list, shape (n,)
+            The types of association sites for each component. Use `None` for molecules
+            without association sites. If a molecule has multiple association sites,
+            use a nested list for that component to specify the association scheme for
+            each site. The accepted association schemes are those given by Huang and
+            Radosz (1990): 1, 2A, 2B, 3A, 3B, 4A, 4B, 4C. If `e_assoc` and `vol_a` are
+            given but `assoc_scheme` is not, the 2B association scheme is assumed (which
+            would, for example, correspond to one hydroxyl functional group).
+
+    Returns
+    -------
+    lnfugcoef : ndarray, shape (n,)
+        Natural logarithm of the fugacity coefficients for each component.
+    """
+    x, params = ensure_numpy_input(x, params)
+    check_input(x, {'density':rho, 'temperature':t})
+    params = check_association(params)
+    cppargs = create_struct(params)
+    return np.asarray(pcsaft_lnfug_cpp(t, rho, x, cppargs))
+
+
+def pcsaft_fugcoef(t, rho, x, params):
     """
     Calculate the fugacity coefficients for one phase of the system.
 
@@ -192,7 +259,7 @@ def pcsaft_fugcoef(t, rho, x, pyargs):
     x : ndarray, shape (n,)
         Mole fractions of each component. It has a length of n, where n is
         the number of components in the system.
-    pyargs : dict
+    params : dict
         A dictionary containing PC-SAFT parameters that can be passed for
         use in PC-SAFT:
 
@@ -239,14 +306,14 @@ def pcsaft_fugcoef(t, rho, x, pyargs):
     fugcoef : ndarray, shape (n,)
         Fugacity coefficients of each component.
     """
-    x, pyargs = ensure_numpy_input(x, pyargs)
+    x, params = ensure_numpy_input(x, params)
     check_input(x, {'density':rho, 'temperature':t})
-    pyargs = check_association(pyargs)
-    cppargs = create_struct(pyargs)
+    params = check_association(params)
+    cppargs = create_struct(params)
     return np.asarray(pcsaft_fugcoef_cpp(t, rho, x, cppargs))
 
 
-def pcsaft_Z(t, rho, x, pyargs):
+def pcsaft_Z(t, rho, x, params):
     """
     Calculate the compressibility factor.
 
@@ -259,7 +326,7 @@ def pcsaft_Z(t, rho, x, pyargs):
     x : ndarray, shape (n,)
         Mole fractions of each component. It has a length of n, where n is
         the number of components in the system.
-    pyargs : dict
+    params : dict
         A dictionary containing PC-SAFT parameters that can be passed for
         use in PC-SAFT:
 
@@ -306,14 +373,14 @@ def pcsaft_Z(t, rho, x, pyargs):
     Z : float
         Compressibility factor
     """
-    x, pyargs = ensure_numpy_input(x, pyargs)
+    x, params = ensure_numpy_input(x, params)
     check_input(x, {'density':rho, 'temperature':t})
-    pyargs = check_association(pyargs)
-    cppargs = create_struct(pyargs)
+    params = check_association(params)
+    cppargs = create_struct(params)
     return pcsaft_Z_cpp(t, rho, x, cppargs)
 
 
-def flashPQ(p, q, x, pyargs, t_guess=None):
+def flashPQ(p, q, x, params, t_guess=None):
     """
     Calculate the temperature of the system where vapor and liquid phases are in equilibrium.
 
@@ -326,7 +393,7 @@ def flashPQ(p, q, x, pyargs, t_guess=None):
     x : ndarray, shape (n,)
         Mole fractions of each component. It has a length of n, where n is
         the number of components in the system.
-    pyargs : dict
+    params : dict
         A dictionary containing PC-SAFT parameters that can be passed for
         use in PC-SAFT:
 
@@ -402,10 +469,10 @@ def flashPQ(p, q, x, pyargs, t_guess=None):
     If you want to use different functions for temperature dependent parameters with `flashPQ`
     then you will need to modify the source code and recompile it.
     """
-    x, pyargs = ensure_numpy_input(x, pyargs)
+    x, params = ensure_numpy_input(x, params)
     check_input(x, {'pressure':p, 'Q':q})
-    pyargs = check_association(pyargs)
-    cppargs = create_struct(pyargs)
+    params = check_association(params)
+    cppargs = create_struct(params)
     try:
         if t_guess is not None:
             result = flashPQ_cpp(p, q, x, cppargs, t_guess)
@@ -420,7 +487,7 @@ def flashPQ(p, q, x, pyargs, t_guess=None):
     return t, xl, xv
 
 
-def flashTQ(t, q, x, pyargs, p_guess=None):
+def flashTQ(t, q, x, params, p_guess=None):
     """
     Calculate the pressure of the system where vapor and liquid phases are in equilibrium.
 
@@ -433,7 +500,7 @@ def flashTQ(t, q, x, pyargs, p_guess=None):
     x : ndarray, shape (n,)
         Mole fractions of each component. It has a length of n, where n is
         the number of components in the system.
-    pyargs : dict
+    params : dict
         A dictionary containing PC-SAFT parameters that can be passed for
         use in PC-SAFT:
 
@@ -487,10 +554,10 @@ def flashTQ(t, q, x, pyargs, p_guess=None):
     xv : ndarray, shape (n,)
         Vapor mole fractions after flash
     """
-    x, pyargs = ensure_numpy_input(x, pyargs)
+    x, params = ensure_numpy_input(x, params)
     check_input(x, {'temperature':t, 'Q':q})
-    pyargs = check_association(pyargs)
-    cppargs = create_struct(pyargs)
+    params = check_association(params)
+    cppargs = create_struct(params)
     try:
         if p_guess is not None:
             result = flashTQ_cpp(t, q, x, cppargs, p_guess)
@@ -504,7 +571,7 @@ def flashTQ(t, q, x, pyargs, p_guess=None):
     xl, xv = np.split(xl, 2)
     return p, xl, xv
 
-def pcsaft_Hvap(t, x, pyargs, p_guess=None):
+def pcsaft_Hvap(t, x, params, p_guess=None):
     """
     Calculate the enthalpy of vaporization.
 
@@ -515,7 +582,7 @@ def pcsaft_Hvap(t, x, pyargs, p_guess=None):
     x : ndarray, shape (n,)
         Mole fractions of each component. It has a length of n, where n is
         the number of components in the system.
-    pyargs : dict
+    params : dict
         A dictionary containing PC-SAFT parameters that can be passed for
         use in PC-SAFT:
 
@@ -567,10 +634,10 @@ def pcsaft_Hvap(t, x, pyargs, p_guess=None):
             0 : enthalpy of vaporization (J/mol), float
             1 : vapor pressure (Pa), float
     """
-    x, pyargs = ensure_numpy_input(x, pyargs)
+    x, params = ensure_numpy_input(x, params)
     check_input(x, {'temperature': t})
-    pyargs = check_association(pyargs)
-    cppargs = create_struct(pyargs)
+    params = check_association(params)
+    cppargs = create_struct(params)
 
     q = 0
     try:
@@ -593,7 +660,7 @@ def pcsaft_Hvap(t, x, pyargs, p_guess=None):
     return output
 
 
-def pcsaft_osmoticC(t, rho, x, pyargs):
+def pcsaft_osmoticC(t, rho, x, params):
     """
     Calculate the osmotic coefficient.
 
@@ -606,7 +673,7 @@ def pcsaft_osmoticC(t, rho, x, pyargs):
     x : ndarray, shape (n,)
         Mole fractions of each component. It has a length of n, where n is
         the number of components in the system.
-    pyargs : dict
+    params : dict
         A dictionary containing PC-SAFT parameters that can be passed for
         use in PC-SAFT:
 
@@ -653,12 +720,12 @@ def pcsaft_osmoticC(t, rho, x, pyargs):
     osmC : float
         Molal osmotic coefficient
     """
-    x, pyargs = ensure_numpy_input(x, pyargs)
+    x, params = ensure_numpy_input(x, params)
     check_input(x, {'density':rho, 'temperature':t})
-    pyargs = check_association(pyargs)
-    cppargs = create_struct(pyargs)
+    params = check_association(params)
+    cppargs = create_struct(params)
 
-    indx_water = np.where(pyargs['e'] == 353.9449)[0] # to find index for water
+    indx_water = np.where(params['e'] == 353.9449)[0] # to find index for water
     molality = x/(x[indx_water]*18.0153/1000.)
     molality[indx_water] = 0
     x0 = np.zeros_like(x)
@@ -677,7 +744,7 @@ def pcsaft_osmoticC(t, rho, x, pyargs):
     osmC = -1000*np.log(x[indx_water]*gamma)/18.0153/np.sum(molality)
     return osmC
 
-def pcsaft_cp(t, rho, params, x, pyargs):
+def pcsaft_cp(t, rho, aly_lee_params, x, params):
     """
     Calculate the specific molar isobaric heat capacity.
 
@@ -687,14 +754,14 @@ def pcsaft_cp(t, rho, params, x, pyargs):
         Temperature (K)
     rho : float
         Molar density (mol m\ :sup:`-3`)
-    params : ndarray, shape (5,)
+    aly_lee_params : ndarray, shape (5,)
         Constants for the Aly-Lee equation. Can be substituted with parameters for
         another equation if the ideal gas heat capacity is given using a different
         equation.
     x : ndarray, shape (n,)
         Mole fractions of each component. It has a length of n, where n is
         the number of components in the system.
-    pyargs : dict
+    params : dict
         A dictionary containing PC-SAFT parameters that can be passed for
         use in PC-SAFT:
 
@@ -741,18 +808,18 @@ def pcsaft_cp(t, rho, params, x, pyargs):
     cp : float
         Specific molar isobaric heat capacity (J mol\ :sup:`-1` K\ :sup:`-1`)
     """
-    x, pyargs = ensure_numpy_input(x, pyargs)
+    x, params = ensure_numpy_input(x, params)
     check_input(x, {'density':rho, 'temperature':t})
-    pyargs = check_association(pyargs)
+    params = check_association(params)
 
     if rho > 900:
         ph = 0
     else:
         ph = 1
 
-    cppargs = create_struct(pyargs)
+    cppargs = create_struct(params)
 
-    cp_ideal = aly_lee(t, params)
+    cp_ideal = aly_lee(t, aly_lee_params)
     p = pcsaft_p_cpp(t, rho, x, cppargs)
     rho0 = pcsaft_den_cpp(t-0.001, p, x, ph, cppargs)
     hres0 = pcsaft_hres_cpp(t-0.001, rho0, x, cppargs)
@@ -762,7 +829,7 @@ def pcsaft_cp(t, rho, params, x, pyargs):
     return cp_ideal + dhdt
 
 
-def pcsaft_den(t, p, x, pyargs, phase='liq'):
+def pcsaft_den(t, p, x, params, phase='liq'):
     """
     Calculate the molar density.
 
@@ -775,7 +842,7 @@ def pcsaft_den(t, p, x, pyargs, phase='liq'):
     x : ndarray, shape (n,)
         Mole fractions of each component. It has a length of n, where n is
         the number of components in the system.
-    pyargs : dict
+    params : dict
         A dictionary containing PC-SAFT parameters that can be passed for
         use in PC-SAFT:
 
@@ -826,10 +893,10 @@ def pcsaft_den(t, p, x, pyargs, phase='liq'):
     rho : float
         Molar density (mol m\ :sup:`-3`)
     """
-    x, pyargs = ensure_numpy_input(x, pyargs)
+    x, params = ensure_numpy_input(x, params)
     check_input(x, {'pressure':p, 'temperature':t})
-    pyargs = check_association(pyargs)
-    cppargs = create_struct(pyargs)
+    params = check_association(params)
+    cppargs = create_struct(params)
     if phase == 'liq':
         phase_num = 0
     else:
@@ -838,7 +905,7 @@ def pcsaft_den(t, p, x, pyargs, phase='liq'):
     return pcsaft_den_cpp(t, p, x, phase_num, cppargs)
 
 
-def pcsaft_hres(t, rho, x, pyargs):
+def pcsaft_hres(t, rho, x, params):
     """
     Calculate the residual enthalpy for one phase of the system.
 
@@ -851,7 +918,7 @@ def pcsaft_hres(t, rho, x, pyargs):
     x : ndarray, shape (n,)
         Mole fractions of each component. It has a length of n, where n is
         the number of components in the system.
-    pyargs : dict
+    params : dict
         A dictionary containing PC-SAFT parameters that can be passed for
         use in PC-SAFT:
 
@@ -898,13 +965,13 @@ def pcsaft_hres(t, rho, x, pyargs):
     hres : float
         Residual enthalpy (J mol\ :sup:`-1`)
     """
-    x, pyargs = ensure_numpy_input(x, pyargs)
+    x, params = ensure_numpy_input(x, params)
     check_input(x, {'density':rho, 'temperature':t})
-    pyargs = check_association(pyargs)
-    cppargs = create_struct(pyargs)
+    params = check_association(params)
+    cppargs = create_struct(params)
     return pcsaft_hres_cpp(t, rho, x, cppargs)
 
-def pcsaft_sres(t, rho, x, pyargs):
+def pcsaft_sres(t, rho, x, params):
     """
     Calculate the residual entropy (constant volume) for one phase of the system.
 
@@ -917,7 +984,7 @@ def pcsaft_sres(t, rho, x, pyargs):
     x : ndarray, shape (n,)
         Mole fractions of each component. It has a length of n, where n is
         the number of components in the system.
-    pyargs : dict
+    params : dict
         A dictionary containing PC-SAFT parameters that can be passed for
         use in PC-SAFT:
 
@@ -964,13 +1031,13 @@ def pcsaft_sres(t, rho, x, pyargs):
     sres : float
         Residual entropy (J mol\ :sup:`-1` K\ :sup:`-1`)
     """
-    x, pyargs = ensure_numpy_input(x, pyargs)
+    x, params = ensure_numpy_input(x, params)
     check_input(x, {'density':rho, 'temperature':t})
-    pyargs = check_association(pyargs)
-    cppargs = create_struct(pyargs)
+    params = check_association(params)
+    cppargs = create_struct(params)
     return pcsaft_sres_cpp(t, rho, x, cppargs)
 
-def pcsaft_gres(t, rho, x, pyargs):
+def pcsaft_gres(t, rho, x, params):
     """
     Calculate the residual Gibbs energy for one phase of the system.
 
@@ -983,7 +1050,7 @@ def pcsaft_gres(t, rho, x, pyargs):
     x : ndarray, shape (n,)
         Mole fractions of each component. It has a length of n, where n is
         the number of components in the system.
-    pyargs : dict
+    params : dict
         A dictionary containing PC-SAFT parameters that can be passed for
         use in PC-SAFT:
 
@@ -1030,14 +1097,14 @@ def pcsaft_gres(t, rho, x, pyargs):
     gres : float
         Residual Gibbs energy (J mol\ :sup:`-1`)
     """
-    x, pyargs = ensure_numpy_input(x, pyargs)
+    x, params = ensure_numpy_input(x, params)
     check_input(x, {'density':rho, 'temperature':t})
-    pyargs = check_association(pyargs)
-    cppargs = create_struct(pyargs)
+    params = check_association(params)
+    cppargs = create_struct(params)
     return pcsaft_gres_cpp(t, rho, x, cppargs)
 
 
-def pcsaft_ares(t, rho, x, pyargs):
+def pcsaft_ares(t, rho, x, params):
     """
     Calculate the residual Helmholtz energy.
 
@@ -1050,7 +1117,7 @@ def pcsaft_ares(t, rho, x, pyargs):
     x : ndarray, shape (n,)
         Mole fractions of each component. It has a length of n, where n is
         the number of components in the system.
-    pyargs : dict
+    params : dict
         A dictionary containing PC-SAFT parameters that can be passed for
         use in PC-SAFT:
 
@@ -1097,14 +1164,14 @@ def pcsaft_ares(t, rho, x, pyargs):
     ares : float
         Residual Helmholtz energy (J mol\ :sup:`-1`)
     """
-    x, pyargs = ensure_numpy_input(x, pyargs)
+    x, params = ensure_numpy_input(x, params)
     check_input(x, {'density':rho, 'temperature':t})
-    pyargs = check_association(pyargs)
-    cppargs = create_struct(pyargs)
+    params = check_association(params)
+    cppargs = create_struct(params)
     return pcsaft_ares_cpp(t, rho, x, cppargs)
 
 
-def pcsaft_dadt(t, rho, x, pyargs):
+def pcsaft_dadt(t, rho, x, params):
     """
     Calculate the temperature derivative of the residual Helmholtz energy.
 
@@ -1117,7 +1184,7 @@ def pcsaft_dadt(t, rho, x, pyargs):
     x : ndarray, shape (n,)
         Mole fractions of each component. It has a length of n, where n is
         the number of components in the system.
-    pyargs : dict
+    params : dict
         A dictionary containing PC-SAFT parameters that can be passed for
         use in PC-SAFT:
 
@@ -1164,10 +1231,10 @@ def pcsaft_dadt(t, rho, x, pyargs):
     dadt : float
         Temperature derivative of the residual Helmholtz energy (J mol\ :sup:`-1`)
     """
-    x, pyargs = ensure_numpy_input(x, pyargs)
+    x, params = ensure_numpy_input(x, params)
     check_input(x, {'density':rho, 'temperature':t})
-    pyargs = check_association(pyargs)
-    cppargs = create_struct(pyargs)
+    params = check_association(params)
+    cppargs = create_struct(params)
     return pcsaft_dadt_cpp(t, rho, x, cppargs)
 
 
@@ -1257,34 +1324,34 @@ def np_to_vector_int(np_array):
 
     return cpp_vector
 
-def create_struct(pyargs):
+def create_struct(params):
     """Convert PC-SAFT parameters to a C++ struct."""
     cdef add_args cppargs
 
-    cppargs.m = np_to_vector_double(pyargs['m'])
-    cppargs.s = np_to_vector_double(pyargs['s'])
-    cppargs.e = np_to_vector_double(pyargs['e'])
-    if 'k_ij' in pyargs:
-        cppargs.k_ij = np_to_vector_double(pyargs['k_ij'])
-    if ('e_assoc' in pyargs) and np.any(pyargs['e_assoc']):
-        cppargs.e_assoc = np_to_vector_double(pyargs['e_assoc'])
-    if ('vol_a' in pyargs) and np.any(pyargs['vol_a']):
-        cppargs.vol_a = np_to_vector_double(pyargs['vol_a'])
-    if ('dipm' in pyargs) and np.any(pyargs['dip_num']) and np.any(pyargs['dipm']):
-        cppargs.dipm = np_to_vector_double(pyargs['dipm'])
-    if ('dip_num' in pyargs) and np.any(pyargs['dip_num']):
-        cppargs.dip_num = np_to_vector_double(pyargs['dip_num'])
-    if 'z' in pyargs:
-        cppargs.z = np_to_vector_double(pyargs['z'])
-    if 'dielc' in pyargs:
-        cppargs.dielc = pyargs['dielc']
-    if 'assoc_num' in pyargs:
-        cppargs.assoc_num = np_to_vector_int(pyargs['assoc_num'])
-    if 'assoc_matrix' in pyargs:
-        cppargs.assoc_matrix = np_to_vector_int(pyargs['assoc_matrix'])
-    if 'k_hb' in pyargs:
-        cppargs.k_hb = np_to_vector_double(pyargs['k_hb'])
-    if 'l_ij' in pyargs:
-        cppargs.l_ij = np_to_vector_double(pyargs['l_ij'])
+    cppargs.m = np_to_vector_double(params['m'])
+    cppargs.s = np_to_vector_double(params['s'])
+    cppargs.e = np_to_vector_double(params['e'])
+    if 'k_ij' in params:
+        cppargs.k_ij = np_to_vector_double(params['k_ij'])
+    if ('e_assoc' in params) and np.any(params['e_assoc']):
+        cppargs.e_assoc = np_to_vector_double(params['e_assoc'])
+    if ('vol_a' in params) and np.any(params['vol_a']):
+        cppargs.vol_a = np_to_vector_double(params['vol_a'])
+    if ('dipm' in params) and np.any(params['dip_num']) and np.any(params['dipm']):
+        cppargs.dipm = np_to_vector_double(params['dipm'])
+    if ('dip_num' in params) and np.any(params['dip_num']):
+        cppargs.dip_num = np_to_vector_double(params['dip_num'])
+    if 'z' in params:
+        cppargs.z = np_to_vector_double(params['z'])
+    if 'dielc' in params:
+        cppargs.dielc = params['dielc']
+    if 'assoc_num' in params:
+        cppargs.assoc_num = np_to_vector_int(params['assoc_num'])
+    if 'assoc_matrix' in params:
+        cppargs.assoc_matrix = np_to_vector_int(params['assoc_matrix'])
+    if 'k_hb' in params:
+        cppargs.k_hb = np_to_vector_double(params['k_hb'])
+    if 'l_ij' in params:
+        cppargs.l_ij = np_to_vector_double(params['l_ij'])
 
     return cppargs
