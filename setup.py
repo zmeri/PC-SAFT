@@ -24,7 +24,7 @@ if os.path.isfile(requirements_path):
         install_requires = f.read().splitlines()
 
 setup(name='pcsaft',
-      version='1.4.0',
+      version='1.4.1',
       author="Zach Baird",
       description="The PC-SAFT equation of state, including dipole, association and ion terms.",
       long_description=long_description,
