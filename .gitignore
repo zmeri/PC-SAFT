@@ -1,6 +1,7 @@
 docs/_build/
 build/
 dist/
+__pycache__
 tests/__pycache__
 *.egg-info
 *.pytest_cache
