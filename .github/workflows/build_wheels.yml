@@ -13,7 +13,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     env:
       CIBW_BEFORE_BUILD: pip install numpy scipy cython
-      CIBW_SKIP: cp310-* pp*
+      CIBW_SKIP: pp*
     strategy:
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
