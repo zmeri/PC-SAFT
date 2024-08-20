@@ -13,7 +13,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     env:
       CIBW_BEFORE_BUILD: pip install numpy scipy cython
-      CIBW_SKIP: pp* cp36-* cp37-* cp38-* cp313-*
+      CIBW_SKIP: pp* cp36-* cp37-* cp38-* cp39-* cp313-*
     strategy:
       fail-fast: false
       matrix:
