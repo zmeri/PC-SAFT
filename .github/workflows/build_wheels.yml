@@ -14,7 +14,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, windows-latest, macos-13, macos-14]
+        os: [ubuntu-latest]
 
     steps:
       - uses: actions/checkout@v4
@@ -28,7 +28,7 @@ jobs:
         uses: pypa/cibuildwheel@v2.20.0
         env:
           CIBW_BEFORE_BUILD: python -m pip install numpy scipy Cython
-          CIBW_SKIP: pp* cp36-* cp37-* cp38-* cp39-* cp313-*
+          CIBW_SKIP: pp* cp313-*
 
       - uses: actions/upload-artifact@v4
         with:
