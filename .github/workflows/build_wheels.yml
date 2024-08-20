@@ -27,10 +27,8 @@ jobs:
       - name: Build wheels
         uses: pypa/cibuildwheel@v2.20.0
         env:
-          CIBW_BEFORE_BUILD: |
-            python -m pip install --upgrade pip
-            python -m pip install numpy scipy Cython
-          CIBW_SKIP: pp* cp313-*
+          CIBW_BEFORE_BUILD: python -m pip install numpy scipy Cython
+          CIBW_SKIP: pp* cp36-* cp37-* cp313-*
 
       - uses: actions/upload-artifact@v4
         with:
