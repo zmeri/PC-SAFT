@@ -443,9 +443,9 @@ double pcsaft_Z_cpp(double t, double rho, vector<double> x, add_args &cppargs) {
             double chi, sigma_k;
             summ = 0.;
             for (int i = 0; i < ncomp; i++) {
-                chi = 3/pow(kappa*cppargs.s[i], 3)*(1.5 + log(1+kappa*cppargs.s[i]) - 2*(1+kappa*cppargs.s[i]) +
-                    0.5*pow(1+kappa*cppargs.s[i], 2));
-                sigma_k = -2*chi+3/(1+kappa*cppargs.s[i]);
+                chi = 3/pow(kappa*d[i], 3)*(1.5 + log(1+kappa*d[i]) - 2*(1+kappa*d[i]) +
+                    0.5*pow(1+kappa*d[i], 2));
+                sigma_k = -2*chi+3/(1+kappa*d[i]);
                 summ += q[i]*q[i]*x[i]*sigma_k;
             }
             Zion = -1*kappa/24./PI/kb/t/(cppargs.dielc*perm_vac)*summ;
@@ -920,9 +920,9 @@ vector<double> pcsaft_lnfug_cpp(double t, double rho, vector<double> x, add_args
             double summ1 = 0.;
             double summ2 = 0.;
             for (int i = 0; i < ncomp; i++) {
-                chi[i] = 3/pow(kappa*cppargs.s[i], 3)*(1.5 + log(1+kappa*cppargs.s[i]) - 2*(1+kappa*cppargs.s[i]) +
-                    0.5*pow(1+kappa*cppargs.s[i], 2));
-                sigma_k[i] = -2*chi[i]+3/(1+kappa*cppargs.s[i]);
+                chi[i] = 3/pow(kappa*d[i], 3)*(1.5 + log(1+kappa*d[i]) - 2*(1+kappa*d[i]) +
+                    0.5*pow(1+kappa*d[i], 2));
+                sigma_k[i] = -2*chi[i]+3/(1+kappa*d[i]);
                 summ1 += q[i]*q[i]*x[i]*sigma_k[i];
                 summ2 += x[i]*q[i]*q[i];
             }
@@ -1235,11 +1235,10 @@ double pcsaft_ares_cpp(double t, double rho, vector<double> x, add_args &cppargs
 
         if (kappa != 0) {
             vector<double> chi(ncomp);
-            vector<double> sigma_k(ncomp);
             summ = 0.;
             for (int i = 0; i < ncomp; i++) {
-                chi[i] = 3/pow(kappa*cppargs.s[i], 3)*(1.5 + log(1+kappa*cppargs.s[i]) - 2*(1+kappa*cppargs.s[i]) +
-                    0.5*pow(1+kappa*cppargs.s[i], 2));
+                chi[i] = 3/pow(kappa*d[i], 3)*(1.5 + log(1+kappa*d[i]) - 2*(1+kappa*d[i]) +
+                    0.5*pow(1+kappa*d[i], 2));
                 summ += x[i]*q[i]*q[i]*chi[i]*kappa;
             }
 
@@ -1572,9 +1571,9 @@ double pcsaft_dadt_cpp(double t, double rho, vector<double> x, add_args &cppargs
             vector<double> dchikap_dk(ncomp);
             summ = 0.;
             for (int i = 0; i < ncomp; i++) {
-                chi[i] = 3/pow(kappa*cppargs.s[i], 3)*(1.5 + log(1+kappa*cppargs.s[i]) - 2*(1+kappa*cppargs.s[i]) +
-                    0.5*pow(1+kappa*cppargs.s[i], 2));
-                dchikap_dk[i] = -2*chi[i]+3/(1+kappa*cppargs.s[i]);
+                chi[i] = 3/pow(kappa*d[i], 3)*(1.5 + log(1+kappa*d[i]) - 2*(1+kappa*d[i]) +
+                    0.5*pow(1+kappa*d[i], 2));
+                dchikap_dk[i] = -2*chi[i]+3/(1+kappa*d[i]);
                 summ += x[i]*cppargs.z[i]*cppargs.z[i];
             }
             dkappa_dt = -0.5*den*E_CHRG*E_CHRG/kb/t/t/(cppargs.dielc*perm_vac)*summ/kappa;

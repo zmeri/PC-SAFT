@@ -12,6 +12,10 @@ PC-SAFT
 .. image:: https://readthedocs.org/projects/pcsaft/badge/?version=latest
    :target: http://pcsaft.readthedocs.io/?badge=latest
 
+Status
+------
+This project is no longer actively maintained. In the past years, newer projects (such as `Clapeyron.jl`_ and `teqp`_) have come out that also implement PC-SAFT. Some of these also include the electrolyte term. Additionally, these programs are also more sophisticated than the PC-SAFT code here. For instance, they allow a variety of different models to be used in addition to PC-SAFT, handle differentiation more elegantly, and appear to have more robust algorithms for handling different phases. Try out one of these newer projects instead.
+
 Introduction
 ------------
 This package implements the PC-SAFT equation of state. In addition to the hard chain and dispersion terms, these functions also include dipole, association and ion terms for use with these types of compounds. When the ion term is included it is also called electrolyte PC-SAFT (ePC-SAFT).
@@ -109,6 +113,8 @@ When developing these functions the code from two other groups was used as refer
 - Code from Joachim Gross (https://www.th.bci.tu-dortmund.de/cms/de/Forschung/PC-SAFT/Download/index.html)
 - The MATLAB/Octave program written by Angel Martin and others (http://hpp.uva.es/open-source-software-eos/)
 
+.. _`Clapeyron.jl`: https://github.com/ClapeyronThermo/Clapeyron.jl
+.. _`teqp`: https://github.com/usnistgov/teqp
 .. _`Read the Docs`: https://pcsaft.readthedocs.io/en/latest/
 .. _Cython: http://cython.org/
 .. _Eigen: https://github.com/eigenteam/eigen-git-mirror
