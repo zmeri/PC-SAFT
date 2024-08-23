@@ -30,7 +30,7 @@ jobs:
           CIBW_BEFORE_BUILD_LINUX: python -m pip install numpy scipy Cython
           CIBW_BEFORE_BUILD_MACOS: unset __PYVENV_LAUNCHER__ && python -m pip install numpy scipy Cython
           CIBW_BEFORE_BUILD_WINDOWS: python -m pip install numpy scipy Cython
-          CIBW_SKIP: "pp* *-win32 *-manylinux_i686" cp313-* cp37-win* cp37-macosx* cp38-win* cp38-macosx* cp39-win* cp39-macosx* cp310-win* cp310-macosx*"
+          CIBW_SKIP: "pp* *-win32 *-manylinux_i686 cp313-* cp37-win* cp37-macosx* cp38-win* cp38-macosx* cp39-win* cp39-macosx* cp310-win* cp310-macosx*"
 
       - uses: actions/upload-artifact@v4
         with:
